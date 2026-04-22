@@ -6,6 +6,7 @@ internal static class PayloadLocator
 {
     private static readonly byte[] TrailerMagic = "PIFINST1"u8.ToArray();
     private const int TrailerSize = 24;
+    private const int DownloadProgressStepBytes = 8 * 1024 * 1024;
 
     public static PayloadSource OpenPayloadSource(IProgress<InstallProgress>? progress, CancellationToken cancellationToken)
     {
@@ -24,9 +25,7 @@ internal static class PayloadLocator
         var sidecarPath = Path.Combine(AppContext.BaseDirectory, ReleasePayloadManifest.SidecarArchiveName);
         if (File.Exists(sidecarPath))
         {
-            return new PayloadSource(
-                new FileStream(sidecarPath, FileMode.Open, FileAccess.Read, FileShare.Read),
-                () => new FileStream(sidecarPath, FileMode.Open, FileAccess.Read, FileShare.Read));
+            return CreateFilePayloadSource(sidecarPath, deleteOnDispose: false);
         }
 
         return DownloadPayloadArchive(progress, cancellationToken);
@@ -67,6 +66,7 @@ internal static class PayloadLocator
         try
         {
             using var outputStream = new FileStream(tempPartialPath, FileMode.Create, FileAccess.Write, FileShare.None);
+            long nextProgressBytes = DownloadProgressStepBytes;
             foreach (var assetName in ReleasePayloadManifest.PayloadPartNames)
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -86,7 +86,11 @@ internal static class PayloadLocator
                     cancellationToken.ThrowIfCancellationRequested();
                     outputStream.Write(buffer, 0, bytesRead);
                     downloadedBytes += bytesRead;
-                    progress?.Report(new InstallProgress("Downloading game files...", assetName, downloadedBytes, ReleasePayloadManifest.TotalPayloadBytes));
+                    if (downloadedBytes >= nextProgressBytes || downloadedBytes == ReleasePayloadManifest.TotalPayloadBytes)
+                    {
+                        progress?.Report(new InstallProgress("Downloading game files...", assetName, downloadedBytes, ReleasePayloadManifest.TotalPayloadBytes));
+                        nextProgressBytes = downloadedBytes + DownloadProgressStepBytes;
+                    }
                 }
             }
         }
@@ -131,7 +135,8 @@ internal static class PayloadLocator
                     {
                     }
                 }
-                : null);
+                : null,
+            archiveFilePath: archivePath);
     }
 
     private static bool TryReadEmbeddedPayload(FileStream executableStream, out long payloadOffset, out long payloadLength)
@@ -163,15 +168,21 @@ internal sealed class PayloadSource : IDisposable
 {
     private readonly Action? _disposeAction;
 
-    public PayloadSource(Stream containerStream, Func<Stream> createPayloadStream, Action? disposeAction = null)
+    public PayloadSource(
+        Stream containerStream,
+        Func<Stream> createPayloadStream,
+        Action? disposeAction = null,
+        string? archiveFilePath = null)
     {
         ContainerStream = containerStream;
         CreatePayloadStream = createPayloadStream;
         _disposeAction = disposeAction;
+        ArchiveFilePath = archiveFilePath;
     }
 
     public Stream ContainerStream { get; }
     public Func<Stream> CreatePayloadStream { get; }
+    public string? ArchiveFilePath { get; }
 
     public void Dispose()
     {

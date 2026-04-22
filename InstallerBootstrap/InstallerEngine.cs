@@ -11,6 +11,7 @@ internal static class InstallerEngine
     private const string DesktopShortcutName = "Kuray Infinite Fusion.lnk";
     private const string StartMenuFolderName = "Kuray Infinite Fusion";
     private const string CompatibilityShortcutName = "Kuray Infinite Fusion Compatibility Mode.lnk";
+    private const int ManagedExtractProgressStepBytes = 16 * 1024 * 1024;
 
     public static void Install(
         InstallerOptions options,
@@ -18,6 +19,23 @@ internal static class InstallerEngine
         CancellationToken cancellationToken)
     {
         using var source = PayloadLocator.OpenPayloadSource(progress, cancellationToken);
+        var installRoot = Path.GetFullPath(options.TargetDirectory);
+
+        if (BundledSevenZip.CanUseFastExtraction(source, installRoot))
+        {
+            BundledSevenZip.ExtractArchiveToEmptyInstallRoot(source.ArchiveFilePath!, installRoot, progress, cancellationToken);
+            EnsureWritableDirectories(installRoot);
+
+            if (!options.SkipShortcuts)
+            {
+                progress?.Report(new InstallProgress("Creating shortcuts...", string.Empty, 100, 100));
+                CreateShortcuts(installRoot);
+            }
+
+            progress?.Report(new InstallProgress("Installation complete.", installRoot, 100, 100));
+            return;
+        }
+
         using var payloadStream = source.CreatePayloadStream();
         using var archive = SevenZipArchive.OpenArchive(payloadStream, new ReaderOptions());
 
@@ -30,11 +48,11 @@ internal static class InstallerEngine
             throw new InvalidOperationException("The embedded payload does not contain any files.");
         }
 
-        var installRoot = Path.GetFullPath(options.TargetDirectory);
         Directory.CreateDirectory(installRoot);
 
         long totalBytes = entries.Sum(entry => entry.Size);
         long extractedBytes = 0;
+        long nextProgressBytes = ManagedExtractProgressStepBytes;
         progress?.Report(new InstallProgress("Preparing files...", string.Empty, 0, totalBytes));
 
         foreach (var entry in entries)
@@ -58,7 +76,13 @@ internal static class InstallerEngine
             progress?.Report(new InstallProgress("Extracting files...", relativePath, extractedBytes, totalBytes));
 
             using var entryStream = entry.OpenEntryStream();
-            using var outputStream = new FileStream(destinationPath, FileMode.Create, FileAccess.Write, FileShare.None);
+            using var outputStream = new FileStream(
+                destinationPath,
+                FileMode.Create,
+                FileAccess.Write,
+                FileShare.None,
+                bufferSize: 1024 * 1024,
+                options: FileOptions.SequentialScan);
             var buffer = new byte[1024 * 1024];
             int bytesRead;
             while ((bytesRead = entryStream.Read(buffer, 0, buffer.Length)) > 0)
@@ -66,7 +90,11 @@ internal static class InstallerEngine
                 cancellationToken.ThrowIfCancellationRequested();
                 outputStream.Write(buffer, 0, bytesRead);
                 extractedBytes += bytesRead;
-                progress?.Report(new InstallProgress("Extracting files...", relativePath, extractedBytes, totalBytes));
+                if (extractedBytes >= nextProgressBytes || extractedBytes == totalBytes)
+                {
+                    progress?.Report(new InstallProgress("Extracting files...", relativePath, extractedBytes, totalBytes));
+                    nextProgressBytes = extractedBytes + ManagedExtractProgressStepBytes;
+                }
             }
 
             File.SetLastWriteTime(destinationPath, entry.LastModifiedTime ?? DateTime.Now);

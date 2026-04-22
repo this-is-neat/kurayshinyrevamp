@@ -17,8 +17,8 @@ internal sealed class InstallerForm : Form
         _initialOptions = options;
 
         Text = "Kuray Infinite Fusion Installer";
-        Width = 700;
-        Height = 260;
+        AutoScaleMode = AutoScaleMode.Dpi;
+        ClientSize = new Size(700, 290);
         FormBorderStyle = FormBorderStyle.FixedDialog;
         StartPosition = FormStartPosition.CenterScreen;
         MaximizeBox = false;
@@ -29,7 +29,7 @@ internal sealed class InstallerForm : Form
             Left = 20,
             Top = 20,
             Width = 640,
-            Height = 40,
+            Height = 48,
             Text = "Install Kuray Infinite Fusion to your Games folder. If the game files are not bundled with this installer, it will download them from GitHub first."
         };
 
@@ -61,7 +61,7 @@ internal sealed class InstallerForm : Form
         _statusLabel = new Label
         {
             Left = 20,
-            Top = 130,
+            Top = 138,
             Width = 640,
             Text = "Ready to install."
         };
@@ -69,7 +69,7 @@ internal sealed class InstallerForm : Form
         _detailLabel = new Label
         {
             Left = 20,
-            Top = 150,
+            Top = 160,
             Width = 640,
             Text = string.Empty
         };
@@ -77,7 +77,7 @@ internal sealed class InstallerForm : Form
         _progressBar = new ProgressBar
         {
             Left = 20,
-            Top = 175,
+            Top = 188,
             Width = 640,
             Height = 18,
             Style = ProgressBarStyle.Continuous
@@ -86,7 +86,7 @@ internal sealed class InstallerForm : Form
         _installButton = new Button
         {
             Left = 470,
-            Top = 205,
+            Top = 225,
             Width = 90,
             Text = "Install"
         };
@@ -95,7 +95,7 @@ internal sealed class InstallerForm : Form
         _cancelButton = new Button
         {
             Left = 570,
-            Top = 205,
+            Top = 225,
             Width = 90,
             Text = "Cancel"
         };

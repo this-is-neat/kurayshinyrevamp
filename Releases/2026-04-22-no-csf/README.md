@@ -20,6 +20,11 @@ This release packages the current playable client from the updated `kurayshinyre
 - `PIF-player-build-20260422-no-csf-WebSetup.exe` is the GitHub-friendly installer. It downloads the game payload from this release and installs to your `Games` folder with shortcuts.
 - Payload files are split into GitHub-safe parts because GitHub cannot host this build as one single 11+ GB release asset.
 
+## Installer refresh
+
+- The web installer was refreshed after first release to use bundled native `7z` extraction for empty install folders, which is much faster than the original managed extraction path for this archive.
+- The installer window layout was also adjusted so the action buttons are no longer clipped at the bottom on the affected display scale.
+
 ## Exclusions
 
 - No personal save data

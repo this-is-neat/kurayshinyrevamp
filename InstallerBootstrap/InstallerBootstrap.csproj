@@ -14,4 +14,13 @@
     </Reference>
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="..\REQUIRED_BY_INSTALLER_UPDATER\7z.exe">
+      <LogicalName>InstallerBootstrap.NativeTools.7z.exe</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\REQUIRED_BY_INSTALLER_UPDATER\7z.dll">
+      <LogicalName>InstallerBootstrap.NativeTools.7z.dll</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+
 </Project>
