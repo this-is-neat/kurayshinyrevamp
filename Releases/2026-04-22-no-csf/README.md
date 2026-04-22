@@ -41,3 +41,7 @@ This release packages the current playable client from the updated `kurayshinyre
 
 - The web installer checksum is provided in `PIF-player-build-20260422-no-csf-WebSetup.sha256.txt`.
 - The packaged build manifest is included as `PIF-player-build-20260422-no-csf.manifest.txt`.
+
+## Comparison Notes
+
+- A local-workspace-vs-GitHub comparison note for this build is recorded in `LOCAL-VS-GITHUB-DIFF.md`.
