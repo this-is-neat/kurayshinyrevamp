@@ -24,6 +24,8 @@ This release packages the current playable client from the updated `kurayshinyre
 
 - The web installer was refreshed after first release to use bundled native `7z` extraction for empty install folders, which is much faster than the original managed extraction path for this archive.
 - The installer window layout was also adjusted so the action buttons are no longer clipped at the bottom on the affected display scale.
+- The web installer was refreshed again later on 2026-04-22 to clean up canceled installs more safely, stage extraction before deployment, and remove stale temp payload files instead of leaving large leftovers behind.
+- This refresh is meant to make download-and-install testing safer for players by reducing partial installs and wasted disk space after a cancel or failed run.
 
 ## Exclusions
 
@@ -41,6 +43,7 @@ This release packages the current playable client from the updated `kurayshinyre
 
 - The web installer checksum is provided in `PIF-player-build-20260422-no-csf-WebSetup.sha256.txt`.
 - The packaged build manifest is included as `PIF-player-build-20260422-no-csf.manifest.txt`.
+- Current web installer SHA-256: `4ae51e7315ac926edeb7224132880b480ced835f5f88a783cd3437fa307a650c`
 
 ## Comparison Notes
 

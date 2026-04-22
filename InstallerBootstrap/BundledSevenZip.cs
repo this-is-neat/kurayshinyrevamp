@@ -16,56 +16,21 @@ internal static class BundledSevenZip
         return !string.IsNullOrWhiteSpace(source.ArchiveFilePath) && IsDirectoryEmptyOrMissing(installRoot);
     }
 
-    public static void ExtractArchiveToEmptyInstallRoot(
+    public static void ExtractArchiveToStageRoot(
         string archivePath,
-        string installRoot,
+        string stageRoot,
         IProgress<InstallProgress>? progress,
         CancellationToken cancellationToken)
     {
         var sevenZipExePath = EnsureTooling();
-        var installParent = Directory.GetParent(installRoot)?.FullName
-            ?? throw new InvalidOperationException("Install directory must have a parent directory.");
+        Directory.CreateDirectory(stageRoot);
+        progress?.Report(new InstallProgress("Extracting files...", "Preparing fast extraction...", 0, 100));
+        RunSevenZipExtraction(sevenZipExePath, archivePath, stageRoot, progress, cancellationToken);
 
-        Directory.CreateDirectory(installParent);
-
-        var stagingRoot = Path.Combine(installParent, $".kif-extract-{Guid.NewGuid():N}");
-        Directory.CreateDirectory(stagingRoot);
-
-        try
+        var extractedRoot = Path.Combine(stageRoot, "PIF");
+        if (!Directory.Exists(extractedRoot))
         {
-            progress?.Report(new InstallProgress("Extracting files...", "Preparing fast extraction...", 0, 100));
-            RunSevenZipExtraction(sevenZipExePath, archivePath, stagingRoot, progress, cancellationToken);
-
-            var extractedRoot = Path.Combine(stagingRoot, "PIF");
-            if (!Directory.Exists(extractedRoot))
-            {
-                throw new InvalidOperationException("The extracted archive did not produce the expected PIF folder.");
-            }
-
-            if (Directory.Exists(installRoot))
-            {
-                if (!IsDirectoryEmptyOrMissing(installRoot))
-                {
-                    throw new InvalidOperationException("Fast extraction requires an empty install directory.");
-                }
-
-                Directory.Delete(installRoot);
-            }
-
-            Directory.Move(extractedRoot, installRoot);
-        }
-        finally
-        {
-            try
-            {
-                if (Directory.Exists(stagingRoot))
-                {
-                    Directory.Delete(stagingRoot, recursive: true);
-                }
-            }
-            catch
-            {
-            }
+            throw new InvalidOperationException("The extracted archive did not produce the expected PIF folder.");
         }
     }
 

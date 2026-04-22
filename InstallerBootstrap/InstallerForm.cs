@@ -11,6 +11,8 @@ internal sealed class InstallerForm : Form
     private readonly Button _browseButton;
     private readonly Button _cancelButton;
     private CancellationTokenSource? _installCancellation;
+    private bool _closeAfterInstallStops;
+    private bool _allowClose;
 
     public InstallerForm(InstallerOptions options)
     {
@@ -100,6 +102,7 @@ internal sealed class InstallerForm : Form
             Text = "Cancel"
         };
         _cancelButton.Click += CancelButton_Click;
+        FormClosing += InstallerForm_FormClosing;
 
         Controls.Add(introLabel);
         Controls.Add(pathLabel);
@@ -189,12 +192,13 @@ internal sealed class InstallerForm : Form
                 }
             }
 
+            _allowClose = true;
             Close();
         }
         catch (OperationCanceledException)
         {
             _statusLabel.Text = "Installation canceled.";
-            _detailLabel.Text = string.Empty;
+            _detailLabel.Text = "Temporary files cleaned up.";
         }
         catch (Exception ex)
         {
@@ -207,6 +211,12 @@ internal sealed class InstallerForm : Form
             _installCancellation?.Dispose();
             _installCancellation = null;
             ToggleUi(isInstalling: false);
+            if (_closeAfterInstallStops)
+            {
+                _closeAfterInstallStops = false;
+                _allowClose = true;
+                Close();
+            }
         }
     }
 
@@ -214,7 +224,7 @@ internal sealed class InstallerForm : Form
     {
         if (_installCancellation is not null)
         {
-            _installCancellation.Cancel();
+            RequestCancellation();
             return;
         }
 
@@ -226,6 +236,7 @@ internal sealed class InstallerForm : Form
         _installButton.Enabled = !isInstalling;
         _browseButton.Enabled = !isInstalling;
         _installPathTextBox.Enabled = !isInstalling;
+        _cancelButton.Enabled = true;
         _cancelButton.Text = isInstalling ? "Stop" : "Cancel";
     }
 
@@ -242,5 +253,30 @@ internal sealed class InstallerForm : Form
 
         var percentage = (int)Math.Clamp(progress.ExtractedBytes * 100 / progress.TotalBytes, 0, 100);
         _progressBar.Value = percentage;
+    }
+
+    private void InstallerForm_FormClosing(object? sender, FormClosingEventArgs e)
+    {
+        if (_allowClose || _installCancellation is null)
+        {
+            return;
+        }
+
+        e.Cancel = true;
+        _closeAfterInstallStops = true;
+        RequestCancellation();
+    }
+
+    private void RequestCancellation()
+    {
+        if (_installCancellation is null || _installCancellation.IsCancellationRequested)
+        {
+            return;
+        }
+
+        _statusLabel.Text = "Canceling installation...";
+        _detailLabel.Text = "Cleaning up temporary files...";
+        _cancelButton.Enabled = false;
+        _installCancellation.Cancel();
     }
 }

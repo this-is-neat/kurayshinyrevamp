@@ -7,9 +7,13 @@ internal static class PayloadLocator
     private static readonly byte[] TrailerMagic = "PIFINST1"u8.ToArray();
     private const int TrailerSize = 24;
     private const int DownloadProgressStepBytes = 8 * 1024 * 1024;
+    private const string TempRootFolderName = "KurayInfiniteFusionInstaller";
+    private static readonly TimeSpan StalePayloadAge = TimeSpan.FromHours(12);
 
     public static PayloadSource OpenPayloadSource(IProgress<InstallProgress>? progress, CancellationToken cancellationToken)
     {
+        CleanupStaleInstallerArtifacts();
+
         var executablePath = Application.ExecutablePath;
         var executableStream = new FileStream(executablePath, FileMode.Open, FileAccess.Read, FileShare.Read);
 
@@ -33,7 +37,7 @@ internal static class PayloadLocator
 
     private static PayloadSource DownloadPayloadArchive(IProgress<InstallProgress>? progress, CancellationToken cancellationToken)
     {
-        var tempRoot = Path.Combine(Path.GetTempPath(), "KurayInfiniteFusionInstaller", ReleasePayloadManifest.ReleaseTag);
+        var tempRoot = GetReleaseTempRoot();
         Directory.CreateDirectory(tempRoot);
 
         var tempArchivePath = Path.Combine(tempRoot, ReleasePayloadManifest.PayloadArchiveName);
@@ -42,16 +46,17 @@ internal static class PayloadLocator
             var existingLength = new FileInfo(tempArchivePath).Length;
             if (existingLength == ReleasePayloadManifest.TotalPayloadBytes)
             {
-                return CreateFilePayloadSource(tempArchivePath, deleteOnDispose: false);
+                progress?.Report(new InstallProgress("Preparing game files...", "Reusing a previous installer download", 0, ReleasePayloadManifest.TotalPayloadBytes));
+                return CreateFilePayloadSource(tempArchivePath, deleteOnDispose: true);
             }
 
-            File.Delete(tempArchivePath);
+            InstallerCleanup.TryDeleteFile(tempArchivePath);
         }
 
         var tempPartialPath = tempArchivePath + ".partial";
         if (File.Exists(tempPartialPath))
         {
-            File.Delete(tempPartialPath);
+            InstallerCleanup.TryDeleteFile(tempPartialPath);
         }
 
         progress?.Report(new InstallProgress("Downloading game files...", "Preparing download", 0, ReleasePayloadManifest.TotalPayloadBytes));
@@ -96,18 +101,14 @@ internal static class PayloadLocator
         }
         catch
         {
-            if (File.Exists(tempPartialPath))
-            {
-                File.Delete(tempPartialPath);
-            }
-
+            InstallerCleanup.TryDeleteFile(tempPartialPath);
             throw;
         }
 
         var finalLength = new FileInfo(tempPartialPath).Length;
         if (finalLength != ReleasePayloadManifest.TotalPayloadBytes)
         {
-            File.Delete(tempPartialPath);
+            InstallerCleanup.TryDeleteFile(tempPartialPath);
             throw new InvalidOperationException(
                 $"Downloaded payload size mismatch. Expected {ReleasePayloadManifest.TotalPayloadBytes} bytes, got {finalLength} bytes.");
         }
@@ -118,25 +119,37 @@ internal static class PayloadLocator
 
     private static PayloadSource CreateFilePayloadSource(string archivePath, bool deleteOnDispose)
     {
+        var archiveDirectory = Path.GetDirectoryName(archivePath);
         return new PayloadSource(
             new FileStream(archivePath, FileMode.Open, FileAccess.Read, FileShare.Read),
             () => new FileStream(archivePath, FileMode.Open, FileAccess.Read, FileShare.Read),
             deleteOnDispose
                 ? () =>
                 {
-                    try
+                    InstallerCleanup.TryDeleteFile(archivePath);
+                    InstallerCleanup.TryDeleteFile(archivePath + ".partial");
+                    if (!string.IsNullOrWhiteSpace(archiveDirectory))
                     {
-                        if (File.Exists(archivePath))
-                        {
-                            File.Delete(archivePath);
-                        }
-                    }
-                    catch
-                    {
+                        InstallerCleanup.TryDeleteEmptyDirectory(archiveDirectory);
                     }
                 }
                 : null,
             archiveFilePath: archivePath);
+    }
+
+    private static string GetReleaseTempRoot()
+    {
+        return Path.Combine(Path.GetTempPath(), TempRootFolderName, ReleasePayloadManifest.ReleaseTag);
+    }
+
+    private static void CleanupStaleInstallerArtifacts()
+    {
+        var releaseRoot = GetReleaseTempRoot();
+        InstallerCleanup.CleanupStaleFiles(releaseRoot, ReleasePayloadManifest.PayloadArchiveName, StalePayloadAge);
+        InstallerCleanup.CleanupStaleFiles(releaseRoot, ReleasePayloadManifest.PayloadArchiveName + ".partial", StalePayloadAge);
+        InstallerCleanup.CleanupStaleDirectories(Path.Combine(releaseRoot, "sessions"), "*", StalePayloadAge);
+        InstallerCleanup.TryDeleteEmptyDirectory(Path.Combine(releaseRoot, "sessions"));
+        InstallerCleanup.TryDeleteEmptyDirectory(releaseRoot);
     }
 
     private static bool TryReadEmbeddedPayload(FileStream executableStream, out long payloadOffset, out long payloadLength)

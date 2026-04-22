@@ -18,12 +18,17 @@ internal static class InstallerEngine
         IProgress<InstallProgress>? progress,
         CancellationToken cancellationToken)
     {
+        InstallWorkspace.CleanupStaleStageDirectories(options.TargetDirectory);
+        using var workspace = new InstallWorkspace(options.TargetDirectory);
+        workspace.Prepare();
         using var source = PayloadLocator.OpenPayloadSource(progress, cancellationToken);
-        var installRoot = Path.GetFullPath(options.TargetDirectory);
+        var installRoot = workspace.InstallRoot;
 
         if (BundledSevenZip.CanUseFastExtraction(source, installRoot))
         {
-            BundledSevenZip.ExtractArchiveToEmptyInstallRoot(source.ArchiveFilePath!, installRoot, progress, cancellationToken);
+            BundledSevenZip.ExtractArchiveToStageRoot(source.ArchiveFilePath!, workspace.StagingRoot, progress, cancellationToken);
+            EnsureWritableDirectories(workspace.ExtractedRoot);
+            DeployStagedInstall(workspace, progress);
             EnsureWritableDirectories(installRoot);
 
             if (!options.SkipShortcuts)
@@ -48,8 +53,6 @@ internal static class InstallerEngine
             throw new InvalidOperationException("The embedded payload does not contain any files.");
         }
 
-        Directory.CreateDirectory(installRoot);
-
         long totalBytes = entries.Sum(entry => entry.Size);
         long extractedBytes = 0;
         long nextProgressBytes = ManagedExtractProgressStepBytes;
@@ -66,7 +69,7 @@ internal static class InstallerEngine
                 continue;
             }
 
-            var destinationPath = GetSafeDestinationPath(installRoot, relativePath);
+            var destinationPath = GetSafeDestinationPath(workspace.ExtractedRoot, relativePath);
             var destinationDirectory = Path.GetDirectoryName(destinationPath);
             if (!string.IsNullOrEmpty(destinationDirectory))
             {
@@ -100,6 +103,8 @@ internal static class InstallerEngine
             File.SetLastWriteTime(destinationPath, entry.LastModifiedTime ?? DateTime.Now);
         }
 
+        EnsureWritableDirectories(workspace.ExtractedRoot);
+        DeployStagedInstall(workspace, progress);
         EnsureWritableDirectories(installRoot);
 
         if (!options.SkipShortcuts)
@@ -147,6 +152,62 @@ internal static class InstallerEngine
         {
             Directory.CreateDirectory(Path.Combine(installRoot, relativePath));
         }
+    }
+
+    private static void DeployStagedInstall(InstallWorkspace workspace, IProgress<InstallProgress>? progress)
+    {
+        progress?.Report(new InstallProgress("Finalizing installation...", string.Empty, 100, 100));
+        DeployStagedInstall(workspace.ExtractedRoot, workspace.InstallRoot);
+    }
+
+    private static void DeployStagedInstall(string stagedRoot, string installRoot)
+    {
+        if (!Directory.Exists(stagedRoot))
+        {
+            throw new InvalidOperationException("The installer staging folder is missing.");
+        }
+
+        if (IsDirectoryEmptyOrMissing(installRoot))
+        {
+            if (Directory.Exists(installRoot))
+            {
+                Directory.Delete(installRoot);
+            }
+
+            Directory.Move(stagedRoot, installRoot);
+            return;
+        }
+
+        CopyDirectoryContents(stagedRoot, installRoot);
+        InstallerCleanup.TryDeleteDirectory(stagedRoot);
+    }
+
+    private static void CopyDirectoryContents(string sourceRoot, string destinationRoot)
+    {
+        foreach (var sourceDirectory in Directory.EnumerateDirectories(sourceRoot, "*", SearchOption.AllDirectories))
+        {
+            var relativePath = Path.GetRelativePath(sourceRoot, sourceDirectory);
+            Directory.CreateDirectory(GetSafeDestinationPath(destinationRoot, relativePath));
+        }
+
+        foreach (var sourceFile in Directory.EnumerateFiles(sourceRoot, "*", SearchOption.AllDirectories))
+        {
+            var relativePath = Path.GetRelativePath(sourceRoot, sourceFile);
+            var destinationPath = GetSafeDestinationPath(destinationRoot, relativePath);
+            var destinationDirectory = Path.GetDirectoryName(destinationPath);
+            if (!string.IsNullOrEmpty(destinationDirectory))
+            {
+                Directory.CreateDirectory(destinationDirectory);
+            }
+
+            File.Copy(sourceFile, destinationPath, overwrite: true);
+            File.SetLastWriteTime(destinationPath, File.GetLastWriteTime(sourceFile));
+        }
+    }
+
+    private static bool IsDirectoryEmptyOrMissing(string path)
+    {
+        return !Directory.Exists(path) || !Directory.EnumerateFileSystemEntries(path).Any();
     }
 
     private static void CreateShortcuts(string installRoot)
