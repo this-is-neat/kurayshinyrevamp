@@ -46,6 +46,72 @@ _Text instruction on how to Install KIF are available on our Discord: https://di
 
 __Google Docs of the game (OBSOLETE, but some informations are still useful):__ https://docs.google.com/document/d/1O6pKKL62dbLcapO0c2zDG2UI-eN6uatYlt_0GSk1dbE/edit
 
+# 2026-04-22 Upgrade Summary
+
+This repo now has a release comparison note for the current upgraded local build, and the short version is:
+
+- `673` tracked non-graphics files differ from the older GitHub snapshot that was compared for this release.
+- `5,653` non-graphics files are local-only additions beyond that older GitHub snapshot.
+- Graphics differences are intentionally not listed on the front page here, to keep the upgrade summary readable.
+
+The full comparison note is here:
+
+- [`Releases/2026-04-22-no-csf/LOCAL-VS-GITHUB-DIFF.md`](./Releases/2026-04-22-no-csf/LOCAL-VS-GITHUB-DIFF.md)
+
+GitHub-visible release/install commits for this upgrade:
+
+- [`e6fedf4`](https://github.com/this-is-neat/kurayshinyrevamp/commit/e6fedf4) adds the reusable build scripts
+- [`61dc46d`](https://github.com/this-is-neat/kurayshinyrevamp/commit/61dc46d) adds the web installer source and release-note files
+- [`9e45249`](https://github.com/this-is-neat/kurayshinyrevamp/commit/9e45249) speeds up extraction and fixes the clipped installer layout
+- [`385ff4e`](https://github.com/this-is-neat/kurayshinyrevamp/commit/385ff4e) adds the local-vs-GitHub comparison note
+
+## What Changed In This Upgrade
+
+Compared with the older GitHub repo snapshot used for the release comparison, this upgraded local build includes the following non-graphics changes.
+
+### Changed tracked files
+
+- Root config changes in `Game.ini` and `mkxp.json`
+- Core gameplay/data changes in `Data/CommonEvents.rxdata`
+- Encounter table changes in `Data/encounters.dat`, `Data/encounters_randomized.dat`, and `Data/encounters_remix.dat`
+- Item and world-connection changes in `Data/items.dat`, `Data/map_connections.dat`, and `Data/map_metadata.dat`
+- Many changed map/event files across `Data/Map*.rxdata`
+- Installer source updates under `InstallerBootstrap/`, including `InstallerEngine.cs`, `InstallerForm.cs`, `PayloadLocator.cs`, `ReleasePayloadManifest.cs`, and `BundledSevenZip.cs`
+
+### Added local systems and files
+
+- Multiplayer/server files in `KIFM/`
+- Extra runtime libraries in `Libs/`
+- Local mod-development workspace in `ModDev/`
+- Installer/update tooling such as `package_release.ps1`, `package_release.bat`, `build_installer.ps1`, `build_installer.bat`, and `pif_installer.iss`
+- Auto-update helpers like `autoupdater.rb` and `autoupdate_multiplayer.bat`
+- Installer/updater dependency bundle in `REQUIRED_BY_INSTALLER_UPDATER/`
+
+### Added local script areas
+
+- Hoenn-related script content under `Data/Scripts/053_PIF_Hoenn/`
+- Kanto rematch content under `Data/Scripts/054_PIF_Kanto/EliteFourRematches/`
+- Multiplayer gameplay/UI/client content under `Data/Scripts/659_Multiplayer/`
+- Extra storage/UI script files under `Data/Scripts/016_UI/PokemonStorage/`
+
+### Added local mods
+
+- `counterfeit_shinies`
+- `diagonal_movement`
+- `freedom_of_exploration`
+- `mouse_ui`
+- `MoveInCircles`
+- `pc_shopping`
+- `player_identity_bedroom`
+- `pokegun_terminal`
+- `uncap_trainer_rematch_level`
+- `custom_species_framework`
+
+### Important note
+
+- `custom_species_framework` exists in the local workspace and in the comparison notes, but it is still intentionally excluded from the current public packaged build.
+- The front-page summary here skips the huge graphics expansion on purpose. The detailed comparison note keeps the bigger counts and file-area breakdown.
+
 # List of Constant Features
 
 - **Modding support** **| by DEMICE**
