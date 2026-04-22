@@ -1,0 +1,88 @@
+﻿Packaged Build Manifest
+
+Project root: C:\Games\PIF
+Package root folder name: PIF
+Packaging mode: archive
+Included source size: 12.24 GB
+Generated at: 2026-04-22 01:25:05 -04:00
+
+Included directories:
+ - Audio
+ - Data
+ - Fonts
+ - Graphics
+ - Libs
+ - Mods
+ - KIFM
+
+Included root files:
+ - Game.exe
+ - Game-compatibility.exe
+ - Game.ini
+ - mkxp.json
+ - README.md
+ - PIF_readme.txt
+ - PIF_Credits.txt
+ - RGSS100J.dll
+ - RGSS104E.dll
+ - Shiny Finder.bat
+ - Shiny Finder.exe
+ - Shiny Finder.pck
+ - x64-msvcrt-ruby300.dll
+ - x64-msvcrt-ruby310.dll
+ - zlib1.dll
+
+Cleanup removals after copy:
+ - Data\.idea
+ - Data\.DS_Store
+ - Data\sprites\sprites_rate_limit.log
+ - Mods\compat_report.txt
+ - Mods\mod_manager_state.json
+ - KIFM\platinum_uuids.txt
+ - KIFM\discord_ids.txt
+ - KIFM\pending_discord_link.txt
+ - KIFM\coop_debug.log
+ - KIFM\pvp_wins.txt
+ - KIFM\discord_link.log
+
+Excluded package paths:
+ - Mods\custom_species_framework
+ - Data\encounters.json
+ - Data\starter_sets.json
+ - Data\trainer_hooks.json
+ - Data\species
+ - Graphics\Battlers\1202
+ - Graphics\Battlers\1203
+ - Graphics\Battlers\1204
+ - Graphics\Battlers\1205
+ - Graphics\Battlers\1206
+ - Graphics\CustomBattlers\indexed\1202
+ - Graphics\CustomBattlers\indexed\1203
+ - Graphics\CustomBattlers\indexed\1204
+ - Graphics\CustomBattlers\indexed\1205
+ - Graphics\CustomBattlers\indexed\1206
+ - Graphics\Icons\icon1202.png
+ - Graphics\Icons\icon1203.png
+ - Graphics\Icons\icon1204.png
+ - Graphics\Icons\icon1205.png
+ - Graphics\Icons\icon1206.png
+ - Graphics\Pokemon\Back\CSF_AQUALITH.png
+ - Graphics\Pokemon\Back\CSF_CINDRAKE.png
+ - Graphics\Pokemon\Back\CSF_VERDALYK.png
+ - Graphics\Pokemon\Front\CSF_AQUALITH.png
+ - Graphics\Pokemon\Front\CSF_CINDRAKE.png
+ - Graphics\Pokemon\Front\CSF_VERDALYK.png
+ - Graphics\Pokemon\Icons\CSF_AQUALITH.png
+ - Graphics\Pokemon\Icons\CSF_CINDRAKE.png
+ - Graphics\Pokemon\Icons\CSF_VERDALYK.png
+ - Graphics\Pokemon\Icons\CSF_SANDSHREW_GLACIAL.png
+ - Graphics\Pokemon\Icons\CSF_SANDSLASH_GLACIAL.png
+
+Recursive cleanup file names:
+ - .DS_Store
+ - Thumbs.db
+
+Recursive cleanup directory names:
+ - .idea
+ - __pycache__
+

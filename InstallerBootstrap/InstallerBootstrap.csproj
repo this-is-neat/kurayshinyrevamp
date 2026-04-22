@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="SharpCompress">
+      <HintPath>C:\Users\bored\.nuget\packages\sharpcompress\0.47.4\lib\net8.0\SharpCompress.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
