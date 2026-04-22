@@ -1,0 +1,11 @@
+{
+  "id": "MoveInCircles",
+  "name": "Move In Circles",
+  "version": "1.0.0",
+  "author": "Converted by Copilot",
+  "description": "Adds a silly option to move the player in circles automatically.",
+  "main": "main.rb",
+  "entry": "main.rb",
+  "tags": ["silly", "movement", "options"],
+  "min_game_version": "1.0.0"
+}

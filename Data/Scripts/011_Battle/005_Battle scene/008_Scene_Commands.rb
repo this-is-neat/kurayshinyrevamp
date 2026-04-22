@@ -1,4 +1,9 @@
 class PokeBattle_Scene
+
+  def setLastCommandIndex(battlerIndex,commandIndex)
+    @lastCmd[battlerIndex] = commandIndex
+  end
+
   #=============================================================================
   # The player chooses a main command for a Pokémon
   # Return values: -1=Cancel, 0=Fight, 1=Bag, 2=Pokémon, 3=Run, 4=Call
@@ -454,7 +459,9 @@ class PokeBattle_Scene
   # Opens the nicknaming screen for a newly caught Pokémon
   #=============================================================================
   def pbNameEntry(helpText,pkmn)
-    return pbEnterPokemonName(helpText, 0, Pokemon::MAX_NAME_SIZE, "", pkmn)
+    ret = pbEnterPokemonName(helpText, 0, Pokemon::MAX_NAME_SIZE, "", pkmn)
+    GC.start
+    return ret
   end
 
   #=============================================================================
@@ -466,5 +473,6 @@ class PokeBattle_Scene
       screen = PokemonPokedexInfoScreen.new(scene)
       screen.pbDexEntry(species)
     }
+    GC.start
   end
 end

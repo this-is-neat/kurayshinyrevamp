@@ -7,6 +7,52 @@ AUTOSAVE_STEPS_SWITCH = 784
 AUTOSAVE_STEPS_VAR = 236
 DEFAULT_AUTOSAVE_STEPS = 500
 
+module DeferredAutosave
+  @pending = false
+  @cooldown_frames = 0
+
+  module_function
+
+  def request(delay_frames = 0)
+    @pending = true
+    delay_frames = delay_frames.to_i
+    @cooldown_frames = [@cooldown_frames.to_i, delay_frames].max
+  end
+
+  def pending?
+    !!@pending
+  end
+
+  def ready_to_flush?
+    return false unless pending?
+    return false if !$scene.is_a?(Scene_Map)
+    return false if !$Trainer || !$Trainer.save_slot
+    return false if !$game_switches || !$game_switches[AUTOSAVE_ENABLED_SWITCH]
+    return false if !defined?($game_temp) || !$game_temp
+    return false if $game_temp.in_battle || $game_temp.in_menu
+    return false if $game_temp.message_window_showing
+    return false if $game_temp.player_transferring || $game_temp.transition_processing
+    true
+  end
+
+  def flush
+    return false unless ready_to_flush?
+    if @cooldown_frames.to_i > 0
+      @cooldown_frames -= 1
+      return false
+    end
+
+    @pending = false
+    @cooldown_frames = 0
+    Kernel.Autosave
+    true
+  rescue
+    @pending = false
+    @cooldown_frames = 0
+    false
+  end
+end
+
 def pbSetPokemonCenter
   $PokemonGlobal.pokecenterMapId     = $game_map.map_id
   $PokemonGlobal.pokecenterX         = $game_player.x
@@ -28,7 +74,13 @@ end
 
 def Kernel.tryAutosave()
   return if  !$Trainer.save_slot
-  Kernel.Autosave if $game_switches[AUTOSAVE_ENABLED_SWITCH]
+  return unless $game_switches[AUTOSAVE_ENABLED_SWITCH]
+  if defined?($game_temp) && $game_temp && $game_temp.in_battle
+    # Wait a few map frames after battle so post-battle UI/cleanup can settle.
+    DeferredAutosave.request(6)
+    return
+  end
+  Kernel.Autosave
 end
 
 Events.onMapUpdate += proc { |sender, e|
@@ -43,6 +95,18 @@ Events.onMapUpdate += proc { |sender, e|
     end
   end
 }
+
+class Scene_Map
+  unless method_defined?(:deferred_autosave_original_update)
+    alias deferred_autosave_original_update update
+  end
+
+  def update
+    deferred_autosave_original_update
+    DeferredCaughtPokemonProcessing.flush if defined?(DeferredCaughtPokemonProcessing)
+    DeferredAutosave.flush if defined?(DeferredAutosave)
+  end
+end
 
 
 
@@ -129,5 +193,3 @@ class AutosaveOptionsScene < PokemonOption_Scene
   end
 
 end
-
-

@@ -1,0 +1,18 @@
+{
+  "name": "PC Shopping",
+  "id": "pc_shopping",
+  "version": "1.0.0",
+  "author": "Unknown",
+  "description": "Adds Infinitely Instant Delivery PC shopping and battle betting features.",
+  "tags": ["Gameplay", "Economy", "PC"],
+  "dependencies": [],
+  "incompatible": [],
+  "settings": [],
+  "scripts": [
+    "000_LoadLibraries.rb",
+    "003_5_Invoker.rb",
+    "003_Interpreter.rb",
+    "004_ClothesShopPC.rb",
+    "005_BattleBettingPC.rb"
+  ]
+}

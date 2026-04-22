@@ -55,10 +55,10 @@ class PokeBattle_Battle
           requireds[idxTrainer] += 1
         end
         # Compare the have values with the need values
-        if requireds.length>sideCounts.length
-          raise _INTL("Error: def pbGetOwnerIndexFromBattlerIndex gives invalid owner index ({1} for battle type {2}v{3}, trainers {4}v{5})",
-             requireds.length-1,@sideSizes[0],@sideSizes[1],side1counts.length,side2counts.length)
-        end
+        # if requireds.length>sideCounts.length
+        #   raise "Error: def pbGetOwnerIndexFromBattlerIndex gives invalid owner index ({1} for battle type {2}v{3}, trainers {4}v{5}",
+        #      requireds.length-1,@sideSizes[0],@sideSizes[1],side1counts.length,side2counts.length)
+        # end
         sideCounts.each_with_index do |_count,i|
           if !requireds[i] || requireds[i]==0
             raise _INTL("Player-side trainer {1} has no battler position for their Pokémon to go (trying {2}v{3} battle)",
@@ -158,30 +158,17 @@ class PokeBattle_Battle
   #=============================================================================
   # Send out all battlers at the start of battle
   #=============================================================================
-  def battleStartShinyCheck(foemon)
-    if foemon.shiny? && $PokemonSystem.autobattlershiny && $PokemonSystem.autobattlershiny == 1 && $PokemonSystem.autobattler && $PokemonSystem.autobattler == 1
-      $AutoBattler = false
-      $PokemonSystem.autobattler = 0
-    end
-  end
-  
   def pbStartBattleSendOut(sendOuts)
     # "Want to battle" messages
     if wildBattle?
       foeParty = pbParty(1)
       case foeParty.length
       when 1
-        battleStartShinyCheck(foeParty[0])
         pbDisplayPaused(_INTL("Oh! A wild {1} appeared!",foeParty[0].name))
       when 2
-        battleStartShinyCheck(foeParty[0])
-        battleStartShinyCheck(foeParty[1])
         pbDisplayPaused(_INTL("Oh! A wild {1} and {2} appeared!",foeParty[0].name,
            foeParty[1].name))
       when 3
-        battleStartShinyCheck(foeParty[0])
-        battleStartShinyCheck(foeParty[1])
-        battleStartShinyCheck(foeParty[2])
         pbDisplayPaused(_INTL("Oh! A wild {1}, {2} and {3} appeared!",foeParty[0].name,
            foeParty[1].name,foeParty[2].name))
       end
@@ -279,9 +266,23 @@ class PokeBattle_Battle
     pbEnsureParticipants
     begin
       pbStartBattleCore
-    rescue BattleAbortedException
-      @decision = 0
-      @scene.pbEndBattle(@decision)
+    rescue BattleAbortedException => e
+      caught_count = (@caughtPokemon) ? @caughtPokemon.length : 0
+      if wildBattle? && caught_count > 0
+        MultiplayerDebug.warn("CATCH-ABORT", "Recovered aborted wild capture battle: decision=#{@decision.inspect}, caught=#{caught_count}, size=#{@sideSizes.inspect}, error=#{e.message}") if defined?(MultiplayerDebug)
+        begin
+          @decision = 4
+          pbEndOfBattle
+        rescue => recovery_error
+          MultiplayerDebug.error("CATCH-ABORT", "Recovery failed: #{recovery_error.class}: #{recovery_error.message}") if defined?(MultiplayerDebug)
+          @decision = 0
+          @scene.pbEndBattle(@decision)
+        end
+      else
+        MultiplayerDebug.warn("CATCH-ABORT", "Battle aborted before normal cleanup: decision=#{@decision.inspect}, caught=#{caught_count}, size=#{@sideSizes.inspect}, error=#{e.message}") if defined?(MultiplayerDebug)
+        @decision = 0
+        @scene.pbEndBattle(@decision)
+      end
     end
     return @decision
   end
@@ -354,7 +355,6 @@ class PokeBattle_Battle
       break if @decision>0
       @turnCount += 1
     end
-    $PokemonSystem.is_in_battle = false
     pbEndOfBattle
   end
 
@@ -364,12 +364,6 @@ class PokeBattle_Battle
   def pbGainMoney
     return if $game_switches[SWITCH_IS_REMATCH] #is rematch
     return if !@internalBattle || !@moneyGain
-    if $PokemonSystem.nomoneylost
-      if $PokemonSystem.nomoneylost != 0
-        $PokemonSystem.nomoneylost = 0
-        return
-      end
-    end
     # Money rewarded from opposing trainers
     if trainerBattle?
       tMoney = 0
@@ -401,12 +395,6 @@ class PokeBattle_Battle
   def pbLoseMoney
     return if !@internalBattle || !@moneyGain
     return if $game_switches[Settings::NO_MONEY_LOSS]
-    if $PokemonSystem.nomoneylost
-      if $PokemonSystem.nomoneylost != 0
-        $PokemonSystem.nomoneylost = 0
-        return
-      end
-    end
     maxLevel = pbMaxLevelInTeam(0,0)   # Player's Pokémon only, not partner's
     multiplier = [8,16,24,36,48,64,80,100,120]
     idxMultiplier = [pbPlayer.badge_count, multiplier.length - 1].min
@@ -425,6 +413,15 @@ class PokeBattle_Battle
   end
 
   def pbEndOfBattle
+    if wildBattle? && (@decision == 1 || @decision == 4) &&
+       (!@caughtPokemon || @caughtPokemon.empty?) &&
+       defined?(CaptureCompletionFallback)
+      recovered_catches = CaptureCompletionFallback.pending_recent_for_battle_end
+      if recovered_catches && !recovered_catches.empty?
+        MultiplayerDebug.warn("CATCH-RECOVER", "Promoting #{recovered_catches.length} pending catch(es) into pbEndOfBattle") if defined?(MultiplayerDebug)
+        @caughtPokemon = recovered_catches.dup
+      end
+    end
     oldDecision = @decision
     @decision = 4 if @decision==1 && wildBattle? && @caughtPokemon.length>0
     case oldDecision
@@ -434,46 +431,21 @@ class PokeBattle_Battle
       PBDebug.log("***Player won***")
       if trainerBattle?
         @scene.pbTrainerBattleSuccess
-        #stop here without more input if looping
-        dontdoit = false
-        if $PokemonSystem.sb_loopinput && $PokemonSystem.nomoneylost
-          if $PokemonSystem.sb_loopinput == 1 && $PokemonSystem.nomoneylost != 0
-            dontdoit = true
-          end
-        end
         case @opponent.length
         when 1
-          if dontdoit
-            pbDisplay(_INTL("You defeated {1}!",@opponent[0].full_name))
-          else
-            pbDisplayPaused(_INTL("You defeated {1}!",@opponent[0].full_name))
-          end
+          pbDisplayPaused(_INTL("You defeated {1}!",@opponent[0].full_name))
         when 2
-          if dontdoit
-            pbDisplay(_INTL("You defeated {1} and {2}!",@opponent[0].full_name,
-               @opponent[1].full_name))
-          else
-            pbDisplayPaused(_INTL("You defeated {1} and {2}!",@opponent[0].full_name,
-               @opponent[1].full_name))
-          end
+          pbDisplayPaused(_INTL("You defeated {1} and {2}!",@opponent[0].full_name,
+             @opponent[1].full_name))
         when 3
-          if dontdoit
-            pbDisplay(_INTL("You defeated {1}, {2} and {3}!",@opponent[0].full_name,
-               @opponent[1].full_name,@opponent[2].full_name))
-          else
-            pbDisplayPaused(_INTL("You defeated {1}, {2} and {3}!",@opponent[0].full_name,
-               @opponent[1].full_name,@opponent[2].full_name))
-          end
+          pbDisplayPaused(_INTL("You defeated {1}, {2} and {3}!",@opponent[0].full_name,
+             @opponent[1].full_name,@opponent[2].full_name))
         end
-          @opponent.each_with_index do |_t,i|
-            @scene.pbShowOpponent(i)
-            msg = (@endSpeeches[i] && @endSpeeches[i]!="") ? @endSpeeches[i] : "..."
-            if dontdoit
-              pbDisplay(msg.gsub(/\\[Pp][Nn]/,pbPlayer.name))
-            else
-              pbDisplayPaused(msg.gsub(/\\[Pp][Nn]/,pbPlayer.name))
-            end
-          end
+        @opponent.each_with_index do |_t,i|
+          @scene.pbShowOpponent(i)
+          msg = (@endSpeeches[i] && @endSpeeches[i] !="") ? @endSpeeches[i] : "..."
+          pbDisplayPaused(msg.gsub(/\\[Pp][Nn]/,pbPlayer.name))
+        end
       end
       # Gain money from winning a trainer battle, and from Pay Day
       pbGainMoney if @decision!=4
@@ -490,37 +462,16 @@ class PokeBattle_Battle
       PBDebug.log("***Player drew with opponent***") if @decision==5
       if @internalBattle
         pbDisplayPaused(_INTL("You have no more Pokémon that can fight!"))
-        #stop here without more input if looping
-        dontdoit = false
-        if $PokemonSystem.sb_loopinput && $PokemonSystem.nomoneylost
-          if $PokemonSystem.sb_loopinput == 1 && $PokemonSystem.nomoneylost != 0
-            dontdoit = true
-          end
-        end
         if trainerBattle?
           case @opponent.length
           when 1
-            if dontdoit
-              pbDisplay(_INTL("You lost against {1}!",@opponent[0].full_name))
-            else
-              pbDisplayPaused(_INTL("You lost against {1}!",@opponent[0].full_name))
-            end
+            pbDisplayPaused(_INTL("You lost against {1}!",@opponent[0].full_name))
           when 2
-            if dontdoit
-              pbDisplay(_INTL("You lost against {1} and {2}!",
-                 @opponent[0].full_name,@opponent[1].full_name))
-            else
-              pbDisplayPaused(_INTL("You lost against {1} and {2}!",
-                 @opponent[0].full_name,@opponent[1].full_name))
-            end
+            pbDisplayPaused(_INTL("You lost against {1} and {2}!",
+               @opponent[0].full_name,@opponent[1].full_name))
           when 3
-            if dontdoit
-              pbDisplay(_INTL("You lost against {1}, {2} and {3}!",
-                 @opponent[0].full_name,@opponent[1].full_name,@opponent[2].full_name))
-            else
-              pbDisplayPaused(_INTL("You lost against {1}, {2} and {3}!",
-                 @opponent[0].full_name,@opponent[1].full_name,@opponent[2].full_name))
-            end
+            pbDisplayPaused(_INTL("You lost against {1}, {2} and {3}!",
+               @opponent[0].full_name,@opponent[1].full_name,@opponent[2].full_name))
           end
         end
         # Lose money from losing a battle
@@ -540,7 +491,7 @@ class PokeBattle_Battle
       @scene.pbWildBattleSuccess if !Settings::GAIN_EXP_FOR_CAPTURE
     end
     # Register captured Pokémon in the Pokédex, and store them
-    # pbRecordAndStoreCaughtPokemon
+    #pbRecordAndStoreCaughtPokemon
 
     isRematch = $game_switches[SWITCH_IS_REMATCH]
     begin
@@ -578,6 +529,7 @@ class PokeBattle_Battle
         end
       end
     end
+
     pbParty(0).each_with_index do |pkmn,i|
       next if !pkmn
       @peer.pbOnLeavingBattle(self,pkmn,@usedInBattle[0][i],true)   # Reset form
@@ -589,6 +541,8 @@ class PokeBattle_Battle
 
     # Clean up battle stuff
     @scene.pbEndBattle(@decision)
+    EBDXOverlayCleanup.request_stray_cleanup if @decision == 4 && defined?(EBDXOverlayCleanup)
+    GC.start if @decision == 4
     @battlers.each do |b|
       next if !b
       pbCancelChoice(b.index)   # Restore unused items to Bag

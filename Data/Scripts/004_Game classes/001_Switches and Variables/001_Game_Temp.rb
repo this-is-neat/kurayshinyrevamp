@@ -27,9 +27,24 @@ class Game_Temp
   attr_accessor :mart_prices
   attr_accessor :fromkurayshop
   attr_accessor :unimportedSprites
-
   attr_accessor :nb_imported_sprites
   attr_accessor :loading_screen
+  attr_accessor :custom_sprites_list
+  attr_accessor :base_sprites_list
+  attr_accessor :moving_furniture
+  attr_accessor :moving_furniture_oldPlayerPosition
+  attr_accessor :moving_furniture_oldItemPosition
+  attr_accessor :visitor_secret_bases
+  attr_accessor :talking_npc_id
+  attr_accessor :dialog_context
+  attr_accessor :active_event_finalizer
+  attr_accessor :surf_patches
+  attr_accessor :transfer_box_autosave
+  attr_accessor :must_save_now
+  attr_accessor :original_direction
+  attr_accessor :temp_waterfall
+  attr_accessor :water_plane
+  attr_accessor :water_plane2
 
   #-----------------------------------------------------------------------------
   # * Object Initialization
@@ -58,6 +73,25 @@ class Game_Temp
     @transition_processing  = false
     @mart_prices            = {}
     @fromkurayshop          = nil
+    @unimportedSprites      = nil
+    @nb_imported_sprites    = 0
+    @loading_screen         = nil
+    @custom_sprites_list    = {}
+    @base_sprites_list      = {}
+    @moving_furniture       = nil
+    @moving_furniture_oldPlayerPosition = nil
+    @moving_furniture_oldItemPosition   = nil
+    @visitor_secret_bases   = []
+    @talking_npc_id         = nil
+    @dialog_context         = {}
+    @active_event_finalizer = nil
+    @surf_patches           = []
+    @transfer_box_autosave  = false
+    @must_save_now          = false
+    @original_direction     = nil
+    @temp_waterfall         = nil
+    @water_plane            = nil
+    @water_plane2           = nil
   end
 
   def clear_mart_prices

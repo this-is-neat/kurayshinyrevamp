@@ -140,9 +140,6 @@ class PokemonEntryScene
         @sprites["shadow"].x=33*2
         @sprites["shadow"].y=32*2
         @sprites["subject"]=PokemonIconSprite.new(pokemon,@viewport)
-        #Sylvi Big Icons
-        @sprites["subject"].icon_offset_x = 0
-        @sprites["subject"].icon_offset_y = 0
         @sprites["subject"].setOffset(PictureOrigin::Center)
         @sprites["subject"].x=88
         @sprites["subject"].y=54
@@ -152,30 +149,10 @@ class PokemonEntryScene
         @sprites["gender"].bitmap.clear
         pbSetSystemFont(@sprites["gender"].bitmap)
         textpos=[]
-        #KurayNewSymbolGender
-        # imagepos = []
-        kuraygender1t = "♂"
-        kuraygender2t = "♀"
-        kuraygender3t = "G"
-        kuraygender4t = "P"
-        kuraygender1r = [55, 148, 229]
-        kuraygender1s = [68, 98, 125]
-        kuraygender2r = [229, 55, 203]
-        kuraygender2s = [137, 73, 127]
-        kuraygender3r = [55, 229, 81]
-        kuraygender3s = [68, 127, 76]
-        kuraygender4r = [229, 127, 55]
-        kuraygender4s = [135, 95, 69]
-        if pokemon.pizza?
-          # imagepos.push(["Graphics/Pictures/Storage/gender4", -12, 1])
-          textpos.push([_INTL(kuraygender4t), 0, -6, false, Color.new(kuraygender4r[0], kuraygender4r[1], kuraygender4r[2]), Color.new(kuraygender4s[0], kuraygender4s[1], kuraygender4s[2])])
-        elsif pokemon.male?
-          textpos.push([_INTL(kuraygender1t), 0, -6, false, Color.new(kuraygender1r[0], kuraygender1r[1], kuraygender1r[2]), Color.new(kuraygender1s[0], kuraygender1s[1], kuraygender1s[2])])
+        if pokemon.male?
+          textpos.push(["♂",0,-6,false,Color.new(0,128,248),Color.new(168,184,184)])
         elsif pokemon.female?
-          textpos.push([_INTL(kuraygender2t), 0, -6, false, Color.new(kuraygender2r[0], kuraygender2r[1], kuraygender2r[2]), Color.new(kuraygender2s[0], kuraygender2s[1], kuraygender2s[2])])
-        elsif pokemon.genderless?
-          # imagepos.push(["Graphics/Pictures/Storage/gender3", -12, 7])
-          textpos.push([_INTL(kuraygender3t), 0, -6, false, Color.new(kuraygender3r[0], kuraygender3r[1], kuraygender3r[2]), Color.new(kuraygender3s[0], kuraygender3s[1], kuraygender3s[2])])
+          textpos.push(["♀",0,-6,false,Color.new(248,24,24),Color.new(168,184,184)])
         end
         pbDrawTextPositions(@sprites["gender"].bitmap,textpos)
       end
@@ -448,9 +425,6 @@ class PokemonEntryScene2
         @sprites["shadow"].x = 66
         @sprites["shadow"].y = 64
         @sprites["subject"] = PokemonIconSprite.new(pokemon, @viewport)
-        #Sylvi Big Icons
-        @sprites["subject"].icon_offset_x = 0
-        @sprites["subject"].icon_offset_y = 0
         @sprites["subject"].setOffset(PictureOrigin::Center)
         @sprites["subject"].x = 88
         @sprites["subject"].y = 54
@@ -460,30 +434,10 @@ class PokemonEntryScene2
         @sprites["gender"].bitmap.clear
         pbSetSystemFont(@sprites["gender"].bitmap)
         textpos = []
-        #KurayNewSymbolGender
-        # imagepos = []
-        kuraygender1t = "♂"
-        kuraygender2t = "♀"
-        kuraygender3t = "G"
-        kuraygender4t = "P"
-        kuraygender1r = [55, 148, 229]
-        kuraygender1s = [68, 98, 125]
-        kuraygender2r = [229, 55, 203]
-        kuraygender2s = [137, 73, 127]
-        kuraygender3r = [55, 229, 81]
-        kuraygender3s = [68, 127, 76]
-        kuraygender4r = [229, 127, 55]
-        kuraygender4s = [135, 95, 69]
-        if pokemon.pizza?
-          # imagepos.push(["Graphics/Pictures/Storage/gender4", -12, 1])
-          textpos.push([_INTL(kuraygender4t), 0, -6, false, Color.new(kuraygender4r[0], kuraygender4r[1], kuraygender4r[2]), Color.new(kuraygender4s[0], kuraygender4s[1], kuraygender4s[2])])
-        elsif pokemon.male?
-          textpos.push([_INTL(kuraygender1t), 0, -6, false, Color.new(kuraygender1r[0], kuraygender1r[1], kuraygender1r[2]), Color.new(kuraygender1s[0], kuraygender1s[1], kuraygender1s[2])])
+        if pokemon.male?
+          textpos.push(["♂", 0, -6, false, Color.new(0, 128, 248), Color.new(168, 184, 184)])
         elsif pokemon.female?
-          textpos.push([_INTL(kuraygender2t), 0, -6, false, Color.new(kuraygender2r[0], kuraygender2r[1], kuraygender2r[2]), Color.new(kuraygender2s[0], kuraygender2s[1], kuraygender2s[2])])
-        elsif pokemon.genderless?
-          # imagepos.push(["Graphics/Pictures/Storage/gender3", -12, 7])
-          textpos.push([_INTL(kuraygender3t), 0, -6, false, Color.new(kuraygender3r[0], kuraygender3r[1], kuraygender3r[2]), Color.new(kuraygender3s[0], kuraygender3s[1], kuraygender3s[2])])
+          textpos.push(["♀", 0, -6, false, Color.new(248, 24, 24), Color.new(168, 184, 184)])
         end
         pbDrawTextPositions(@sprites["gender"].bitmap, textpos)
       end
@@ -529,7 +483,7 @@ class PokemonEntryScene2
     @sprites["controls"] = IconSprite.new(0, 0, @viewport)
     @sprites["controls"].x = 16
     @sprites["controls"].y = 96
-    @sprites["controls"].setBitmap(_INTL("Graphics/Pictures/Naming/overlay_controls"))
+    @sprites["controls"].setBitmap("Graphics/Pictures/Naming/overlay_controls")
     @init = true
     @sprites["overlay"] = BitmapSprite.new(Graphics.width, Graphics.height, @viewport)
     pbDoUpdateOverlay2
@@ -547,7 +501,7 @@ class PokemonEntryScene2
   def pbDoUpdateOverlay2
     overlay = @sprites["overlay"].bitmap
     overlay.clear
-    modeIcon = [[_INTL("Graphics/Pictures/Naming/icon_mode"), 44 + @mode * 62, 120, @mode * 60, 0, 60, 44]]
+    modeIcon = [["Graphics/Pictures/Naming/icon_mode", 44 + @mode * 62, 120, @mode * 60, 0, 60, 44]]
     pbDrawImagePositions(overlay, modeIcon)
   end
 

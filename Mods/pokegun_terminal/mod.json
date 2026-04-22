@@ -1,0 +1,14 @@
+{
+  "name": "Pokegun Terminal",
+  "id": "pokegun_terminal",
+  "version": "1.0.0",
+  "author": "Probably",
+  "description": "Adds a Pokegun PC terminal that sells specialty guns and ammo.",
+  "tags": ["Gameplay", "Items", "PC", "Battle"],
+  "dependencies": [],
+  "incompatible": [],
+  "settings": [],
+  "scripts": [
+    "main.rb"
+  ]
+}

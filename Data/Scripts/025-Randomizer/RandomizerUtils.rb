@@ -22,7 +22,7 @@ HELD_ITEMS = [:AIRBALLOON, :BRIGHTPOWDER, :EVIOLITE, :FLOATSTONE, :DESTINYKNOT, 
 
 INVALID_ITEMS = [:COVERFOSSIL, :PLUMEFOSSIL, :ACCURACYUP, :DAMAGEUP, :ANCIENTSTONE, :ODDKEYSTONE_FULL,
                  :DEVOLUTIONSPRAY, :INVISIBALL]
-RANDOM_ITEM_EXCEPTIONS = [:DNASPLICERS,:POKEBALL, :DYNAMITE]
+RANDOM_ITEM_EXCEPTIONS = [:DNASPLICERS,:POKEBALL, :DYNAMITE, :PINKANBERRY]
 
 def getRandomGivenTM(item)
   return item if item == nil
@@ -62,18 +62,18 @@ def getDynamicRandomItem(item)
   # return item if item.is_key_item?
   # return item if item.is_HM?
   # return item if NON_RANDOMIZE_ITEMS.include?(item.id)
-
+  #
   # #TM
   # if (item.is_TM?)
   #   return $game_switches[SWITCH_RANDOM_TMS] ? pbGetRandomTM() : item
   # end
   # #item normal
   # return item if !$game_switches[SWITCH_RANDOM_ITEMS_DYNAMIC] || !$game_switches[SWITCH_RANDOM_ITEMS]
-
-
+  #
+  #
   # #berries
   # return pbGetRandomBerry() if item.is_berry?
-
+  #
   # items_list = GameData::Item.list_all
   # newItem_id = items_list.keys.sample
   # newItem = GameData::Item.get(newItem_id)
@@ -91,7 +91,7 @@ def pbGetRandomItem(item_id)
   if $game_switches[SWITCH_RANDOM_ITEMS_MAPPED]
     return getMappedRandomItem(item)
   # elsif $game_switches[SWITCH_RANDOM_ITEMS_DYNAMIC]
-    # return getDynamicRandomItem(item)
+  #   return getDynamicRandomItem(item)
   end
   return item
 end
@@ -124,3 +124,18 @@ def pbGetRandomTM()
   return newItem
 end
 
+def displayRandomizerErrorMessage()
+  echoln caller
+  Kernel.pbMessage(_INTL("The randomizer has encountered an error. You should try to re-randomize your game as soon as possible."))
+  Kernel.pbMessage(_INTL("You can do this on the top floor of Pokémon Centers."))
+end
+
+def ensureRandomHashInitialized()
+  if $PokemonGlobal.psuedoBSTHash == nil
+    psuedoHash = Hash.new
+    for i in 0..NB_POKEMON
+      psuedoHash[i] = i
+    end
+    $PokemonGlobal.psuedoBSTHash = psuedoHash
+  end
+end

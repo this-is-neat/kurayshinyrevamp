@@ -81,6 +81,14 @@ class Scene_Map
     $game_switches[SWITCH_ILEX_FOREST_SPOOKED_POKEMON] = false
   end
 
+  def clear_quest_icons()
+    for sprite in $scene.spriteset.character_sprites
+      if sprite.is_a?(Sprite_Character) && sprite.questIcon
+         sprite.removeQuestIcon
+      end
+    end
+  end
+
   def transfer_player(cancelVehicles = true)
     reset_switches_for_map_transfer()
     $game_temp.player_transferring = false
@@ -88,6 +96,7 @@ class Scene_Map
     autofade($game_temp.player_new_map_id)
     pbBridgeOff
     @spritesetGlobal.playersprite.clearShadows
+    clear_quest_icons()
     if $game_map.map_id != $game_temp.player_new_map_id
       $MapFactory.setup($game_temp.player_new_map_id)
     end
@@ -209,16 +218,26 @@ class Scene_Map
     end
     return if $game_temp.message_window_showing
     if !pbMapInterpreterRunning?
-      if Input.trigger?(Input::USE)
+      mp_ui_blocked = defined?(MultiplayerUI) &&
+                      MultiplayerUI.respond_to?(:block_overworld_mouse_input?) &&
+                      MultiplayerUI.block_overworld_mouse_input?
+      chat_typing = defined?($chat_window) && $chat_window && $chat_window.input_mode
+      if $game_temp.moving_furniture
+        placeFurnitureMenu() if !mp_ui_blocked && !chat_typing && Input.trigger?(Input::USE)
+        rotate__held_furniture_left if Input.trigger?(Input::JUMPDOWN)
+        rotate_held_furniture_right if Input.trigger?(Input::JUMPUP)
+      end
+
+      if !mp_ui_blocked && !chat_typing && Input.trigger?(Input::USE)
         $PokemonTemp.hiddenMoveEventCalling = true
-      elsif Input.trigger?(Input::BACK)
+      elsif !mp_ui_blocked && !chat_typing && Input.trigger?(Input::BACK)
         unless $game_system.menu_disabled || $game_player.moving?
           $game_temp.menu_calling = true
           $game_temp.menu_beep = true
           dayOfWeek = getDayOfTheWeek().to_s
-          $scene.spriteset.addUserSprite(LocationWindow.new($game_map.name+ "\n"+ pbGetTimeNow.strftime("%I:%M %p") + "\n" + dayOfWeek))
+          $scene.spriteset.addUserSprite(LocationWindow.new($game_map.name+ "\n"+ pbGetTimeNow.strftime(_INTL("%I:%M %p")) + "\n" + dayOfWeek))
         end
-      elsif Input.trigger?(Input::SPECIAL)
+      elsif !mp_ui_blocked && !chat_typing && Input.trigger?(Input::SPECIAL)
         unless $game_system.menu_disabled || $game_player.moving?
           $PokemonTemp.keyItemCalling = true
         end

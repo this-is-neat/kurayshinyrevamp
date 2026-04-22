@@ -172,18 +172,16 @@ def pbChangeLevel(pkmn, newlevel, scene)
       next if i[0] != pkmn.level
       pbLearnMove(pkmn, i[1], true) { scene.pbUpdate }
     end
-    if pkmn.kuray_no_evo? == 0 || $PokemonSystem.kuray_no_evo == 0
-      # Check for evolution
-      newspecies = pkmn.check_evolution_on_level_up
-      if newspecies
-        pbFadeOutInWithMusic {
-          evo = PokemonEvolutionScene.new
-          evo.pbStartScreen(pkmn, newspecies)
-          evo.pbEvolution
-          evo.pbEndScreen
-          scene.pbRefresh if scene.is_a?(PokemonPartyScreen)
-        }
-      end
+    # Check for evolution
+    newspecies = pkmn.check_evolution_on_level_up
+    if newspecies
+      pbFadeOutInWithMusic {
+        evo = PokemonEvolutionScene.new
+        evo.pbStartScreen(pkmn, newspecies)
+        evo.pbEvolution
+        evo.pbEndScreen
+        scene.pbRefresh if scene.is_a?(PokemonPartyScreen)
+      }
     end
   end
 end
@@ -464,7 +462,12 @@ def pbLearnMove(pkmn, move, ignoreifknown = false, bymachine = false, fast = fal
     if forgetmove >= 0
       oldmovename = pkmn.moves[forgetmove].name
       oldmovepp = pkmn.moves[forgetmove].pp
+      forgotten_move = pkmn.moves[forgetmove]
+      pkmn.add_learned_move(forgotten_move)
+
       pkmn.moves[forgetmove] = Pokemon::Move.new(move) # Replaces current/total PP
+      pkmn.add_learned_move(move)
+
       if bymachine && Settings::TAUGHT_MACHINES_KEEP_OLD_PP
         pkmn.moves[forgetmove].pp = [oldmovepp, pkmn.moves[forgetmove].total_pp].min
       end

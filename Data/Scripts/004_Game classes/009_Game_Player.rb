@@ -331,8 +331,9 @@ class Game_Player < Game_Character
 
   def update_command_new
     dir = Input.dir4
+    chat_typing = defined?($chat_window) && $chat_window && $chat_window.input_mode
     unless pbMapInterpreterRunning? || $game_temp.message_window_showing ||
-           $PokemonTemp.miniupdate || $game_temp.in_menu
+           $PokemonTemp.miniupdate || $game_temp.in_menu || chat_typing
       # Move player in the direction the directional button is being pressed
       if @moved_last_frame ||
          (dir > 0 && dir == @lastdir && Graphics.frame_count - @lastdirframe > Graphics.frame_rate / 20)
@@ -375,7 +376,10 @@ class Game_Player < Game_Character
       pbOnStepTaken(result)
     end
     # Try to manually interact with events
-    if Input.trigger?(Input::USE) && !$PokemonTemp.miniupdate
+    mp_ui_blocked = defined?(MultiplayerUI) &&
+                    MultiplayerUI.respond_to?(:block_overworld_mouse_input?) &&
+                    MultiplayerUI.block_overworld_mouse_input?
+    if !mp_ui_blocked && Input.trigger?(Input::USE) && !$PokemonTemp.miniupdate
       # Same position and front event determinant
       check_event_trigger_here([0])
       check_event_trigger_there([0,2])
@@ -396,7 +400,7 @@ def pbGetPlayerCharset(meta,charset,trainer=nil,force=false)
   $game_player.charsetData = [$Trainer.character_ID,charset,outfit] if $game_player
   ret = meta[charset]
   ret = meta[1] if nil_or_empty?(ret)
-  # if pbResolveBitmap("Graphics/Characters/"+ret+"_"+outfit.to_s)
+  # if pbResolveBitmap("Graphics/Characters/player/"+ret+"_"+outfit.to_s)
   #   ret = ret+"_"+outfit.to_s
   # end
   return ret

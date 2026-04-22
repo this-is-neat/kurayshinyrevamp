@@ -42,12 +42,12 @@ def pbBattleAnimation(bgm=nil,battletype=0,foe=nil)
     if $PokemonGlobal.surfing || $PokemonGlobal.diving
       location = 3
     elsif $PokemonTemp.encounterType &&
-       GameData::EncounterType.get($PokemonTemp.encounterType).type == :fishing
+      GameData::EncounterType.get($PokemonTemp.encounterType).type == :fishing
       location = 3
     elsif $PokemonEncounters.has_cave_encounters?
       location = 2
     elsif !GameData::MapMetadata.exists?($game_map.map_id) ||
-          !GameData::MapMetadata.get($game_map.map_id).outdoor_map
+      !GameData::MapMetadata.get($game_map.map_id).outdoor_map
       location = 1
     end
     anim = ""
@@ -138,6 +138,7 @@ def pbBattleAnimationOverride(viewport,battletype=0,foe=nil)
     tr_type = foe[0].trainer_type
     tr_number= GameData::TrainerType.get(tr_type).id_number
 
+
     if tr_type
       tbargraphic = sprintf("vsBar_%s", tr_type.to_s) rescue nil
       #tgraphic    = sprintf("vsTrainer_%s", tr_type.to_s) rescue nil
@@ -169,6 +170,7 @@ def pbBattleAnimationOverride(viewport,battletype=0,foe=nil)
         # xoffset = ((Graphics.width/2)/10)*10
         xoffset = ((Graphics.width/2)/10)*10
         #xoffset = 0#((Graphics.width/2)/10)*10
+
         bar1 = Sprite.new(viewplayer)
         bar1.bitmap = RPG::Cache.transition(pbargraphic)
         bar1.x      = -xoffset
@@ -265,10 +267,10 @@ def pbBattleAnimationOverride(viewport,battletype=0,foe=nil)
         trainer.tone = Tone.new(0,0,0)
         trainername = foe[0].name
         textpos = [
-           [$Trainer.name,Graphics.width/4,(Graphics.height/1.5)+4,2,
-              Color.new(248,248,248),Color.new(12*6,12*6,12*6)],
-           [trainername,(Graphics.width/4)+(Graphics.width/2),(Graphics.height/1.5)+4,2,
-              Color.new(248,248,248),Color.new(12*6,12*6,12*6)]
+          [$Trainer.name,Graphics.width/4,(Graphics.height/1.5)+4,2,
+           Color.new(248,248,248),Color.new(12*6,12*6,12*6)],
+          [trainername,(Graphics.width/4)+(Graphics.width/2),(Graphics.height/1.5)+4,2,
+           Color.new(248,248,248),Color.new(12*6,12*6,12*6)]
         ]
         pbDrawTextPositions(overlay.bitmap,textpos)
         # Fade out flash, shudder Vs logo and expand it, and then fade to black

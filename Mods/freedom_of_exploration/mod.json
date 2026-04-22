@@ -1,0 +1,9 @@
+{
+  "name": "Freedom Of Exploration",
+  "id": "freedom_of_exploration",
+  "version": "0.1.0",
+  "author": "Copilot",
+  "description": "Adds early PC access to traversal gear, softlock-safe travel overrides, and permanent Route 1 Secret Garden access.",
+  "tags": ["Gameplay", "PC", "QoL"],
+  "scripts": ["main.rb"]
+}

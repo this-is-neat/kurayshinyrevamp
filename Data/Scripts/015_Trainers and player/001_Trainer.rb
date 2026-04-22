@@ -8,10 +8,14 @@ class Trainer
   attr_accessor :language
   attr_accessor :party
   attr_accessor :quests
+  attr_accessor :quests_repaired
   attr_accessor :sprite_override
+  attr_accessor :custom_appearance
   attr_accessor :lowest_difficulty
   attr_accessor :selected_difficulty
   attr_accessor :game_mode
+  attr_accessor :quest_points
+  attr_accessor :secretBase_uuid
 
   def inspect
     str = super.chop
@@ -21,7 +25,7 @@ class Trainer
   end
 
   def full_name
-    return _INTL("{1} {2}", trainer_type_name, @name)
+    return "#{trainer_type_name} #{@name}"
   end
 
   #=============================================================================
@@ -155,16 +159,10 @@ class Trainer
     return (p.length > 0) ? p[p.length - 1] : nil
   end
 
+  # Removes the Pokémon at the given index from the party.
   def remove_pokemon_at_index(index)
-    return false if index < 0 || index >= party_count
-    have_able = false
-    @party.each_with_index do |pkmn, i|
-      have_able = true if i != index && pkmn.able?
-      break if have_able
-    end
-    return false if !have_able
+    return nil if !@party || index < 0 || index >= @party.length
     @party.delete_at(index)
-    return true
   end
 
   # Checks whether the trainer would still have an unfainted Pokémon if the
@@ -183,7 +181,7 @@ class Trainer
   def has_species_or_fusion?(species, form = -1)
     return pokemon_party.any? { |p| p && p.isSpecies?(species) || p.isFusionOf(species) }
   end
-  
+
   # Returns whether there is a fatefully met Pokémon of the given species in the
   # trainer's party.
   def has_fateful_species?(species)
@@ -210,31 +208,20 @@ class Trainer
     @party.each { |pkmn| pkmn.heal }
   end
 
-  #Sylvi Items
-  def clone
-    ret = super
-    ret.party = @party.clone
-    return ret
-  end
-
-  #Sylvi Items
-  def make_vanilla
-    @party.map! { |pkmn| pkmn.clone.make_vanilla }
-    return self
-  end
-
   #=============================================================================
 
-  def initialize(name, trainer_type, sprite_override=nil)
+  def initialize(name, trainer_type, sprite_override=nil, custom_appearance=nil)
     @trainer_type = GameData::TrainerType.get(trainer_type).id
     @name = name
     @id = rand(2 ** 16) | rand(2 ** 16) << 16
     @language = pbGetLanguage
     @party = []
     @sprite_override = sprite_override
+    @custom_appearance = custom_appearance
     @lowest_difficulty=2  #On hard by default, lowered whenever the player selects another difficulty
     @selected_difficulty=2  #On hard by default, lowered whenever the player selects another difficulty
     @game_mode =0  #classic
+    @quest_points = 0
   end
 end
 
@@ -244,10 +231,11 @@ end
 class NPCTrainer < Trainer
   attr_accessor :items
   attr_accessor :lose_text
-
-  def initialize(name, trainer_type, sprite_override=nil)
+  def initialize(name, trainer_type, sprite_override=nil,custom_appearance=nil)
     super
     @items = []
     @lose_text = nil
   end
+
+
 end

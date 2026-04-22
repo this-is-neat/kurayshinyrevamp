@@ -205,9 +205,6 @@ class Player < Trainer
     # @param dex [Integer] region ID
     def seen_count(dex = -1)
       try_resync_pokedex()
-      # if dex_sync_needed?()
-        # resync_pokedex()
-      # end
       return count_dex(@seen_standard, @seen_fusion) + @owned_triple.size
     end
 
@@ -286,6 +283,7 @@ class Player < Trainer
     def owned_fusion?(species)
       bodyId = getBodyID(species)
       headId = getHeadID(species, bodyId)
+
       # p headId
       # p @owned_fusion[headId]
       # if !@owned_fusion[headId]
@@ -293,6 +291,7 @@ class Player < Trainer
       #   @seen_fusion = initFusionDexArray(true)
       # end
       # p @owned_fusion[headId]
+
       return @owned_fusion[headId][bodyId] == true
     end
 
@@ -329,9 +328,6 @@ class Player < Trainer
     # in that region.
     # @param region [Integer] region ID
     def owned_count(dex = -1)
-      # if dex_sync_needed?()
-      #   resync_pokedex()
-      # end
       return count_dex(@owned_standard, @owned_fusion) + @owned_triple.size
     end
 
@@ -430,24 +426,22 @@ class Player < Trainer
     end
 
     # @param pkmn [Pokemon] Pokemon to register unfused pkmn from
-    # @return [Array<Integer>] Dex numbers of unfused pokemon
+    # @return [Array<Symbol>] species IDs of newly registered unfused Pokemon
     def register_unfused_pkmn(pkmn)
-      # Trapstarr & HungryPickle
       registered = []
-      return registered if (pkmn.species_data.id_number < NB_POKEMON) || $PokemonSystem.improved_pokedex == 0
-      if pkmn.species_data.id_number > (NB_POKEMON * NB_POKEMON) + NB_POKEMON
-        # Triple Fusion Logic, skipping for now (not sure if supported yet)
-      else
-        bodyPoke = getBasePokemonID(pkmn.species_data.id_number, true)
-        headPoke = getBasePokemonID(pkmn.species_data.id_number, false)
-        [headPoke, bodyPoke].each do |poke|
-          if !owned?(poke)
-            set_owned(poke)
-            if $Trainer.has_pokedex
-              register(poke)
-              registered << poke
-            end
-          end
+      return registered if !pkmn || !pkmn.respond_to?(:species_data)
+      return registered if !pkmn.respond_to?(:isFusion?) || !pkmn.isFusion?
+      return registered if !$PokemonSystem || !$PokemonSystem.respond_to?(:improved_pokedex) || $PokemonSystem.improved_pokedex == 0
+      return registered if pkmn.isTripleFusion?
+
+      body_poke = GameData::Species.get(getBasePokemonID(pkmn.species, true)).species
+      head_poke = GameData::Species.get(getBasePokemonID(pkmn.species, false)).species
+      [head_poke, body_poke].each do |poke|
+        next if owned?(poke)
+        set_owned(poke)
+        if $Trainer.has_pokedex
+          register(poke)
+          registered << poke
         end
       end
       return registered

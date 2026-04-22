@@ -324,7 +324,7 @@ class Interpreter
   end
 
   # Sets another event's self switch (eg. pbSetSelfSwitch(20, "A", true) ).
-  def pbSetSelfSwitch(eventid, switch_name, value, mapid = -1)
+    def pbSetSelfSwitch(eventid, switch_name, value, mapid = -1)
     mapid = @map_id if mapid < 0
     old_value = $game_self_switches[[mapid, eventid, switch_name]]
     $game_self_switches[[mapid, eventid, switch_name]] = value
@@ -393,11 +393,8 @@ class Interpreter
     old_y  = event.y
     # Apply strict version of passable, which treats tiles that are passable
     # only from certain directions as fully impassible
-
     # ^why?? - no
-    # ^IDK, what's the deal with that anyway?
     return if !event.can_move_in_direction?($game_player.direction, false)
-    # return if !event.can_move_in_direction?($game_player.direction, true)
     case $game_player.direction
     when 2 then event.move_down
     when 4 then event.move_left

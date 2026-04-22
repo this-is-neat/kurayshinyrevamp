@@ -65,8 +65,12 @@ class PokemonLoadPanel < SpriteWrapper
         textpos.push([@title,16*2,2*2,0,TEXTCOLOR,TEXTSHADOWCOLOR])
         textpos.push([_INTL("Badges:"),16*2,53*2,0,TEXTCOLOR,TEXTSHADOWCOLOR])
         textpos.push([@trainer.badge_count.to_s,103*2,53*2,1,TEXTCOLOR,TEXTSHADOWCOLOR])
-        textpos.push([_INTL("Pokédex:"),16*2,69*2,0,TEXTCOLOR,TEXTSHADOWCOLOR])
-        textpos.push([@trainer.pokedex.seen_count.to_s,103*2,69*2,1,TEXTCOLOR,TEXTSHADOWCOLOR])
+        # textpos.push(["Pokédex:",16*2,69*2,0,TEXTCOLOR,TEXTSHADOWCOLOR])
+        # textpos.push([@trainer.pokedex.seen_count.to_s,103*2,69*2,1,TEXTCOLOR,TEXTSHADOWCOLOR])
+
+        textpos.push([_INTL(getDisplayDifficultyFromIndex(@trainer.lowest_difficulty)),16*2,69*2,0,TEXTCOLOR,TEXTSHADOWCOLOR])
+        textpos.push([getGameModeFromIndex(@trainer.game_mode),103*2,69*2,1,TEXTCOLOR,TEXTSHADOWCOLOR])
+
         textpos.push([_INTL("Time:"),16*2,85*2,0,TEXTCOLOR,TEXTSHADOWCOLOR])
         hour = @totalsec / 60 / 60
         min  = @totalsec / 60 % 60
@@ -299,9 +303,6 @@ class PokemonLoadScreen
     cmd_mystery_gift = -1
     cmd_debug        = -1
     cmd_quit         = -1
-    #Kuray Add Documentation & Discord server links
-    cmd_doc         = -1
-    cmd_discord         = -1
     show_continue = !@save_data.empty?
     new_game_plus = show_continue && (@save_data[:player].new_game_plus_unlocked || $DEBUG)
     if show_continue
@@ -314,10 +315,8 @@ class PokemonLoadScreen
     if new_game_plus
       commands[cmd_new_game_plus = commands.length]  = _INTL('New Game +')
     end
-    commands[cmd_options = commands.length]   = _INTL('Optidons')
+    commands[cmd_options = commands.length]   = _INTL('Options')
     commands[cmd_language = commands.length]  = _INTL('Language') if Settings::LANGUAGES.length >= 2
-    commands[cmd_discord = commands.length]     = _INTL('Join Discord Server')
-    commands[cmd_doc = commands.length]     = _INTL('Open Documentation')
     commands[cmd_debug = commands.length]     = _INTL('Debug') if $DEBUG
     commands[cmd_quit = commands.length]      = _INTL('Quit Game')
     map_id = show_continue ? @save_data[:map_factory].map.map_id : 0
@@ -335,28 +334,20 @@ class PokemonLoadScreen
         return
       when cmd_new_game
         @scene.pbEndScene
-        Game.start_new
+        Game.start_new(new_game_plus)
+        echoln new_game_plus
+        @save_data[:player].new_game_plus_unlocked=new_game_plus
         return
       when cmd_new_game_plus
         @scene.pbEndScene
-        Game.start_new(@save_data[:bag],@save_data[:storage_system],@save_data[:player])
+        Game.start_new(new_game_plus,@save_data[:bag],@save_data[:storage_system],@save_data[:player])
         @save_data[:player].new_game_plus_unlocked=true
-        return
-      when cmd_doc
-        # https://docs.google.com/document/d/1O6pKKL62dbLcapO0c2zDG2UI-eN6uatYlt_0GSk1dbE
-        # system("start https://docs.google.com/document/d/1O6pKKL62dbLcapO0c2zDG2UI-eN6uatYlt_0GSk1dbE")
-        `open https://docs.google.com/document/d/1O6pKKL62dbLcapO0c2zDG2UI-eN6uatYlt_0GSk1dbE`
-        return
-      when cmd_discord
-        # https://discord.gg/UFxQkUZeyE
-        # system("start https://discord.gg/UFxQkUZeyE")
-        `open https://discord.gg/UFxQkUZeyE`
         return
       when cmd_mystery_gift
         pbFadeOutIn { pbDownloadMysteryGift(@save_data[:player]) }
       when cmd_options
         pbFadeOutIn do
-          scene = PokemonOption_Scene.new
+          scene = PokemonGameOption_Scene.new
           screen = PokemonOptionScreen.new(scene)
           screen.pbStartScreen(true)
         end

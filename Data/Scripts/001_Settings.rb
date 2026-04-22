@@ -5,9 +5,13 @@
 #==============================================================================#
 module Settings
   # The version of your game. It has to adhere to the MAJOR.MINOR.PATCH format.
-  GAME_VERSION = '6.4.5'
-  IF_VERSION = "6.4.5"
-  LATEST_GAME_RELEASE = "6.4"
+  GAME_ID = :IF_KANTO
+  GAME_VERSION = '6.7.2'
+  IF_VERSION = "6.7.2"
+  LATEST_GAME_RELEASE = "6.7"
+
+  KANTO = (GAME_ID == :IF_KANTO)
+  HOENN = (GAME_ID == :IF_HOENN)
 
   # GAME_VERSION_NUMBER = "0.19.0"
   # Read the VERSION file inside Data folder to get the version number
@@ -27,6 +31,9 @@ module Settings
   #getRandomCustomFusionForIntro
   FUSION_ICON_SPRITE_OFFSET = 10
 
+  ANIMATE_REFLECTIONS = false
+  USE_REFLECTIONS = false
+
   #Infinite fusion settings
   NB_POKEMON = 501
   CUSTOM_BASE_SPRITES_FOLDER = "Graphics/BaseSprites/"
@@ -42,6 +49,7 @@ module Settings
   REMOTE_VERSION_FILE_PATH = "Data/REMOTE_VERSION"
   CUSTOM_SPRITES_FILE_PATH = "Data/sprites/CUSTOM_SPRITES"
   BASE_SPRITES_FILE_PATH = "Data/sprites/BASE_SPRITES"
+  UPDATED_SPRITESHEETS_CACHE = "Data/sprites/updated_spritesheets_cache"
   CUSTOM_DEX_ENTRIES_PATH = "Data/pokedex/dex.json"
   AI_DEX_ENTRIES_PATH = "Data/pokedex/generated_entries.json"
   POKEDEX_ENTRIES_PATH = "Data/pokedex/all_entries.json"
@@ -75,6 +83,9 @@ module Settings
   
   MYSTERY_GIFT_KURAY_URL = "https://raw.githubusercontent.com/kurayamiblackheart/kurayshinyrevamp/main/Data/MysteryGift.txt"
   MYSTERY_GIFT_KURAY_PATH = "MysteryGift.txt"
+
+  REMOTE_NPC_DIALOG = false
+  REMOTE_NPC_DIALOG_SERVER_URL = nil
 
   # MIGHT_NOT_NEED84x
   # LEVEL_CAPS=[12,22,26,35,38,45,51,54,58,62,63,64,64,65,67,68]

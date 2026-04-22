@@ -1,0 +1,12 @@
+{
+  "name": "Player Identity and Bedroom",
+  "id": "player_identity_bedroom",
+  "version": "0.1.0",
+  "author": "Probably",
+  "description": [
+    "Adds a nonbinary player option with they/them pronouns and decouples bedroom style from gender.",
+    "Uses intro/menu aliases plus targeted event/common-event overrides to stay compatible with the Kuray framework."
+  ],
+  "tags": ["Gameplay", "UI", "Cosmetic", "Bug Fix"],
+  "scripts": ["main.rb"]
+}

@@ -86,28 +86,28 @@
     // 4: xBRZ
     // (default: 0)
     //
-    // "smoothScaling": 0,
+    "smoothScaling": 0,
 
 
     // Apply smooth interpolation when game screen
     // is downscaled (same values as smoothScaling)
     // (default: 0)
     //
-    // "smoothScalingDown": 0,
+    "smoothScalingDown": 0,
 
 
     // Apply smooth interpolation when bitmaps
     // are upscaled (same values as smoothScaling)
     // (default: 0)
     //
-    // "bitmapSmoothScaling": 0,
+    "bitmapSmoothScaling": 0,
 
 
     // Apply smooth interpolation when bitmaps
     // are downscaled (same values as smoothScaling)
     // (default: 0)
     //
-    // "bitmapSmoothScalingDown": 0,
+    "bitmapSmoothScalingDown": 0,
 
 
     // Apply mipmap interpolation when game screen

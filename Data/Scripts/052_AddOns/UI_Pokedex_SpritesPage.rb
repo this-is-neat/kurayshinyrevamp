@@ -45,7 +45,9 @@ class PokemonPokedexInfo_Scene
     @sprites["bgSelected_next"].setBitmap(_INTL("Graphics/Pictures/Pokedex/bg_forms_selected_small"))
     @sprites["bgSelected_next"].visible = false
 
-    @creditsOverlay = BitmapSprite.new(Graphics.width, Graphics.height, @viewport).bitmap
+    @sprites["creditsOverlay"] = BitmapSprite.new(Graphics.width, Graphics.height, @viewport)
+    @sprites["creditsOverlay"].z = 9999999
+    @creditsOverlay = @sprites["creditsOverlay"].bitmap
 
   end
 
@@ -141,6 +143,15 @@ class PokemonPokedexInfo_Scene
   end
 
   def setAvailableBitmaps(available_alts)
+    if @available_bitmaps
+      @available_bitmaps.each do |bmp|
+        next if !bmp
+        begin
+          bmp.dispose if bmp.respond_to?(:dispose) && !bmp.disposed?
+        rescue
+        end
+      end
+    end
     @available_bitmaps = available_alts.map { |path| AnimatedBitmap.new(path).recognizeDims() }
   end
 
@@ -202,7 +213,8 @@ class PokemonPokedexInfo_Scene
   end
 
   def showSpriteCredits(filename, generated_sprite = false)
-    @creditsOverlay.dispose
+    return if !@creditsOverlay
+    @creditsOverlay.clear
 
     x = Graphics.width / 2 - 75
     y = Graphics.height - 60
@@ -221,7 +233,6 @@ class PokemonPokedexInfo_Scene
 
     label_base_color = Color.new(248, 248, 248)
     label_shadow_color = Color.new(104, 104, 104)
-    @creditsOverlay = BitmapSprite.new(Graphics.width, Graphics.height, @viewport).bitmap
     textpos = [[author_name, x, y, 0, label_base_color, label_shadow_color]]
     pbDrawTextPositions(@creditsOverlay, textpos)
   end
@@ -312,6 +323,25 @@ class PokemonPokedexInfo_Scene
     end
     @sprites["uparrow"].visible = false
     @sprites["downarrow"].visible = false
+  end
+
+  unless method_defined?(:pokedex_sprite_page_original_pbEndScene)
+    alias pokedex_sprite_page_original_pbEndScene pbEndScene
+  end
+
+  def pbEndScene
+    if @available_bitmaps
+      @available_bitmaps.each do |bmp|
+        next if !bmp
+        begin
+          bmp.dispose if bmp.respond_to?(:dispose) && !bmp.disposed?
+        rescue
+        end
+      end
+      @available_bitmaps = nil
+    end
+    @creditsOverlay = nil
+    pokedex_sprite_page_original_pbEndScene
   end
 
   # def is_main_sprite(index = nil)

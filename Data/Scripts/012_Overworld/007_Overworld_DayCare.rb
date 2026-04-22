@@ -125,15 +125,10 @@ def pbDayCareGetCompat
   # Shadow Pokémon cannot breed
   return 0 if pkmn1.shadowPokemon? || pkmn2.shadowPokemon?
   # Pokémon in the Undiscovered egg group cannot breed
-  # egg_groups1 = pkmn1.species_data.egg_groups
-  # egg_groups2 = pkmn2.species_data.egg_groups
-  # Forcing it into array to prevent crash from undefined method include? for :Undiscovered:Symbol
-  egg_groups1 = [pkmn1.species_data.egg_groups].flatten
-  egg_groups2 = [pkmn2.species_data.egg_groups].flatten
+  egg_groups1 = pkmn1.species_data.egg_groups
+  egg_groups2 = pkmn2.species_data.egg_groups
   return 0 if egg_groups1.include?(:Undiscovered) ||
               egg_groups2.include?(:Undiscovered)
-  return 0 if (!$PokemonSystem.legendarybreed || $PokemonSystem.legendarybreed == 0) &&
-              (egg_groups1.include?(:HeadUndiscovered) || egg_groups2.include?(:HeadUndiscovered))
   # Pokémon that don't share an egg group (and neither is in the Ditto group)
   # cannot breed
   return 0 if !egg_groups1.include?(:Ditto) &&

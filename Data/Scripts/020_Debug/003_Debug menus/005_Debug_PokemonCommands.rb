@@ -201,22 +201,39 @@ PokemonDebugMenuCommands.register("setlevel", {
     if pkmn.egg?
       screen.pbDisplay(_INTL("{1} is an egg.", pkmn.name))
     else
-      params = ChooseNumberParams.new
-      params.setRange(1, GameData::GrowthRate.max_level)
-      params.setDefaultValue(pkmn.level)
-      level = pbMessageChooseNumber(
-         _INTL("Set the Pokémon's level (max. {1}).", params.maxNumber), params) { screen.pbUpdate }
-      if level != pkmn.level
+      screen.pbRefreshSingle(pkmnid)
+
+      if $PokemonSystem.level_caps==1
+        choice= pbMessage(_INTL("Set to which level?"),[_INTL("Set to level cap"), _INTL("Set to specific level"), _INTL("Cancel")],2)
+        if choice==0
+          level = getCurrentLevelCap()
+        elsif choice == 1
+          level = promptSetLevelToNumber(pkmn,screen)
+        else
+            return
+        end
+      else
+        level = promptSetLevelToNumber(pkmn,screen)
+      end
+      if level && level != pkmn.level
         pkmn.level = level
-        # should fix lv / exp issue
-        # pkmn.exp = pkmn.growth_rate.minimum_exp_for_level(pkmn.level)
         pkmn.calc_stats
+        screen.pbUpdate
         screen.pbRefreshSingle(pkmnid)
       end
     end
     next false
   }
 })
+
+def promptSetLevelToNumber(pkmn,screen)
+  params = ChooseNumberParams.new
+  params.setRange(1, GameData::GrowthRate.max_level)
+  params.setDefaultValue(pkmn.level)
+  level = pbMessageChooseNumber(
+    _INTL("Set the Pokémon's level (max. {1}).", params.maxNumber), params) { screen.pbUpdate }
+  return level
+end
 
 PokemonDebugMenuCommands.register("setexp", {
   "parent"      => "levelstats",
@@ -849,7 +866,6 @@ PokemonDebugMenuCommands.register("printInfo", {
     next false
   }
 })
-
 PokemonDebugMenuCommands.register("speciesform", {
   "parent"      => "main",
   "name"        => _INTL("Species/form..."),
@@ -861,8 +877,7 @@ PokemonDebugMenuCommands.register("speciesform", {
              _INTL("Species {1}, form {2} (forced).", pkmn.speciesName, pkmn.form)][(pkmn.forced_form.nil?) ? 0 : 1]
       cmd = screen.pbShowCommands(msg, [
          _INTL("Set species"),
-         _INTL("Set form"),
-         _INTL("Remove form override")], cmd)
+         _INTL("Set fusion species")], cmd)
       break if cmd < 0
       case cmd
       when 0   # Set species
@@ -874,29 +889,51 @@ PokemonDebugMenuCommands.register("speciesform", {
           end
           pkmn.calc_stats
           $Trainer.pokedex.register(pkmn) if !settingUpBattle
+          $Trainer.pokedex.set_owned(pkmn.species) if !settingUpBattle
           screen.pbRefreshSingle(pkmnid)
         end
       when 1   # Set form
+        old_head_dex = get_head_number_from_symbol(pkmn.species)
+        old_body_dex = get_body_number_from_symbol(pkmn.species)
+        pbMessage('Head species?')
+        head_species = pbChooseSpeciesList(old_head_dex,NB_POKEMON)
+        pbMessage('Body species?')
+        body_species = pbChooseSpeciesList(old_body_dex,NB_POKEMON)
+
+        fused_species_dex = getFusionSpecies(body_species.species, head_species.species)
+        species = GameData::Species.get(fused_species_dex)
+
+        if species && species != pkmn.species
+          pkmn.species = species
+          if pkmn.shiny?
+            pkmn.debug_shiny=true
+          end
+          pkmn.calc_stats
+          $Trainer.pokedex.register(pkmn) if !settingUpBattle
+          $Trainer.pokedex.set_owned(pkmn.species) if !settingUpBattle
+          screen.pbRefreshSingle(pkmnid)
+        end
+
         # cmd2 = 0
         # formcmds = [[], []]
         # GameData::Species.each do |sp|
         #   next if sp.species != pkmn.species
         #   form_name = sp.form_name
-        #   form_name = _INTL("Unnamed form") if !form_name || form_name.empty?
+        #   form_name = "Unnamed form" if !form_name || form_name.empty?
         #   form_name = sprintf("%d: %s", sp.form, form_name)
         #   formcmds[0].push(sp.form)
         #   formcmds[1].push(form_name)
         #   cmd2 = sp.form if pkmn.form == sp.form
         # end
         # if formcmds[0].length <= 1
-        #   screen.pbDisplay(_INTL("Species {1} only has one form.", pkmn.speciesName))
+        #   screen.pbDisplay("Species {1} only has one form.", pkmn.speciesName)
         # else
-        #   cmd2 = screen.pbShowCommands(_INTL("Set the Pokémon's form."), formcmds[1], cmd2)
+        #   cmd2 = screen.pbShowCommands("Set the Pokémon's form."), formcmds[1], cmd2
         #   next if cmd2 < 0
         #   f = formcmds[0][cmd2]
         #   if f != pkmn.form
         #     if MultipleForms.hasFunction?(pkmn, "getForm")
-        #       next if !screen.pbConfirm(_INTL("This species decides its own form. Override?"))
+        #       next if !screen.pbConfirm("This species decides its own form. Override?")
         #       pkmn.forced_form = f
         #     end
         #     pkmn.form = f
@@ -904,9 +941,9 @@ PokemonDebugMenuCommands.register("speciesform", {
         #     screen.pbRefreshSingle(pkmnid)
         #   end
         # end
-      when 2   # Remove form override
-        pkmn.forced_form = nil
-        screen.pbRefreshSingle(pkmnid)
+      # when 2   # Remove form override
+      #   pkmn.forced_form = nil
+      #   screen.pbRefreshSingle(pkmnid)
       end
     end
     next false
@@ -930,20 +967,58 @@ PokemonDebugMenuCommands.register("setshininess", {
     cmd = 0
     loop do
       msg = [_INTL("Is shiny."), _INTL("Is normal (not shiny).")][pkmn.shiny? ? 0 : 1]
-      cmd = screen.pbShowCommands(msg, [
-           _INTL("Make shiny"),
-           _INTL("Make normal"),
-           _INTL("Reset")], cmd)
+      cmdMakeShiny = _INTL("Make shiny")
+      cmdMakeNormal = _INTL("Make normal")
+      cmdMakeHeadShiny = _INTL("Make head shiny")
+      cmdMakeBodyShiny = _INTL("Make body shiny")
+      cmdMakeHeadNormal = _INTL("Make head normal")
+      cmdMakeBodyNormal = _INTL("Make body normal")
+      cmdReset = _INTL("Reset")
+
+      options = []
+      if(pkmn.isFusion?)
+        options << cmdMakeBodyShiny if !pkmn.body_shiny
+        options << cmdMakeBodyNormal if pkmn.body_shiny
+
+        options << cmdMakeHeadShiny if !pkmn.head_shiny
+        options << cmdMakeHeadNormal if pkmn.head_shiny
+      else
+        options << cmdMakeNormal if pkmn.shiny?
+        options << cmdMakeShiny if !pkmn.shiny?
+      end
+      options << cmdReset
+
+      cmd = screen.pbShowCommands(msg,options,cmd)
       break if cmd < 0
-      case cmd
-      when 0   # Make shiny
+      case options[cmd]
+      when cmdMakeShiny  # Make shiny (unfused)
         pkmn.shiny = true
         pkmn.debug_shiny=true
-      when 1   # Make normal
+      when cmdMakeHeadShiny    # Fused - Shiny head
+        pkmn.shiny = true
+        pkmn.head_shiny = true
+        pkmn.debug_shiny=true
+
+        echoln "head is shiny!"
+      when cmdMakeBodyShiny   # Fused - Shiny head
+        pkmn.shiny = true
+        pkmn.body_shiny = true
+        pkmn.debug_shiny=true
+      when cmdMakeNormal   # Make normal
         pkmn.shiny = false
         pkmn.debug_shiny=false
-      when 2   # Reset
+      when cmdMakeBodyNormal   # Make boxy normal
+        pkmn.body_shiny = false
+        pkmn.debug_shiny=false if !pkmn.head_shiny
+        pkmn.shiny=false if !pkmn.head_shiny
+      when cmdMakeHeadNormal   # Make boxy normal
+        pkmn.head_shiny = false
+        pkmn.debug_shiny=false if !pkmn.body_shiny
+        pkmn.shiny=false if !pkmn.body_shiny
+      when cmdReset     # Reset
         pkmn.shiny = nil
+        pkmn.head_shiny = nil
+        pkmn.body_shiny = nil
         pkmn.debug_shiny=nil
       end
       screen.pbRefreshSingle(pkmnid)
@@ -991,8 +1066,7 @@ PokemonDebugMenuCommands.register("setribbons", {
       commands = []
       ids = []
       GameData::Ribbon.each do |ribbon_data|
-        commands.push(_INTL("{1} {2}",
-           (pkmn.hasRibbon?(ribbon_data.id)) ? "[Y]" : "[  ]", ribbon_data.name))
+        commands.push("#{pkmn.hasRibbon?(ribbon_data.id) ? '[Y]' : '[  ]'} #{ribbon_data.name}")
         ids.push(ribbon_data.id)
       end
       commands.push(_INTL("Give all"))

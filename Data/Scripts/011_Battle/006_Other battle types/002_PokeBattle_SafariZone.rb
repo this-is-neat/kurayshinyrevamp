@@ -23,10 +23,7 @@ class PokeBattle_FakeBattler
   def totalhp;        return @pokemon.totalhp; end
   def displayGender;  return @pokemon.gender;  end
   def shiny?;         return @pokemon.shiny?;  end
-  def fakeshiny?;     return @pokemon.fakeshiny?; end
-  def kuraygender?;         return @pokemon.kuraygender?;  end
   alias isShiny? shiny?
-  alias isFakeShiny? fakeshiny?
 
   def isSpecies?(check_species)
     return @pokemon && @pokemon.isSpecies?(check_species)
@@ -44,24 +41,6 @@ class PokeBattle_FakeBattler
   alias isPrimal? primal?
   def captured;       return false; end
   def captured=(value); end
-
-  #KurayX_About_GENDER
-  def displayGenderPizza
-    if $PokemonSystem.shenanigans && $PokemonSystem.shenanigans == 1
-      return false
-    else
-      if @pokemon.kuraygender?
-        kuraythegender = @pokemon.kuraygender?
-      else
-        kuraythegender = rand(65536)
-      end
-    end
-    if kuraythegender < 256
-      return true
-    else
-      return false
-    end
-  end
 
   def owned?
     return $Trainer.owned?(pokemon.species)
@@ -302,7 +281,7 @@ class PokeBattle_Scene
     rockAnim.dispose
   end
 
-  alias __safari__pbThrowSuccess pbThrowSuccess unless method_defined?(:__safari__pbThrowSuccess)
+  alias __safari__pbThrowSuccess pbThrowSuccess
   def pbThrowSuccess
     __safari__pbThrowSuccess
     pbWildBattleSuccess if @battle.is_a?(PokeBattle_SafariZone)

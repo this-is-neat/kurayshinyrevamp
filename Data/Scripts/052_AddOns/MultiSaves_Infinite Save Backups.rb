@@ -5,8 +5,8 @@ class Player
   attr_accessor :inf_backup_slots
 
   alias inf_backup_slots_initialize initialize unless method_defined?(:inf_backup_slots_initialize)
-  def initialize(name, trainer_type)
-    inf_backup_slots_initialize(name, trainer_type)
+  def initialize(*args)
+    inf_backup_slots_initialize(*args)
     @inf_backup_slots= [0,0,0,0,0,0,0,0]
   end
 

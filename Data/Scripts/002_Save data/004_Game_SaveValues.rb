@@ -179,3 +179,27 @@ SaveData.register(:kuray_storage_system) do
   ensure_class :PokemonStorage
   save_value { $PokemonStorage }
 end
+
+class Player
+  def make_vanilla
+    return self
+  end
+end
+
+class PokemonGlobalMetadata
+  def make_vanilla
+    return self
+  end
+end
+
+class PokemonBag
+  def make_vanilla
+    return self
+  end
+end
+
+class PokemonStorage
+  def make_vanilla
+    return self
+  end
+end

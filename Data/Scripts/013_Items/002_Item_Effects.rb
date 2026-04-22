@@ -119,7 +119,7 @@ ItemHandlers::UseInField.add(:MAXREPEL, proc { |item|
 Events.onStepTaken += proc {
   if $PokemonGlobal.repel > 0 && !$game_player.terrain_tag.ice # Shouldn't count down if on ice
     $PokemonGlobal.repel -= 1
-    if $PokemonGlobal.repel <= 0
+    if $PokemonGlobal.repel <= 0 && ! $PokemonGlobal.tempRepel
       isIncense = $game_switches[SWITCH_USED_AN_INCENSE]
       $game_switches[SWITCH_FORCE_ALL_WILD_FUSIONS] = false
       $game_switches[SWITCH_USED_AN_INCENSE] = false
@@ -148,17 +148,19 @@ Events.onStepTaken += proc {
 
 ItemHandlers::UseInField.add(:BLACKFLUTE, proc { |item|
   pbUseItemMessage(item)
-  pbMessage(_INTL("Wild Pokémon will be repelled."))
-  $PokemonMap.blackFluteUsed = true
+  message = $PokemonMap.blackFluteUsed ? "Wild Pokemon will no longer be repelled.": "Wild Pokémon will be repelled."
+  pbMessage(_INTL(message))
+  $PokemonMap.blackFluteUsed = !$PokemonMap.blackFluteUsed
   $PokemonMap.whiteFluteUsed = false
   next 1
 })
 
 ItemHandlers::UseInField.add(:WHITEFLUTE, proc { |item|
   pbUseItemMessage(item)
-  pbMessage(_INTL("Wild Pokémon will be lured."))
+  message = $PokemonMap.whiteFluteUsed ? "Wild Pokemon will no longer be lured.": "Wild Pokémon will be lured."
+  pbMessage(_INTL(message))
+  $PokemonMap.whiteFluteUsed = !$PokemonMap.whiteFluteUsed
   $PokemonMap.blackFluteUsed = false
-  $PokemonMap.whiteFluteUsed = true
   next 1
 })
 
@@ -358,7 +360,7 @@ ItemHandlers::UseOnPokemon.addIf(proc { |item| GameData::Item.get(item).is_evolu
                                      next false
                                    end
                                    newspecies = pkmn.check_evolution_on_use_item(item)
-                                   if newspecies && (pkmn.kuray_no_evo? == 0 || $PokemonSystem.kuray_no_evo == 0)
+                                   if newspecies
                                      pbFadeOutInWithMusic {
                                        evo = PokemonEvolutionScene.new
                                        evo.pbStartScreen(pkmn, newspecies)
@@ -478,11 +480,7 @@ ItemHandlers::UseOnPokemon.add(:ICEHEAL, proc { |item, pkmn, scene|
   end
   pkmn.heal_status
   scene.pbRefresh
-  if (!$PokemonSystem.frostbite || $PokemonSystem.frostbite == 0)
-    then scene.pbDisplay(_INTL("{1} was thawed out.", pkmn.name))
-  elsif ($PokemonSystem.frostbite && $PokemonSystem.frostbite != 0)
-    then scene.pbDisplay(_INTL("{1}'s frostbite was healed.", pkmn.name))
-  end
+  scene.pbDisplay(_INTL("{1} was thawed out.", pkmn.name))
   next true
 })
 
@@ -789,8 +787,8 @@ ItemHandlers::UseOnPokemon.add(:SWIFTWING, proc { |item, pkmn, scene|
 })
 
 def can_use_rare_candy(pkmn)
-  return false if pkmn.level >= GameData::GrowthRate.max_level || pkmn.shadowPokemon? || pkmn.level_simple >= getkuraylevelcap()
-  # return false if $PokemonSystem.level_caps==1 && pokemonExceedsLevelCap(pkmn)
+  return false if pkmn.level >= GameData::GrowthRate.max_level || pkmn.shadowPokemon?
+  return false if $PokemonSystem.level_caps==1 && pokemonExceedsLevelCap(pkmn)
   return true
 end
 
@@ -870,65 +868,65 @@ ItemHandlers::UseOnPokemon.add(:GRACIDEA, proc { |item, pkmn, scene|
   next true
 })
 
-ItemHandlers::UseOnPokemon.add(:REDNECTAR, proc { |item, pkmn, scene|
-  if !pkmn.isSpecies?(:ORICORIO) || pkmn.form == 0
-    scene.pbDisplay(_INTL("It had no effect."))
-    next false
-  end
-  if pkmn.fainted?
-    scene.pbDisplay(_INTL("This can't be used on the fainted Pokémon."))
-  end
-  pkmn.setForm(0) {
-    scene.pbRefresh
-    scene.pbDisplay(_INTL("{1} changed form!", pkmn.name))
-  }
-  next true
-})
-
-ItemHandlers::UseOnPokemon.add(:YELLOWNECTAR, proc { |item, pkmn, scene|
-  if !pkmn.isSpecies?(:ORICORIO) || pkmn.form == 1
-    scene.pbDisplay(_INTL("It had no effect."))
-    next false
-  end
-  if pkmn.fainted?
-    scene.pbDisplay(_INTL("This can't be used on the fainted Pokémon."))
-  end
-  pkmn.setForm(1) {
-    scene.pbRefresh
-    scene.pbDisplay(_INTL("{1} changed form!", pkmn.name))
-  }
-  next true
-})
-
-ItemHandlers::UseOnPokemon.add(:PINKNECTAR, proc { |item, pkmn, scene|
-  if !pkmn.isSpecies?(:ORICORIO) || pkmn.form == 2
-    scene.pbDisplay(_INTL("It had no effect."))
-    next false
-  end
-  if pkmn.fainted?
-    scene.pbDisplay(_INTL("This can't be used on the fainted Pokémon."))
-  end
-  pkmn.setForm(2) {
-    scene.pbRefresh
-    scene.pbDisplay(_INTL("{1} changed form!", pkmn.name))
-  }
-  next true
-})
-
-ItemHandlers::UseOnPokemon.add(:PURPLENECTAR, proc { |item, pkmn, scene|
-  if !pkmn.isSpecies?(:ORICORIO) || pkmn.form == 3
-    scene.pbDisplay(_INTL("It had no effect."))
-    next false
-  end
-  if pkmn.fainted?
-    scene.pbDisplay(_INTL("This can't be used on the fainted Pokémon."))
-  end
-  pkmn.setForm(3) {
-    scene.pbRefresh
-    scene.pbDisplay(_INTL("{1} changed form!", pkmn.name))
-  }
-  next true
-})
+# ItemHandlers::UseOnPokemon.add(:REDNECTAR, proc { |item, pkmn, scene|
+#   if !pkmn.isSpecies?(:ORICORIO) || pkmn.form == 0
+#     scene.pbDisplay("It had no effect.")
+#     next false
+#   end
+#   if pkmn.fainted?
+#     scene.pbDisplay("This can't be used on the fainted Pokémon.")
+#   end
+#   pkmn.setForm(0) {
+#     scene.pbRefresh
+#     scene.pbDisplay("{1} changed form!", pkmn.name)
+#   }
+#   next true
+# })
+#
+# ItemHandlers::UseOnPokemon.add(:YELLOWNECTAR, proc { |item, pkmn, scene|
+#   if !pkmn.isSpecies?(:ORICORIO) || pkmn.form == 1
+#     scene.pbDisplay("It had no effect.")
+#     next false
+#   end
+#   if pkmn.fainted?
+#     scene.pbDisplay("This can't be used on the fainted Pokémon.")
+#   end
+#   pkmn.setForm(1) {
+#     scene.pbRefresh
+#     scene.pbDisplay("{1} changed form!", pkmn.name)
+#   }
+#   next true
+# })
+#
+# ItemHandlers::UseOnPokemon.add(:PINKNECTAR, proc { |item, pkmn, scene|
+#   if !pkmn.isSpecies?(:ORICORIO) || pkmn.form == 2
+#     scene.pbDisplay("It had no effect.")
+#     next false
+#   end
+#   if pkmn.fainted?
+#     scene.pbDisplay("This can't be used on the fainted Pokémon.")
+#   end
+#   pkmn.setForm(2) {
+#     scene.pbRefresh
+#     scene.pbDisplay("{1} changed form!", pkmn.name)
+#   }
+#   next true
+# })
+#
+# ItemHandlers::UseOnPokemon.add(:PURPLENECTAR, proc { |item, pkmn, scene|
+#   if !pkmn.isSpecies?(:ORICORIO) || pkmn.form == 3
+#     scene.pbDisplay("It had no effect.")
+#     next false
+#   end
+#   if pkmn.fainted?
+#     scene.pbDisplay("This can't be used on the fainted Pokémon.")
+#   end
+#   pkmn.setForm(3) {
+#     scene.pbRefresh
+#     scene.pbDisplay("{1} changed form!", pkmn.name)
+#   }
+#   next true
+# })
 
 ItemHandlers::UseOnPokemon.add(:REVEALGLASS, proc { |item, pkmn, scene|
   if !pkmn.isSpecies?(:TORNADUS) &&
@@ -1088,6 +1086,7 @@ ItemHandlers::UseOnPokemon.add(:ABILITYCAPSULE, proc { |item, pkmn, scene|
   end
   next false
 })
+
 
 # ItemHandlers::UseInField.add(:REGITABLET, proc { |item|
 #   pbCommonEvent(COMMON_EVENT_REGI_TABLET)

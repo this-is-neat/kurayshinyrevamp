@@ -75,6 +75,11 @@ class Player < Trainer
     Deprecation.warn_method('Player#clearPokedex', 'v20', 'Player::Pokedex#clear')
     return @pokedex.clear
   end
+
+  def remove_pokemon_at_index(index)
+    return nil if !@party || index < 0 || index >= @party.length
+    @party.delete_at(index)
+  end
 end
 
 # @deprecated Use {Player} instead. PokeBattle_Trainer is slated to be removed in v20.
@@ -124,9 +129,6 @@ end
 # @deprecated Use {Player#remove_pokemon_at_index} instead. This alias is slated to be removed in v20.
 def pbRemovePokemonAt(index)
   Deprecation.warn_method('pbRemovePokemonAt', 'v20', 'Player#remove_pokemon_at_index')
-  if ($PokemonGlobal.pokemonSelectionOriginalParty!=nil)
-    return tempTeam_remove_pokemon_at_index(index)
-  end
   return $Trainer.remove_pokemon_at_index(index)
 end
 

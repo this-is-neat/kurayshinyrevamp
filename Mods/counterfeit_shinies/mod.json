@@ -1,0 +1,17 @@
+{
+  "name": "Counterfeit Shinies",
+  "id": "counterfeit_shinies",
+  "version": "1.0.0",
+  "author": "Probably",
+  "description": "Adds Team Infinite Cannon's counterfeit shiny racket: forged palettes, buyer NPC APIs, enforcer pressure, prestige, and black-market sales.",
+  "tags": ["Gameplay", "Economy", "Fusion", "UI", "Content"],
+  "dependencies": [],
+  "incompatible": [],
+  "settings": [],
+  "scripts": [
+    "001_Config.rb",
+    "002_Core.rb",
+    "003_UI.rb",
+    "004_Hooks.rb"
+  ]
+}

@@ -1,3 +1,6 @@
+#===============================================================================
+#
+#===============================================================================
 
 class ByteWriter
   def initialize(filename)
@@ -39,9 +42,6 @@ class ByteWriter
   end
 end
 
-#===============================================================================
-#
-#===============================================================================
 class AnimatedBitmap
   attr_reader :path
   attr_reader :filename
@@ -92,7 +92,6 @@ class AnimatedBitmap
     end
   end
 
-  #KurayX - KURAYX_ABOUT_SHINIES
   def pbGetRedChannel
     redChannel = []
     for i in 0..@bitmap.bitmap.width
@@ -103,7 +102,6 @@ class AnimatedBitmap
     return redChannel
   end
 
-  #KurayX - KURAYX_ABOUT_SHINIES
   def pbGetBlueChannel
     blueChannel = []
     for i in 0..@bitmap.bitmap.width
@@ -114,7 +112,6 @@ class AnimatedBitmap
     return blueChannel
   end
 
-  #KurayX - KURAYX_ABOUT_SHINIES
   def pbGetGreenChannel
     greenChannel = []
     for i in 0..@bitmap.bitmap.width
@@ -125,355 +122,59 @@ class AnimatedBitmap
     return greenChannel
   end
 
-  #ChatGPT
-  # def getChannelGradient(shiny, redShiny, greenShiny, blueShiny)
-  #   if shiny == 1
-  #     return greenShiny.clone
-  #   elsif shiny == 2
-  #     return blueShiny.clone
-  #   elsif shiny == 0
-  #     return redShiny.clone
-  #   elsif shiny == 3
-  #     return redShiny.clone.zip(greenShiny.clone).map { |r, g| (r + g) / 2 }
-  #   elsif shiny == 4
-  #     return redShiny.clone.zip(blueShiny.clone).map { |r, b| (r + b) / 2 }
-  #   elsif shiny == 5
-  #     return greenShiny.clone.zip(blueShiny.clone).map { |g, b| (g + b) / 2 }
-  #   elsif shiny == 6
-  #     return self.gradientMapping(greenShiny.clone, redShiny.clone)
-  #   elsif shiny == 7
-  #     return self.gradientMapping(greenShiny.clone, blueShiny.clone)
-  #   elsif shiny == 8
-  #     return self.gradientMapping(redShiny.clone, greenShiny.clone)
-  #   elsif shiny == 9
-  #     return self.gradientMapping(redShiny.clone, blueShiny.clone)
-  #   elsif shiny == 10
-  #     return self.gradientMapping(blueShiny.clone, redShiny.clone)
-  #   elsif shiny == 11
-  #     return self.gradientMapping(blueShiny.clone, greenShiny.clone)
-  #   elsif shiny == 12
-  #     colordoing = redShiny.clone
-  #     return colordoing.map { |r| 255.0 - r }
-  #   elsif shiny == 13
-  #     colordoing = greenShiny.clone
-  #     return colordoing.map { |r| 255.0 - r }
-  #   elsif shiny == 14
-  #     colordoing = blueShiny.clone
-  #     return colordoing.map { |r| 255.0 - r }
-  #   elsif shiny == 15
-  #     colordoing = redShiny.clone.zip(greenShiny.clone).map { |r, g| (r + g) / 2 }
-  #     return colordoing.map { |r| 255.0 - r }
-  #   elsif shiny == 16
-  #     colordoing = redShiny.clone.zip(blueShiny.clone).map { |r, b| (r + b) / 2 }
-  #     return colordoing.map { |r| 255.0 - r }
-  #   elsif shiny == 17
-  #     colordoing = greenShiny.clone.zip(blueShiny.clone).map { |g, b| (g + b) / 2 }
-  #     return colordoing.map { |r| 255.0 - r }
-  #   elsif shiny == 18
-  #     colordoing = self.gradientMapping(greenShiny.clone, redShiny.clone)
-  #     return colordoing.map { |r| 255.0 - r }
-  #   elsif shiny == 19
-  #     colordoing = self.gradientMapping(greenShiny.clone, blueShiny.clone)
-  #     return colordoing.map { |r| 255.0 - r }
-  #   elsif shiny == 20
-  #     colordoing = self.gradientMapping(redShiny.clone, greenShiny.clone)
-  #     return colordoing.map { |r| 255.0 - r }
-  #   elsif shiny == 21
-  #     colordoing = self.gradientMapping(redShiny.clone, blueShiny.clone)
-  #     return colordoing.map { |r| 255.0 - r }
-  #   elsif shiny == 22
-  #     colordoing = self.gradientMapping(blueShiny.clone, redShiny.clone)
-  #     return colordoing.map { |r| 255.0 - r }
-  #   elsif shiny == 23
-  #     colordoing = self.gradientMapping(blueShiny.clone, greenShiny.clone)
-  #     return colordoing.map { |r| 255.0 - r }
-  #   end
-  # end
-
-  #ChatGPT
-  # def gradientMappingOld(sourceChannel, targetChannel)
-  #   gradientFactor = 1.0 / (targetChannel.size - 1)
-  #   targetChannel.each_index do |i|
-  #     startValue = sourceChannel[i]
-  #     endValue = sourceChannel[i + 1] || startValue
-  #     value = (startValue * (1 - i * gradientFactor) + endValue * (i * gradientFactor)).to_i
-  #     targetChannel[i] = value
-  #   end
-  #   targetChannel
-  # end
-
-  # def gradientMapping(sourceChannel, targetChannel, steps = 10)
-  #   gradientFactor = 1.0 / (@bitmap.bitmap.width - 1)
-  #   rowLength = @bitmap.bitmap.height + 1
-  
-  #   for i in 0..(@bitmap.bitmap.width - 1)
-  #     startIdx = i * rowLength
-  #     endIdx = (i + 1) * rowLength - 1
-  #     rowValues = sourceChannel[startIdx..endIdx]
-  #     minVal = rowValues.compact.min
-  #     maxVal = rowValues.compact.max
-  #     range = maxVal - minVal
-  
-  #     if range.zero?
-  #       # Assign the values directly if there is no range
-  #       rowValues.each_with_index do |value, j|
-  #         targetIdx = startIdx + j
-  #         targetChannel[targetIdx] = value
-  #       end
-  #     else
-  #       # Interpolate between neighboring colors
-  #       stepSize = 1.0 / (steps + 1)
-  #       stepWeights = (0..steps).map { |step| step * stepSize }
-  
-  #       rowValues.each_cons(2).with_index do |(startValue, endValue), j|
-  #         targetStartIdx = startIdx + j * (steps + 1)
-  #         targetEndIdx = targetStartIdx + steps
-  
-  #         stepWeights.each_with_index do |weight, k|
-  #           value = startValue * (1 - weight) + endValue * weight
-  #           interpolatedValue = (value - minVal) / range * 255
-  #           targetIdx = targetStartIdx + k
-  #           targetChannel[targetIdx] = interpolatedValue
-  #         end
-  #       end
-  #     end
-  #   end
-  #   targetChannel
-  # end
-
-  # def gradientMapping(sourceChannel, targetChannel)
-  #   gradientFactor = 1.0 / (@bitmap.bitmap.width - 1)
-  #   rowLength = @bitmap.bitmap.height + 1
-  #   for i in 0..(@bitmap.bitmap.width - 1)
-  #     startIdx = i * rowLength
-  #     endIdx = (i + 1) * rowLength - 1
-  #     rowValues = sourceChannel[startIdx..endIdx]
-  #     minVal = rowValues.compact.min # Find the minimum non-nil value
-  #     maxVal = rowValues.compact.max # Find the maximum non-nil value
-  #     range = maxVal - minVal
-  #     rowValues.each_with_index do |value, j|
-  #       targetIdx = startIdx + j
-  #       if value.nil?
-  #         targetChannel[targetIdx] = nil
-  #       elsif range.zero?
-  #         targetChannel[targetIdx] = value
-  #       else
-  #         normalizedValue = (value - minVal).to_f / range
-  #         interpolatedValue = (normalizedValue * 255).to_i
-  #         targetChannel[targetIdx] = interpolatedValue
-  #       end
-  #     end
-  #   end
-  #   targetChannel
-  # end
-
-
-  # def export_bitmap_to_png(file_path)
-  #   require 'zlib'
-  #   # Ensure @bitmap is not nil
-  #   return unless @bitmap
-
-  #   # Open a file for writing in binary mode
-  #   File.open(file_path, 'wb') do |file|
-  #     # Write PNG signature
-  #     file.write("\x89PNG\r\n\x1a\n".force_encoding('ASCII-8BIT'))
-
-  #     # Write IHDR chunk (image header)
-  #     ihdr_data = [
-  #       @bitmap.bitmap.width.to_i, # Width
-  #       @bitmap.bitmap.height.to_i, # Height
-  #       8, # Bit depth (8 bits per channel)
-  #       6, # Color type (RGBA)
-  #       0, # Compression method (deflate)
-  #       0, # Filter method (adaptive)
-  #       0  # Interlace method (no interlace)
-  #     ].pack('N2C5')
-  #     file.write([ihdr_data.length].pack('N'))
-  #     file.write('IHDR')
-  #     file.write(ihdr_data)
-  #     file.write([Zlib.crc32('IHDR' + ihdr_data)].pack('N'))
-
-  #     # Write IDAT chunk (image data)
-  #     pixels = @bitmap.bitmap.export_pixels_to_str(0, 0, @bitmap.bitmap.width, @bitmap.bitmap.height, 'RGBA')
-  #     zlib_data = Zlib.deflate(pixels)
-  #     file.write([zlib_data.length].pack('N'))
-  #     file.write('IDAT')
-  #     file.write(zlib_data)
-  #     file.write([Zlib.crc32('IDAT' + zlib_data)].pack('N'))
-
-  #     # Write IEND chunk (image end)
-  #     file.write([0].pack('N'))
-  #     file.write('IEND')
-  #     file.write([Zlib.crc32('IEND')].pack('N'))
-  #   end
-  # end
-
   def bitmap_to_png(filename)
     return unless @bitmap
     require 'zlib'
     f = ByteWriter.new(filename)
-
-    #============================= Writing header ===============================#
-    # PNG signature
     f << [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]
-    # Header length
     f << [0x00, 0x00, 0x00, 0x0D]
-    # IHDR
     headertype = [0x49, 0x48, 0x44, 0x52]
     f << headertype
-
-    # Width, height, compression, filter, interlacing
     headerdata = ByteWriter.to_bytes(@bitmap.width).
       concat(ByteWriter.to_bytes(@bitmap.height)).
       concat([0x08, 0x06, 0x00, 0x00, 0x00])
     f << headerdata
-
-    # CRC32 checksum
     sum = headertype.concat(headerdata)
     f.write_int Zlib::crc32(sum.pack("C*"))
 
-    #============================== Writing data ================================#
     data = []
     for y in 0...@bitmap.height
-      # Start scanline
-      data << 0x00 # Filter: None
+      data << 0x00
       for x in 0...@bitmap.width
         px = @bitmap.bitmap.get_pixel(x, y)
-        # Write raw RGBA pixels
         data << px.red
         data << px.green
         data << px.blue
         data << px.alpha
       end
     end
-    # Zlib deflation
     smoldata = Zlib::Deflate.deflate(data.pack("C*")).bytes
-    # data chunk length
     f.write_int smoldata.size
-    # IDAT
     f << [0x49, 0x44, 0x41, 0x54]
     f << smoldata
-    # CRC32 checksum
     f.write_int Zlib::crc32([0x49, 0x44, 0x41, 0x54].concat(smoldata).pack("C*"))
 
-    #============================== End Of File =================================#
-    # Empty chunk
     f << [0x00, 0x00, 0x00, 0x00]
-    # IEND
     f << [0x49, 0x45, 0x4E, 0x44]
-    # CRC32 checksum
     f.write_int Zlib::crc32([0x49, 0x45, 0x4E, 0x44].pack("C*"))
     f.close
     return nil
   end
 
-  # Not working?
-  def export_bitmap_to_png(file_path)
-    # Ensure @bitmap is not nil
-    return unless @bitmap
-    require 'zlib'
-
-    width = @bitmap.bitmap.width
-    height = @bitmap.bitmap.height
-
-    # Open a file for writing in binary mode
-    File.open(file_path, 'wb') do |file|
-      # Write PNG signature
-      file.write("\x89PNG\r\n\x1a\n".force_encoding('ASCII-8BIT'))
-
-      # Write IHDR chunk (image header)
-      ihdr_data = [
-        width,          # Width
-        height,         # Height
-        8,              # Bit depth (8 bits per channel)
-        6,              # Color type (RGBA)
-        0,              # Compression method (deflate)
-        0,              # Filter method (adaptive)
-        0               # Interlace method (no interlace)
-      ].pack('N2C5')
-      write_chunk(file, 'IHDR', ihdr_data)
-
-      # Write IDAT chunk (image data)
-      pixels = generate_pixel_data(width, height)
-      zlib_data = Zlib.deflate(pixels)
-      write_chunk(file, 'IDAT', zlib_data)
-
-      # Write IEND chunk (image end)
-      write_chunk(file, 'IEND', '')
-    end
-  end
-
-  # Not working?
-  def generate_pixel_data(width, height)
-    pixel_data = ''.force_encoding('ASCII-8BIT')
-    for i in 0...width
-      for j in 0...height
-        alpha = @bitmap.bitmap.get_pixel(i, j).alpha
-        red = @bitmap.bitmap.get_pixel(i, j).red
-        green = @bitmap.bitmap.get_pixel(i, j).green
-        blue = @bitmap.bitmap.get_pixel(i, j).blue
-        # red = canalRed[i * (@bitmap.bitmap.height + 1) + j]
-        # green = canalGreen[i * (@bitmap.bitmap.height + 1) + j]
-        # blue = canalBlue[i * (@bitmap.bitmap.height + 1) + j]
-        pixel_data << [red, green, blue, alpha].pack('C4')
-      end
-    end
-    pixel_data
-  end
-
-  # Not working?
-  def write_chunk(file, type, data)
-    file.write([data.length].pack('N'))
-    file.write(type)
-    file.write(data)
-    file.write([Zlib.crc32(type + data)].pack('N'))
-  end
-
-  def recognizeDims()
-    # If the size are 96x96, we scale up the bitmap to 288x288 using nearest neighbor.
-    if @bitmap.bitmap.width == 96 && @bitmap.bitmap.height == 96
-      @bitmap.scale_bitmap(3)
-    elsif @bitmap.bitmap.width != 288 && @bitmap.bitmap.height != 288
-      echoln("not a 96x96 or 288x288 sprite")
-      puts "#{@path}#{@filename}"
-      puts "Width: #{@bitmap.bitmap.width}"
-      puts "Height: #{@bitmap.bitmap.height}"
-      #puts caller
-    end
-    return self
-  end
-
-  ####### PIF IMPROVED SHINIES #######
-
-  # PIF Anthony's Improved Shinies
   def shiftCustomColors(rules)
     @bitmap.bitmap.hue_customcolor(rules)
   end
 
-  # PIF Anthony's Improved Shinies
   def shiftAllColors(dex_number, bodyShiny, headShiny)
-    # pratically the same as hue_changecolors but for the animated bitmap
     if isFusion(dex_number)
       return if !bodyShiny && !headShiny
       body_id = getBodyID(dex_number)
       head_id = getHeadID(dex_number, body_id)
-      # shiny_directory = "Graphics/Battlers/Shiny/#{head_id}.#{body_id}"
-      # shiny_file_path = "#{shiny_directory}/#{head_id}.#{body_id}"
       offsets = [SHINY_COLOR_OFFSETS[body_id], SHINY_COLOR_OFFSETS[head_id]]
     else
-      # shiny_directory = "Graphics/Battlers/Shiny/#{dex_number}"
-      # shiny_file_path = "#{shiny_directory}/#{dex_number}"
       offsets = [SHINY_COLOR_OFFSETS[dex_number]]
     end
 
-    # Determine the destination folders
-    # shiny_file_path += "_bodyShiny" if bodyShiny
-    # shiny_file_path += "_headShiny" if headShiny
-    # shiny_file_path += ".png"
-    # if File.exist?(shiny_file_path)
-    #   @bitmap.bitmap = Bitmap.new(shiny_file_path)
-    #   return
-    # end
     offset = offsets.compact.max_by { |o| o.keys.count }
     return unless offset
     onetime = true
@@ -483,48 +184,27 @@ class AnimatedBitmap
       if value.is_a?(String) && onetime
         onetime = false
         shiftCustomColors(GameData::Species.calculateCustomShinyHueOffset(dex_number, bodyShiny, headShiny))
-        # Dir.mkdir(shiny_directory) unless Dir.exist?(shiny_directory)
-        # @bitmap.bitmap.save_to_png(shiny_file_path)
       elsif !value.is_a?(String)
         shiftColors(GameData::Species.calculateShinyHueOffset(dex_number, bodyShiny, headShiny, version))
       end
     end
   end
 
-  ####### END OF PIF IMPROVED SHINIES #######
-
-
-  #KurayX - KURAYX_ABOUT_SHINIES Modified by ChatGPT
-  def pbGiveFinaleColor(shinyR, shinyG, shinyB, offset, shinyKRS, shinyOmega={})
-    # Nexus for shiny generation & displaying both for PIF & KIF.
-    # Any shiny go through this nexus to process the shinifying.
-
-    # $PokemonSystem.pifimprovedshinies |
-    # 0 = Hybrid, go through PIF first (50%) then KIF
-    # 1 = Half go through PIF, half go through KIF
-    # 2 = KIF is disabled
-    # 3 = PIF is disabled
-
-
-
+  def pbGiveFinaleColor(shinyR, shinyG, shinyB, offset, shinyKRS, shinyOmega = {})
     shiny_mode = 0
-
-    # shiny_mode = $PokemonSystem.pifimprovedshinies
-    # would be prettier, but we want to hard-code it into this slop to make sure that a bad value don't go through
     if $PokemonSystem
       case $PokemonSystem.pifimprovedshinies
-        when 0
-          shiny_mode = 0
-        when 1
-          shiny_mode = 1
-        when 2
-          shiny_mode = 2
-        when 3
-          shiny_mode = 3
-        end
+      when 0
+        shiny_mode = 0
+      when 1
+        shiny_mode = 1
+      when 2
+        shiny_mode = 2
+      when 3
+        shiny_mode = 3
       end
+    end
 
-    # 0 = FALSE | 1 = TRUE
     dexNum = 1
     body_shiny = false
     head_shiny = false
@@ -532,92 +212,67 @@ class AnimatedBitmap
     force_pif_split = false
     use_pif = 0
     if shinyOmega.has_key?("pif_shiny")
-      use_pif = shinyOmega.fetch("pif_shiny", 0)# failsafe that gives back 0 if unfound
+      use_pif = shinyOmega.fetch("pif_shiny", 0)
     end
 
-    if use_pif > 1# 2 / 3 = PIF
+    if use_pif > 1
       use_pif = 1
-    elsif use_pif == 1# 1 = PIF & KIF
+    elsif use_pif == 1
       use_pif = 1
       force_pif_split = true
-    else# 0 = KIFd
+    else
       use_pif = 0
     end
 
     if shinyOmega.has_key?("dexNum")
-      dexNum = shinyOmega.fetch("dexNum", 1)# failsafe
+      dexNum = shinyOmega.fetch("dexNum", 1)
     end
-
     if shinyOmega.has_key?("body_shiny")
-      body_shiny = shinyOmega.fetch("body_shiny", false)# failsafe
+      body_shiny = shinyOmega.fetch("body_shiny", false)
     end
     if shinyOmega.has_key?("head_shiny")
-      head_shiny = shinyOmega.fetch("head_shiny", false)# failsafe
+      head_shiny = shinyOmega.fetch("head_shiny", false)
     end
 
     shiny_cache_name = "_ps"
-    if head_shiny
-      shiny_cache_name += "h"
-    end
-    if body_shiny
-      shiny_cache_name += "b"
-    end
+    shiny_cache_name += "h" if head_shiny
+    shiny_cache_name += "b" if body_shiny
 
     use_kif = 1
     if shiny_mode == 0
-      # hybrid, 50% PIF first, then KIF
       use_kif = 1
-      if use_pif == 3#3 becomes KIF only
-        use_pif = 0
-      end
+      use_pif = 0 if use_pif == 3
     elsif shiny_mode == 1
-      # split
       if use_pif == 1 && !force_pif_split
         use_kif = 0
       else
         use_kif = 1
       end
     elsif shiny_mode == 2
-      # only PIF
       use_pif = 1
       use_kif = 0
     elsif shiny_mode == 3
-      # only KIF
       use_pif = 0
       use_kif = 1
     end
 
-    if use_kif == 0#fallback that ensures we use at least one method
-      use_pif = 1
-    end
+    use_pif = 1 if use_kif == 0
 
-
-    # dontmodify = 0
-    # if shinyR == 0 && shinyG == 1 && shinyB == 2
-    #   dontmodify = 1
-    # end
     @bitmap = nil
     usedoffset = offset
-    # call load function for shiny if said shiny exists in cache
-    # return afterwards if it does (load the file)
     loadedfromcache = false
-    # puts "Path: #{@path}"
-    # puts "Filename: #{@filename}"
     if $PokemonSystem && $PokemonSystem.shiny_cache != 2
-      # File.exists?(usinglocation + "Disabled")
       originfolder = getPathForShinyCache(@path)
       checkDirectory("Cache")
       checkDirectory("Cache/Shiny")
-      shinyname = "_#{offset+180}_#{shinyR}_#{shinyG}_#{shinyB}"
-      for i in 0..shinyKRS.size-1
+      shinyname = "_#{offset + 180}_#{shinyR}_#{shinyG}_#{shinyB}"
+      for i in 0..shinyKRS.size - 1
         shinyname += "_#{shinyKRS[i]}"
       end
-      if use_pif == 1 and use_kif == 1
-        shinyname += shiny_cache_name
-      end
+      shinyname += shiny_cache_name if use_pif == 1 && use_kif == 1
       pathimport = "Cache/Shiny/"
       if use_kif == 0
-        checkDirectory("Cache/Shiny/vanilla") # PIF shiny cache
+        checkDirectory("Cache/Shiny/vanilla")
         shinyname = shiny_cache_name
         pathimport = "Cache/Shiny/vanilla/"
       end
@@ -631,14 +286,7 @@ class AnimatedBitmap
       end
     end
 
-    # puts "After Path: #{@path}"
-    # puts "After Filename: #{@filename}"
-    # puts "Loaded from cache: #{loadedfromcache}"
-
-    # if use_kif == 0, usedoffset should be changed to PIF's offset system
-    if use_pif == 1
-      usedoffset = 0
-    end
+    usedoffset = 0 if use_pif == 1
     newbitmap = GifBitmap.new(@path, @filename, usedoffset, shinyR, shinyG, shinyB, use_pif, use_kif)
     @bitmap = newbitmap.copy
     recognizeDims()
@@ -646,23 +294,15 @@ class AnimatedBitmap
       return
     end
 
-    # PIF system goes here if use_pif == 1
     if use_pif == 1
       self.shiftAllColors(dexNum, body_shiny, head_shiny)
-      if use_kif == 1
-        @bitmap.bitmap.hue_change(offset)
-      end
+      @bitmap.bitmap.hue_change(offset) if use_kif == 1
     end
 
-    # KIF system goes here if use_kif == 1
     if use_kif == 1
       greenShiny = []
       redShiny = []
       blueShiny = []
-    
-      # greeninclude = [1, 3, 5, 6, 7, 8, 11, 13, 15, 17, 18, 19, 20, 23]
-      # redinclude = [0, 3, 4, 6, 8, 9, 10, 12, 15, 16, 18, 20, 21, 22]
-      # blueinclude = [2, 4, 5, 7, 9, 10, 11, 14, 16, 17, 19, 21, 22, 23]
       greeninclude = [1, 3, 5, 7, 9, 11, 12, 13, 14, 16, 17, 19, 20, 22, 23, 25]
       redinclude = [0, 3, 4, 6, 9, 10, 12, 13, 14, 15, 17, 18, 20, 21, 23, 24]
       blueinclude = [2, 4, 5, 8, 10, 11, 12, 13, 15, 16, 18, 19, 21, 22, 24, 25]
@@ -671,63 +311,36 @@ class AnimatedBitmap
       blueShiny = self.pbGetBlueChannel if blueinclude.include?(shinyR) || blueinclude.include?(shinyB) || blueinclude.include?(shinyG) || shinyKRS[5] > 0
 
       if $PokemonSystem.shinyadvanced != nil && $PokemonSystem.shinyadvanced == 2
-        if shinyKRS[3] > 0
-          redShiny = self.krsapply(redShiny, shinyKRS[3], 0, shinyKRS)
-        end
-        if shinyKRS[4] > 0
-          greenShiny = self.krsapply(greenShiny, shinyKRS[4], 1, shinyKRS)
-        end
-        if shinyKRS[5] > 0
-          blueShiny = self.krsapply(blueShiny, shinyKRS[5], 2, shinyKRS)
-        end
+        redShiny = self.krsapply(redShiny, shinyKRS[3], 0, shinyKRS) if shinyKRS[3] > 0
+        greenShiny = self.krsapply(greenShiny, shinyKRS[4], 1, shinyKRS) if shinyKRS[4] > 0
+        blueShiny = self.krsapply(blueShiny, shinyKRS[5], 2, shinyKRS) if shinyKRS[5] > 0
       end
 
-      # greenShiny = self.pbGetGreenChannel
-      # redShiny = self.pbGetRedChannel
-      # blueShiny = self.pbGetBlueChannel
-    
-      # if dontmodify == 0 || ($PokemonSystem.shinyadvanced != nil && $PokemonSystem.shinyadvanced != 0)
       canalRed = self.getChannelGradient(shinyR, redShiny, greenShiny, blueShiny, shinyKRS, 0)
       canalGreen = self.getChannelGradient(shinyG, redShiny, greenShiny, blueShiny, shinyKRS, 1)
       canalBlue = self.getChannelGradient(shinyB, redShiny, greenShiny, blueShiny, shinyKRS, 2)
 
       for i in 0..@bitmap.bitmap.width
         for j in 0..@bitmap.bitmap.height
-          # begin
           if @bitmap.bitmap.get_pixel(i, j).alpha != 0
             depth = i * (@bitmap.bitmap.height + 1) + j
             @bitmap.bitmap.set_pixel(i, j, Color.new(canalRed[depth], canalGreen[depth], canalBlue[depth], @bitmap.bitmap.get_pixel(i, j).alpha))
           end
-          # rescue TypeError => e
-          #   puts "Caught TypeError: #{e.message}"
-          #   puts "i: #{i}, j: #{j}"
-          #   puts "Canal Red: #{canalRed[depth]}"
-          #   puts "Canal Green: #{canalGreen[depth]}"
-          #   puts "Canal Blue: #{canalBlue[depth]}"
-          #   puts "Depth: #{depth}"
-          # end
         end
       end
     end
 
-
-    # end
     if $PokemonSystem && $PokemonSystem.shiny_cache != 2
-      # Save the generated shiny sprite in the Cache folder
-      # puts "Filename: #{@filename}"
-      # puts "Path: #{@path}"
       originfolder = getPathForShinyCache(@path)
       checkDirectory("Cache")
       checkDirectory("Cache/Shiny")
-      shinyname = "_#{offset+180}_#{shinyR}_#{shinyG}_#{shinyB}"
-      for i in 0..shinyKRS.size-1
+      shinyname = "_#{offset + 180}_#{shinyR}_#{shinyG}_#{shinyB}"
+      for i in 0..shinyKRS.size - 1
         shinyname += "_#{shinyKRS[i]}"
       end
-      if use_pif == 1 and use_kif == 1
-        shinyname += shiny_cache_name
-      end
+      shinyname += shiny_cache_name if use_pif == 1 && use_kif == 1
       if use_kif == 0
-        checkDirectory("Cache/Shiny/vanilla") # PIF shiny cache
+        checkDirectory("Cache/Shiny/vanilla")
         shinyname = shiny_cache_name
       end
       cleanname = @filename[0...-4]
@@ -736,33 +349,28 @@ class AnimatedBitmap
       else
         pathexport = "Cache/Shiny/" + originfolder + cleanname + shinyname + ".png"
       end
-      if !File.exists?(pathexport)
-        self.bitmap_to_png(pathexport)
-      end
-      # puts "Origin Folder: #{originfolder}"
+      self.bitmap_to_png(pathexport) if !File.exists?(pathexport)
     end
   end
 
   def krsapply(channel, condif, idcol, shinyKRS)
     timidblack = shinyKRS[idcol + 6]
     if condif == 1
-      channel = channel.map{|v| v >= 127 ? v-127.0: v}#127 -> 0 / 255 -> 127
+      channel = channel.map { |v| v >= 127 ? v - 127.0 : v }
     elsif condif == 2
-      channel = channel.map do |v|#0 -> 127 / 127 -> 255
-        # v>16&&v <= 127 ? v+127.0 : v
+      channel = channel.map do |v|
         if ((timidblack == 1 && v > 16) || (timidblack == 2 && v > 42) || (timidblack == 0)) && v <= 127
-          v+127.0
+          v + 127.0
         else
           v
         end
       end
     elsif condif == 3
-      channel = channel.map{|v| v >= 127 ? 255.0 - (v - 127.0) : v}#127 -> 255 / 255 -> 127
+      channel = channel.map { |v| v >= 127 ? 255.0 - (v - 127.0) : v }
     elsif condif == 4
-      channel = channel.map do |v|#0 -> 127 / 127 -> 0
-        # v>16&&v <= 127 ? 127.0 - v : v
+      channel = channel.map do |v|
         if ((timidblack == 1 && v > 16) || (timidblack == 2 && v > 42) || (timidblack == 0)) && v <= 127
-          127.0-v
+          127.0 - v
         else
           v
         end
@@ -771,163 +379,8 @@ class AnimatedBitmap
     return channel
   end
 
-
-# timidblack = shinyKRS[idcol + 6]
-# redincr = shinyKRS[0].to_f
-# greenincr = shinyKRS[1].to_f
-# blueincr = shinyKRS[2].to_f
-# # Advanced (advanced shinies)
-# if shiny == 1
-#   return greenShiny.clone.map{|value| value+greenincr}
-# elsif shiny == 2
-#   return blueShiny.clone.map{|value| value+blueincr}
-# elsif shiny == 0
-#   return redShiny.clone.map{|value| value+redincr}
-# elsif shiny == 3
-#   return redShiny.clone.zip(greenShiny.clone).map { |r, g| (r+redincr + g+greenincr) / 2 }
-# elsif shiny == 4
-#   return redShiny.clone.zip(blueShiny.clone).map { |r, b| (r+redincr + b+blueincr) / 2 }
-# elsif shiny == 5
-#   return greenShiny.clone.zip(blueShiny.clone).map { |g, b| (g+greenincr + b+blueincr) / 2 }
-# elsif shiny == 6
-#   colordoing = redShiny.clone
-#   return colordoing.map do |r|
-#     if (timidblack == 1 && r + redincr > 16) || (timidblack == 2 && r + redincr > 42) || (timidblack == 0)
-#       255.0 - (r + redincr)
-#     else
-#       r + redincr
-#     end
-#   end
-# elsif shiny == 7
-#   colordoing = greenShiny.clone
-#   return colordoing.map do |r|
-#     if (timidblack == 1 && r + greenincr > 16) || (timidblack == 2 && r + greenincr > 42) || (timidblack == 0)
-#       255.0 - (r + greenincr)
-#     else
-#       r + greenincr
-#     end
-#   end
-# elsif shiny == 8
-#   colordoing = blueShiny.clone
-#   return colordoing.map do |r|
-#     if (timidblack == 1 && r + blueincr > 16) || (timidblack == 2 && r + blueincr > 42) || (timidblack == 0)
-#       255.0 - (r + blueincr)
-#     else
-#       r + blueincr
-#     end
-#   end
-# elsif shiny == 9
-#   colordoing = redShiny.clone.zip(greenShiny.clone).map { |r, g| (r+redincr + g+greenincr) / 2 }
-#   return colordoing.map do |r|
-#     if (timidblack == 1 && r > 16) || (timidblack == 2 && r > 42) || (timidblack == 0)
-#       255.0 - r
-#     else
-#       r
-#     end
-#   end
-# elsif shiny == 10
-#   colordoing = redShiny.clone.zip(blueShiny.clone).map { |r, b| (r+redincr + b+blueincr) / 2 }
-#   return colordoing.map do |r|
-#     if (timidblack == 1 && r > 16) || (timidblack == 2 && r > 42) || (timidblack == 0)
-#       255.0 - r
-#     else
-#       r
-#     end
-#   end
-# elsif shiny == 11
-#   colordoing = greenShiny.clone.zip(blueShiny.clone).map { |g, b| (g+greenincr + b+blueincr) / 2 }
-#   return colordoing.map do |r|
-#     if (timidblack == 1 && r > 16) || (timidblack == 2 && r > 42) || (timidblack == 0)
-#       255.0 - r
-#     else
-#       r
-#     end
-#   end
-# elsif shiny == 12
-#   return greenShiny.clone.zip(blueShiny.clone, redShiny.clone).map { |g, b, r| (g+greenincr + b+blueincr + r+redincr) / 3 }
-# elsif shiny == 13
-#   colordoing = greenShiny.clone.zip(blueShiny.clone, redShiny.clone).map { |g, b, r| (g+greenincr + b+blueincr + r+redincr) / 3 }
-#   return colordoing.map do |r|
-#     if (timidblack == 1 && r > 16) || (timidblack == 2 && r > 42) || (timidblack == 0)
-#       255.0 - r
-#     else
-#       r
-#     end
-#   end
-# elsif shiny == 14#Citrine
-#   return redShiny.clone.zip(greenShiny.clone).map { |r, g| (r+redincr + (g+greenincr)*3) / 4 }
-# elsif shiny == 15#Violet
-#   return redShiny.clone.zip(blueShiny.clone).map { |r, b| (r+redincr + (b+blueincr)*3) / 4 }
-# elsif shiny == 16#Marine
-#   return greenShiny.clone.zip(blueShiny.clone).map { |g, b| (g+greenincr + (b+blueincr)*3) / 4 }
-# elsif shiny == 17#Orange
-#   return greenShiny.clone.zip(redShiny.clone).map { |g, r| (g+greenincr + (r+redincr)*3) / 4 }
-# elsif shiny == 18#Pink
-#   return blueShiny.clone.zip(redShiny.clone).map { |b, r| (b+blueincr + (r+redincr)*3) / 4 }
-# elsif shiny == 19#Jade
-#   return blueShiny.clone.zip(greenShiny.clone).map { |b, g| (b+blueincr + (g+greenincr)*3) / 4 }
-# elsif shiny == 20#Inverted Citrine
-#   colordoing = redShiny.clone.zip(greenShiny.clone).map { |r, g| (r+redincr + (g+greenincr)*3) / 4 }
-#   return colordoing.map do |r|
-#     if (timidblack == 1 && r > 16) || (timidblack == 2 && r > 42) || (timidblack == 0)
-#       255.0 - r
-#     else
-#       r
-#     end
-#   end
-# elsif shiny == 21#Inverted Violet
-#   colordoing = redShiny.clone.zip(blueShiny.clone).map { |r, b| (r+redincr + (b+blueincr)*3) / 4 }
-#   return colordoing.map do |r|
-#     if (timidblack == 1 && r > 16) || (timidblack == 2 && r > 42) || (timidblack == 0)
-#       255.0 - r
-#     else
-#       r
-#     end
-#   end
-# elsif shiny == 22#Inverted Marine
-#   colordoing = greenShiny.clone.zip(blueShiny.clone).map { |g, b| (g+greenincr + (b+blueincr)*3) / 4 }
-#   return colordoing.map do |r|
-#     if (timidblack == 1 && r > 16) || (timidblack == 2 && r > 42) || (timidblack == 0)
-#       255.0 - r
-#     else
-#       r
-#     end
-#   end
-# elsif shiny == 23#Inverted Orange
-#   colordoing = greenShiny.clone.zip(redShiny.clone).map { |g, r| (g+greenincr + (r+redincr)*3) / 4 }
-#   return colordoing.map do |r|
-#     if (timidblack == 1 && r > 16) || (timidblack == 2 && r > 42) || (timidblack == 0)
-#       255.0 - r
-#     else
-#       r
-#     end
-#   end
-# elsif shiny == 24#Inverted Pink
-#   colordoing = blueShiny.clone.zip(redShiny.clone).map { |b, r| (b+blueincr + (r+redincr)*3) / 4 }
-#   return colordoing.map do |r|
-#     if (timidblack == 1 && r > 16) || (timidblack == 2 && r > 42) || (timidblack == 0)
-#       255.0 - r
-#     else
-#       r
-#     end
-#   end
-# elsif shiny == 25#Inverted Jade
-#   colordoing = blueShiny.clone.zip(greenShiny.clone).map { |b, g| (b+blueincr + (g+greenincr)*3) / 4 }
-#   return colordoing.map do |r|
-#     if (timidblack == 1 && r > 16) || (timidblack == 2 && r > 42) || (timidblack == 0)
-#       255.0 - r
-#     else
-#       r
-#     end
-#   end
-# else
-#   return redShiny.clone
-# end
-
-  #ChatGPT
   def getChannelGradient(shiny, redShiny, greenShiny, blueShiny, shinyKRS, idcol)
     if $PokemonSystem.shinyadvanced != nil && $PokemonSystem.shinyadvanced == 1
-      # Normal (Non-advanced shinies)
       if shiny == 1
         return greenShiny.clone
       elsif shiny == 2
@@ -941,14 +394,11 @@ class AnimatedBitmap
       elsif shiny == 5
         return greenShiny.clone.zip(blueShiny.clone).map { |g, b| (g + b) / 2 }
       elsif shiny == 6
-        colordoing = redShiny.clone
-        return colordoing.map { |r| 255.0 - r }
+        return redShiny.clone.map { |r| 255.0 - r }
       elsif shiny == 7
-        colordoing = greenShiny.clone
-        return colordoing.map { |r| 255.0 - r }
+        return greenShiny.clone.map { |r| 255.0 - r }
       elsif shiny == 8
-        colordoing = blueShiny.clone
-        return colordoing.map { |r| 255.0 - r }
+        return blueShiny.clone.map { |r| 255.0 - r }
       elsif shiny == 9
         colordoing = redShiny.clone.zip(greenShiny.clone).map { |r, g| (r + g) / 2 }
         return colordoing.map { |r| 255.0 - r }
@@ -961,318 +411,112 @@ class AnimatedBitmap
       else
         return redShiny.clone
       end
-    else
-      timidblack = shinyKRS[idcol + 6]
-      redincr = shinyKRS[0].to_f
-      greenincr = shinyKRS[1].to_f
-      blueincr = shinyKRS[2].to_f
-      # Advanced (advanced shinies)
-      if shiny == 1
-        return greenShiny.clone.map { |value| (value + greenincr).clamp(0, 255) }
-      elsif shiny == 2
-        return blueShiny.clone.map { |value| (value + blueincr).clamp(0, 255) }
-      elsif shiny == 0
-        return redShiny.clone.map { |value| (value + redincr).clamp(0, 255) }
-      elsif shiny == 3
-        return redShiny.clone.zip(greenShiny.clone).map { |r, g| (((r + redincr)).clamp(0, 255) + ((g + greenincr)).clamp(0, 255)) / 2 }
-      elsif shiny == 4
-        return redShiny.clone.zip(blueShiny.clone).map { |r, b| (((r + redincr)).clamp(0, 255) + ((b + blueincr)).clamp(0, 255)) / 2 }
-      elsif shiny == 5
-        return greenShiny.clone.zip(blueShiny.clone).map { |g, b| (((g + greenincr)).clamp(0, 255) + ((b + blueincr)).clamp(0, 255)) / 2 }
-      elsif shiny == 6
-        colordoing = redShiny.clone.map { |value| (value + redincr).clamp(0, 255) }
-        return colordoing.map do |r|
-          if (timidblack == 1 && r > 16) || (timidblack == 2 && r > 42) || (timidblack == 0)
-            255.0 - r
-          else
-            r
-          end
-        end
-      elsif shiny == 7
-        colordoing = greenShiny.clone.map { |value| (value + greenincr).clamp(0, 255) }
-        return colordoing.map do |r|
-          if (timidblack == 1 && r > 16) || (timidblack == 2 && r > 42) || (timidblack == 0)
-            255.0 - r
-          else
-            r
-          end
-        end
-      elsif shiny == 8
-        colordoing = blueShiny.clone.map { |value| (value + blueincr).clamp(0, 255) }
-        return colordoing.map do |r|
-          if (timidblack == 1 && r > 16) || (timidblack == 2 && r > 42) || (timidblack == 0)
-            255.0 - r
-          else
-            r
-          end
-        end
-      elsif shiny == 9
-        colordoing = redShiny.clone.zip(greenShiny.clone).map { |r, g| (((r + redincr)).clamp(0, 255) + ((g + greenincr)).clamp(0, 255)) / 2 }
-        return colordoing.map do |r|
-          if (timidblack == 1 && r > 16) || (timidblack == 2 && r > 42) || (timidblack == 0)
-            255.0 - r
-          else
-            r
-          end
-        end
-      elsif shiny == 10
-        colordoing = redShiny.clone.zip(blueShiny.clone).map { |r, b| (((r + redincr)).clamp(0, 255) + ((b + blueincr)).clamp(0, 255)) / 2 }
-        return colordoing.map do |r|
-          if (timidblack == 1 && r > 16) || (timidblack == 2 && r > 42) || (timidblack == 0)
-            255.0 - r
-          else
-            r
-          end
-        end
-      elsif shiny == 11
-        colordoing = greenShiny.clone.zip(blueShiny.clone).map { |g, b| (((g + greenincr)).clamp(0, 255) + ((b + blueincr)).clamp(0, 255)) / 2 }
-        return colordoing.map do |r|
-          if (timidblack == 1 && r > 16) || (timidblack == 2 && r > 42) || (timidblack == 0)
-            255.0 - r
-          else
-            r
-          end
-        end
-      elsif shiny == 12
-        return greenShiny.clone.zip(blueShiny.clone, redShiny.clone).map do |g, b, r|
-          (((g + greenincr)).clamp(0, 255) + ((b + blueincr)).clamp(0, 255) + ((r + redincr)).clamp(0, 255)) / 3
-        end
-      elsif shiny == 13
-        colordoing = greenShiny.clone.zip(blueShiny.clone, redShiny.clone).map do |g, b, r|
-          (((g + greenincr)).clamp(0, 255) + ((b + blueincr)).clamp(0, 255) + ((r + redincr)).clamp(0, 255)) / 3
-        end
-        return colordoing.map do |r|
-          if (timidblack == 1 && r > 16) || (timidblack == 2 && r > 42) || (timidblack == 0)
-            255.0 - r
-          else
-            r
-          end
-        end
-      elsif shiny == 14 # Citrine
-        return redShiny.clone.zip(greenShiny.clone).map do |r, g|
-          (((r + redincr).clamp(0, 255) + ((g + greenincr)).clamp(0, 255) * 3)) / 4
-        end
-      elsif shiny == 15 # Violet
-        return redShiny.clone.zip(blueShiny.clone).map do |r, b|
-          (((r + redincr).clamp(0, 255) + ((b + blueincr)).clamp(0, 255) * 3)) / 4
-        end
-      elsif shiny == 16 # Marine
-        return greenShiny.clone.zip(blueShiny.clone).map do |g, b|
-          (((g + greenincr).clamp(0, 255) + ((b + blueincr)).clamp(0, 255) * 3)) / 4
-        end
-      elsif shiny == 17 # Orange
-        return greenShiny.clone.zip(redShiny.clone).map do |g, r|
-          (((g + greenincr).clamp(0, 255) + ((r + redincr)).clamp(0, 255) * 3)) / 4
-        end
-      elsif shiny == 18 # Pink
-        return blueShiny.clone.zip(redShiny.clone).map do |b, r|
-          (((b + blueincr).clamp(0, 255) + ((r + redincr)).clamp(0, 255) * 3)) / 4
-        end
-      elsif shiny == 19#Jade
-        return blueShiny.clone.zip(greenShiny.clone).map do |b, g|
-          (((b+blueincr).clamp(0,255) + ((g+greenincr)).clamp(0,255)*3)) / 4
-        end
-      elsif shiny == 20#Inverted Citrine
-        colordoing = redShiny.clone.zip(greenShiny.clone).map do |r, g|
-          (((r + redincr).clamp(0, 255) + ((g + greenincr)).clamp(0, 255) * 3)) / 4
-        end
-        return colordoing.map do |r|
-          if (timidblack == 1 && r > 16) || (timidblack == 2 && r > 42) || (timidblack == 0)
-            255.0 - r
-          else
-            r
-          end
-        end
-      elsif shiny == 21#Inverted Violet
-        colordoing = redShiny.clone.zip(blueShiny.clone).map do |r, b|
-          (((r + redincr).clamp(0, 255) + ((b + blueincr)).clamp(0, 255) * 3)) / 4
-        end
-        return colordoing.map do |r|
-          if (timidblack == 1 && r > 16) || (timidblack == 2 && r > 42) || (timidblack == 0)
-            255.0 - r
-          else
-            r
-          end
-        end
-      elsif shiny == 22#Inverted Marine
-        colordoing = greenShiny.clone.zip(blueShiny.clone).map do |g, b|
-          (((g + greenincr).clamp(0, 255) + ((b + blueincr)).clamp(0, 255) * 3)) / 4
-        end
-        return colordoing.map do |r|
-          if (timidblack == 1 && r > 16) || (timidblack == 2 && r > 42) || (timidblack == 0)
-            255.0 - r
-          else
-            r
-          end
-        end
-      elsif shiny == 23#Inverted Orange
-        colordoing = greenShiny.clone.zip(redShiny.clone).map do |g, r|
-          (((g + greenincr).clamp(0, 255) + ((r + redincr)).clamp(0, 255) * 3)) / 4
-        end
-        return colordoing.map do |r|
-          if (timidblack == 1 && r > 16) || (timidblack == 2 && r > 42) || (timidblack == 0)
-            255.0 - r
-          else
-            r
-          end
-        end
-      elsif shiny == 24#Inverted Pink
-        colordoing = blueShiny.clone.zip(redShiny.clone).map do |b, r|
-          (((b + blueincr).clamp(0, 255) + ((r + redincr)).clamp(0, 255) * 3)) / 4
-        end
-        return colordoing.map do |r|
-          if (timidblack == 1 && r > 16) || (timidblack == 2 && r > 42) || (timidblack == 0)
-            255.0 - r
-          else
-            r
-          end
-        end
-      elsif shiny == 25#Inverted Jade
-        colordoing = blueShiny.clone.zip(greenShiny.clone).map do |b, g|
-          (((b+blueincr).clamp(0,255) + ((g+greenincr)).clamp(0,255)*3)) / 4
-        end
-        return colordoing.map do |r|
-          if (timidblack == 1 && r > 16) || (timidblack == 2 && r > 42) || (timidblack == 0)
-            255.0 - r
-          else
-            r
-          end
-        end
-      else
-        return redShiny.clone
-      end
     end
 
-    # Brainstorm
-    # ShinyKRS []
-    # 0 - Red increment
-    # 1 - Green increment
-    # 2 - Blue increment
-    # 3 - R's Semi-Inverted
-    # 4 - G's ~
-    # 5 - B's ~
-    # 6 - R's TimidBlack
-    # 7 - G's ~
-    # 8 - B's ~
-
-    # - TimidBlack -
-    # In this case, RGB is the output directly, it does not affect the shifting
-    # 0 (none, weight of 32)
-    # 1 (when inverted, black remains the same, weight of 16)
-    # 2 (when inverted, 0...10 remains the same, weight of 4)
-
-    # - Increment -
-    # 0 (none, weight of 512)
-    # -50 - 50 (normal mutation - weight of 64)
-    # -100 - 100 (advanced mutation - weight of 16)
-    # -200 - 200 (severe mutation - weight of 4)
-
-    # - Semi-Inverted -
-    # 0 (none, weight of 512)
-    # 127+ > 0-127 (light darkened, weight of 64)
-    # 127- > 127-255 (dark lightened [black ignored!], weight of 64)
-    # 127+ > 127-255 (light inverted, weight of 8)
-    # 127- > 0-127 (dark inverted [black ignored!], weight of 8)
-
-    # Grey
-
-    # 0 = Red
-    # 1 = Green
-    # 2 = Blue
-    # 3 = Yellow
-    # 4 = Magenta
-    # 5 = Cyan
-    # 6 = Inverse Red
-    # 7 = Inverse Green
-    # 8 = Inverse Blue
-    # 9 = Inverse Yellow
-    # 10 = Inverse Magenta
-    # 11 = Inverse Cyan
-    
-    # 12 = Grey
-    # 13 = Inverse Grey
-    
-    # 14 = Citrine (0.5 R | 1.5 G)
-    # 15 = Violet (0.5 R | 1.5 B)
-    # 16 = Marine (0.5 G | 1.5 B)
-    # 17 = Orange (0.5 G | 1.5 R)
-    # 18 = Pink (0.5  B| 1.5 R)
-    # 19 = Jade (0.5  B| 1.5 G)
-
-    # 20 = Inverted Citrine
-    # 21 = Inverted Violet
-    # 22 = Inverted Marine
-    # 23 = Inverted Orange
-    # 24 = Inverted Pink
-    # 25 = Inverted Jade
+    timidblack = shinyKRS[idcol + 6]
+    redincr = shinyKRS[0].to_f
+    greenincr = shinyKRS[1].to_f
+    blueincr = shinyKRS[2].to_f
+    if shiny == 1
+      return greenShiny.clone.map { |value| (value + greenincr).clamp(0, 255) }
+    elsif shiny == 2
+      return blueShiny.clone.map { |value| (value + blueincr).clamp(0, 255) }
+    elsif shiny == 0
+      return redShiny.clone.map { |value| (value + redincr).clamp(0, 255) }
+    elsif shiny == 3
+      return redShiny.clone.zip(greenShiny.clone).map { |r, g| (((r + redincr)).clamp(0, 255) + ((g + greenincr)).clamp(0, 255)) / 2 }
+    elsif shiny == 4
+      return redShiny.clone.zip(blueShiny.clone).map { |r, b| (((r + redincr)).clamp(0, 255) + ((b + blueincr)).clamp(0, 255)) / 2 }
+    elsif shiny == 5
+      return greenShiny.clone.zip(blueShiny.clone).map { |g, b| (((g + greenincr)).clamp(0, 255) + ((b + blueincr)).clamp(0, 255)) / 2 }
+    elsif shiny == 6
+      colordoing = redShiny.clone.map { |value| (value + redincr).clamp(0, 255) }
+      return colordoing.map { |r| ((timidblack == 1 && r > 16) || (timidblack == 2 && r > 42) || (timidblack == 0)) ? 255.0 - r : r }
+    elsif shiny == 7
+      colordoing = greenShiny.clone.map { |value| (value + greenincr).clamp(0, 255) }
+      return colordoing.map { |r| ((timidblack == 1 && r > 16) || (timidblack == 2 && r > 42) || (timidblack == 0)) ? 255.0 - r : r }
+    elsif shiny == 8
+      colordoing = blueShiny.clone.map { |value| (value + blueincr).clamp(0, 255) }
+      return colordoing.map { |r| ((timidblack == 1 && r > 16) || (timidblack == 2 && r > 42) || (timidblack == 0)) ? 255.0 - r : r }
+    elsif shiny == 9
+      colordoing = redShiny.clone.zip(greenShiny.clone).map { |r, g| (((r + redincr)).clamp(0, 255) + ((g + greenincr)).clamp(0, 255)) / 2 }
+      return colordoing.map { |r| ((timidblack == 1 && r > 16) || (timidblack == 2 && r > 42) || (timidblack == 0)) ? 255.0 - r : r }
+    elsif shiny == 10
+      colordoing = redShiny.clone.zip(blueShiny.clone).map { |r, b| (((r + redincr)).clamp(0, 255) + ((b + blueincr)).clamp(0, 255)) / 2 }
+      return colordoing.map { |r| ((timidblack == 1 && r > 16) || (timidblack == 2 && r > 42) || (timidblack == 0)) ? 255.0 - r : r }
+    elsif shiny == 11
+      colordoing = greenShiny.clone.zip(blueShiny.clone).map { |g, b| (((g + greenincr)).clamp(0, 255) + ((b + blueincr)).clamp(0, 255)) / 2 }
+      return colordoing.map { |r| ((timidblack == 1 && r > 16) || (timidblack == 2 && r > 42) || (timidblack == 0)) ? 255.0 - r : r }
+    elsif shiny == 12
+      return greenShiny.clone.zip(blueShiny.clone, redShiny.clone).map { |g, b, r| (((g + greenincr)).clamp(0, 255) + ((b + blueincr)).clamp(0, 255) + ((r + redincr)).clamp(0, 255)) / 3 }
+    elsif shiny == 13
+      colordoing = greenShiny.clone.zip(blueShiny.clone, redShiny.clone).map { |g, b, r| (((g + greenincr)).clamp(0, 255) + ((b + blueincr)).clamp(0, 255) + ((r + redincr)).clamp(0, 255)) / 3 }
+      return colordoing.map { |r| ((timidblack == 1 && r > 16) || (timidblack == 2 && r > 42) || (timidblack == 0)) ? 255.0 - r : r }
+    elsif shiny == 14
+      return redShiny.clone.zip(greenShiny.clone).map { |r, g| (((r + redincr).clamp(0, 255) + ((g + greenincr)).clamp(0, 255) * 3)) / 4 }
+    elsif shiny == 15
+      return redShiny.clone.zip(blueShiny.clone).map { |r, b| (((r + redincr).clamp(0, 255) + ((b + blueincr)).clamp(0, 255) * 3)) / 4 }
+    elsif shiny == 16
+      return greenShiny.clone.zip(blueShiny.clone).map { |g, b| (((g + greenincr).clamp(0, 255) + ((b + blueincr)).clamp(0, 255) * 3)) / 4 }
+    elsif shiny == 17
+      return greenShiny.clone.zip(redShiny.clone).map { |g, r| (((g + greenincr).clamp(0, 255) + ((r + redincr)).clamp(0, 255) * 3)) / 4 }
+    elsif shiny == 18
+      return blueShiny.clone.zip(redShiny.clone).map { |b, r| (((b + blueincr).clamp(0, 255) + ((r + redincr)).clamp(0, 255) * 3)) / 4 }
+    elsif shiny == 19
+      return blueShiny.clone.zip(greenShiny.clone).map { |b, g| (((b + blueincr).clamp(0, 255) + ((g + greenincr)).clamp(0, 255) * 3)) / 4 }
+    elsif shiny == 20
+      colordoing = redShiny.clone.zip(greenShiny.clone).map { |r, g| (((r + redincr).clamp(0, 255) + ((g + greenincr)).clamp(0, 255) * 3)) / 4 }
+      return colordoing.map { |r| ((timidblack == 1 && r > 16) || (timidblack == 2 && r > 42) || (timidblack == 0)) ? 255.0 - r : r }
+    elsif shiny == 21
+      colordoing = redShiny.clone.zip(blueShiny.clone).map { |r, b| (((r + redincr).clamp(0, 255) + ((b + blueincr)).clamp(0, 255) * 3)) / 4 }
+      return colordoing.map { |r| ((timidblack == 1 && r > 16) || (timidblack == 2 && r > 42) || (timidblack == 0)) ? 255.0 - r : r }
+    elsif shiny == 22
+      colordoing = greenShiny.clone.zip(blueShiny.clone).map { |g, b| (((g + greenincr).clamp(0, 255) + ((b + blueincr)).clamp(0, 255) * 3)) / 4 }
+      return colordoing.map { |r| ((timidblack == 1 && r > 16) || (timidblack == 2 && r > 42) || (timidblack == 0)) ? 255.0 - r : r }
+    elsif shiny == 23
+      colordoing = greenShiny.clone.zip(redShiny.clone).map { |g, r| (((g + greenincr).clamp(0, 255) + ((r + redincr)).clamp(0, 255) * 3)) / 4 }
+      return colordoing.map { |r| ((timidblack == 1 && r > 16) || (timidblack == 2 && r > 42) || (timidblack == 0)) ? 255.0 - r : r }
+    elsif shiny == 24
+      colordoing = blueShiny.clone.zip(redShiny.clone).map { |b, r| (((b + blueincr).clamp(0, 255) + ((r + redincr)).clamp(0, 255) * 3)) / 4 }
+      return colordoing.map { |r| ((timidblack == 1 && r > 16) || (timidblack == 2 && r > 42) || (timidblack == 0)) ? 255.0 - r : r }
+    elsif shiny == 25
+      colordoing = blueShiny.clone.zip(greenShiny.clone).map { |b, g| (((b + blueincr).clamp(0, 255) + ((g + greenincr)).clamp(0, 255) * 3)) / 4 }
+      return colordoing.map { |r| ((timidblack == 1 && r > 16) || (timidblack == 2 && r > 42) || (timidblack == 0)) ? 255.0 - r : r }
+    else
+      return redShiny.clone
+    end
   end
 
-  #KurayX - KURAYX_ABOUT_SHINIES (Default)
   def pbGiveFinaleColorDefault(shinyR, shinyG, shinyB, offset)
     dontmodify = 0
-    if shinyR == 0 && shinyG == 1 && shinyB == 2
-      dontmodify = 1
-    end
+    dontmodify = 1 if shinyR == 0 && shinyG == 1 && shinyB == 2
     @bitmap = nil
     newbitmap = GifBitmap.new(@path, @filename, offset, shinyR, shinyG, shinyB)
     @bitmap = newbitmap.copy
     greenShiny = []
     redShiny = []
     blueShiny = []
-    if shinyR == 1 || shinyB == 1 || shinyG == 1
-      # Need Green
-      greenShiny = self.pbGetGreenChannel
-    end
-    if shinyG == 0 || shinyB == 0 || shinyR == 0
-      # Need Red
-      redShiny = self.pbGetRedChannel
-    end
-    if shinyG == 2 || shinyR == 2 || shinyB == 2
-      # Need Blue
-      blueShiny = self.pbGetBlueChannel
-    end
-    if shinyR == 1
-      canalRed = greenShiny.clone
-    elsif shinyR == 2
-      canalRed = blueShiny.clone
-    else
-      canalRed = redShiny.clone
-    end
-    if shinyG == 1
-      canalGreen = greenShiny.clone
-    elsif shinyG == 2
-      canalGreen = blueShiny.clone
-    else
-      canalGreen = redShiny.clone
-    end
-    if shinyB == 1
-      canalBlue = greenShiny.clone
-    elsif shinyB == 2
-      canalBlue = blueShiny.clone
-    else
-      canalBlue = redShiny.clone
-    end
+    greenShiny = self.pbGetGreenChannel if shinyR == 1 || shinyB == 1 || shinyG == 1
+    redShiny = self.pbGetRedChannel if shinyG == 0 || shinyB == 0 || shinyR == 0
+    blueShiny = self.pbGetBlueChannel if shinyG == 2 || shinyR == 2 || shinyB == 2
+    canalRed = shinyR == 1 ? greenShiny.clone : shinyR == 2 ? blueShiny.clone : redShiny.clone
+    canalGreen = shinyG == 1 ? greenShiny.clone : shinyG == 2 ? blueShiny.clone : redShiny.clone
+    canalBlue = shinyB == 1 ? greenShiny.clone : shinyB == 2 ? blueShiny.clone : redShiny.clone
     if dontmodify == 0
       for i in 0..@bitmap.bitmap.width
         for j in 0..@bitmap.bitmap.height
           if @bitmap.bitmap.get_pixel(i, j).alpha != 0
-            depth = i*(@bitmap.bitmap.height+1)+j
+            depth = i * (@bitmap.bitmap.height + 1) + j
             @bitmap.bitmap.set_pixel(i, j, Color.new(canalRed[depth], canalGreen[depth], canalBlue[depth], @bitmap.bitmap.get_pixel(i, j).alpha))
           end
         end
       end
     end
-    # @bitmap = GifBitmap.new(@path, @filename, offset)
   end
-  
+
+
   def shiftColors(offset = 0)
     @bitmap.bitmap.hue_change(offset)
-    # @bitmap = GifBitmap.new(@path, @filename, offset)
-
-    
-    # @bitmap = nil
-    # newbitmap = GifBitmap.new(@path, @filename, offset)
-    # @bitmap = newbitmap.clone
   end
 
   def [](index)
@@ -1333,23 +577,19 @@ class AnimatedBitmap
 
   def scale_bitmap(scale)
     return if scale == 1
-  
-    # Determine the actual bitmap to use
+
     actual_bitmap = @bitmap.respond_to?(:bitmap) ? @bitmap.bitmap : @bitmap
-  
-    # If `actual_bitmap` is still not valid, return early
     return unless actual_bitmap.respond_to?(:width) && actual_bitmap.respond_to?(:height)
-  
-    new_width = (actual_bitmap.width * scale).floor # Sylvi Big Icons
-    new_height = (actual_bitmap.height * scale).floor # Sylvi Big Icons
-  
-    return if new_width <= 0 || new_height <= 0 # Sylvi Big Icons
-  
+
+    new_width = (actual_bitmap.width * scale).floor
+    new_height = (actual_bitmap.height * scale).floor
+    return if new_width <= 0 || new_height <= 0
+
     destination_rect = Rect.new(0, 0, new_width, new_height)
     source_rect = Rect.new(0, 0, actual_bitmap.width, actual_bitmap.height)
     new_bitmap = Bitmap.new(new_width, new_height)
     new_bitmap.stretch_blt(destination_rect, actual_bitmap, source_rect)
-  
+
     if @bitmap.respond_to?(:bitmap)
       @bitmap.bitmap = new_bitmap
     else
@@ -1357,23 +597,63 @@ class AnimatedBitmap
     end
   end
 
-  # def mirror
-  #   for x in 0..@bitmap.bitmap.width / 2
-  #     for y in 0..@bitmap.bitmap.height - 2
-  #       temp = @bitmap.bitmap.get_pixel(x, y)
-  #       newPix = @bitmap.bitmap.get_pixel((@bitmap.bitmap.width - x), y)
-  #
-  #       @bitmap.bitmap.set_pixel(x, y, newPix)
-  #       @bitmap.bitmap.set_pixel((@bitmap.bitmap.width - x), y, temp)
-  #     end
-  #   end
-  # end
-
-  def mirror
-    @bitmap.bitmap
+  def recognizeDims
+    if @bitmap.bitmap.width == 96 && @bitmap.bitmap.height == 96
+      scale_bitmap(3)
+    elsif @bitmap.bitmap.width != 288 && @bitmap.bitmap.height != 288
+      echoln("not a 96x96 or 288x288 sprite")
+      puts "#{@path}#{@filename}"
+      puts "Width: #{@bitmap.bitmap.width}"
+      puts "Height: #{@bitmap.bitmap.height}"
+    end
+    return self
   end
 
+  def mirror
+    mirror_horizontally
+  end
+
+  def mirror_horizontally
+    bmp = @bitmap.bitmap
+    half_width = bmp.width / 2
+    height = bmp.height
+
+    (0...half_width).each do |x|
+      (0...height).each do |y|
+        left_pixel  = bmp.get_pixel(x, y)
+        right_pixel = bmp.get_pixel(bmp.width - 1 - x, y)
+
+        bmp.set_pixel(x, y, right_pixel)
+        bmp.set_pixel(bmp.width - 1 - x, y, left_pixel)
+      end
+    end
+  end
+
+
+  def mirror_vertically
+    bmp = @bitmap.bitmap
+    width = bmp.width
+    half_height = bmp.height / 2
+
+    (0...half_height).each do |y|
+      (0...width).each do |x|
+        top_pixel    = bmp.get_pixel(x, y)
+        bottom_pixel = bmp.get_pixel(x, bmp.height - 1 - y)
+
+        bmp.set_pixel(x, y, bottom_pixel)
+        bmp.set_pixel(x, bmp.height - 1 - y, top_pixel)
+      end
+    end
+  end
+
+
+
+  # def mirror
+  #   @bitmap.bitmap
+  # end
+
 end
+
 
 #===============================================================================
 #
@@ -1493,33 +773,20 @@ end
 #===============================================================================
 class GifBitmap
   attr_accessor :bitmap
-  ###KurayX - KURAYX_ABOUT_SHINIES
   attr_accessor :rcode
   attr_accessor :gcode
   attr_accessor :bcode
-  ###KurayX - KURAYX_ABOUT_SHINIES
   attr_reader :loaded_from_cache
   # Creates a bitmap from a GIF file. Can also load non-animated bitmaps.
-  def initialize(dir, filename, hue = 0, rcode=0, gcode=1, bcode=2, pifshiny=0, kifshiny=0)
+  def initialize(dir, filename, hue = 0, rcode = 0, gcode = 1, bcode = 2, pifshiny = 0, kifshiny = 0)
     @bitmap = nil
-    #KurayX - KURAYX_ABOUT_SHINIES
+    @disposed = false
+    @loaded_from_cache = false
     @rcode = 0
     @gcode = 1
     @bcode = 2
-    @pifshiny = 0
-    @kifshiny = 0
-    # @greenorigin = []
-    # @redorigin = []
-    # @blueorigin = []
-    # @greenoriginlocked = 0
-    # @blueoriginlocked = 0
-    # @redoriginlocked = 0
-    #KurayX - KURAYX_ABOUT_SHINIES
-    @disposed = false
-    @loaded_from_cache = false
     filename = "" if !filename
     begin
-      #KurayX - KURAYX_ABOUT_SHINIES
       @bitmap = RPG::Cache.load_bitmap(dir, filename, hue, rcode, gcode, bcode, pifshiny, kifshiny)
       @loaded_from_cache = true
     rescue
@@ -1528,85 +795,6 @@ class GifBitmap
     @bitmap = BitmapWrapper.new(32, 32) if @bitmap.nil?
     @bitmap.play if @bitmap&.animated?
   end
-
-  def scale_bitmap(scale)
-    return if scale == 1
-  
-    # Determine the actual bitmap to use
-    actual_bitmap = @bitmap.respond_to?(:bitmap) ? @bitmap.bitmap : @bitmap
-  
-    # If `actual_bitmap` is still not valid, return early
-    return unless actual_bitmap.respond_to?(:width) && actual_bitmap.respond_to?(:height)
-  
-    new_width = (actual_bitmap.width * scale).floor # Sylvi Big Icons
-    new_height = (actual_bitmap.height * scale).floor # Sylvi Big Icons
-  
-    return if new_width <= 0 || new_height <= 0 # Sylvi Big Icons
-  
-    destination_rect = Rect.new(0, 0, new_width, new_height)
-    source_rect = Rect.new(0, 0, actual_bitmap.width, actual_bitmap.height)
-    new_bitmap = Bitmap.new(new_width, new_height)
-    new_bitmap.stretch_blt(destination_rect, actual_bitmap, source_rect)
-  
-    if @bitmap.respond_to?(:bitmap)
-      @bitmap.bitmap = new_bitmap
-    else
-      @bitmap = new_bitmap
-    end
-  end
-  
-
-  ##### KURAYX
-
-  # def greenorigin
-  #   @greenorigin
-  # end
-
-  # def greenoriginlocked
-  #   @greenoriginlocked
-  # end
-
-  # def greenoriginlocked=(value)
-  #   @greenoriginlocked=value
-  # end
-
-  # def greenorigin=(value)
-  #   @greenorigin=value
-  # end
-
-  # def redorigin
-  #   @redorigin
-  # end
-
-  # def redoriginlocked
-  #   @redoriginlocked
-  # end
-
-  # def redoriginlocked=(value)
-  #   @redoriginlocked=value
-  # end
-
-  # def redorigin=(value)
-  #   @redorigin=value
-  # end
-
-  # def blueorigin
-  #   @blueorigin
-  # end
-
-  # def blueoriginlocked
-  #   @blueoriginlocked
-  # end
-
-  # def blueoriginlocked=(value)
-  #   @blueoriginlocked=value
-  # end
-
-  # def blueorigin=(value)
-  #   @blueorigin=value
-  # end
-
-  ##### KURAYX
 
   def [](_index)
     return @bitmap

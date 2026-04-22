@@ -173,10 +173,10 @@ class PokeBattle_Battler
     choices = []
     user.eachAlly do |b|
       next if nearOnly && !user.near?(b)
-      pbAddTarget(choices,user,b,nearOnly)
+      pbAddTarget(choices,user,b,_move,nearOnly)
     end
     if choices.length>0
-      pbAddTarget(targets,user,choices[@battle.pbRandom(choices.length)],nearOnly)
+      pbAddTarget(targets,user,choices[@battle.pbRandom(choices.length)],_move,nearOnly)
     end
   end
 
@@ -184,10 +184,10 @@ class PokeBattle_Battler
     choices = []
     user.eachOpposing do |b|
       next if nearOnly && !user.near?(b)
-      pbAddTarget(choices,user,b,nearOnly)
+      pbAddTarget(choices,user,b,_move,nearOnly)
     end
     if choices.length>0
-      pbAddTarget(targets,user,choices[@battle.pbRandom(choices.length)],nearOnly)
+      pbAddTarget(targets,user,choices[@battle.pbRandom(choices.length)],_move,nearOnly)
     end
   end
 end

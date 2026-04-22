@@ -411,7 +411,11 @@ class DependentEvents
     end
     # Check event triggers
     #
-    if Input.trigger?(Input::USE) && !$game_temp.in_menu && !$game_temp.in_battle &&
+    mp_ui_blocked = defined?(MultiplayerUI) &&
+                    MultiplayerUI.respond_to?(:block_overworld_mouse_input?) &&
+                    MultiplayerUI.block_overworld_mouse_input?
+    chat_typing = defined?($chat_window) && $chat_window && $chat_window.input_mode
+    if !mp_ui_blocked && !chat_typing && Input.trigger?(Input::USE) && !$game_temp.in_menu && !$game_temp.in_battle &&
        !$game_player.move_route_forcing && !$game_temp.message_window_showing &&
        !pbMapInterpreterRunning?
       # Get position of tile facing the player

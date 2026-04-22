@@ -3,112 +3,93 @@ class PokeBattle_Scene
   # Create the battle scene and its elements
   #=============================================================================
   def initialize
-    @battle       = nil
-    @abortable    = false
-    @aborted      = false
-    @battleEnd    = false
-    @animations   = []
+    @battle = nil
+    @abortable = false
+    @aborted = false
+    @battleEnd = false
+    @animations = []
     @frameCounter = 0
   end
 
   # Called whenever the battle begins.
   def pbStartBattle(battle)
-    @battle   = battle
-    @viewport = Viewport.new(0,0,Graphics.width,Graphics.height)
+    @battle = battle
+    @viewport = Viewport.new(0, 0, Graphics.width, Graphics.height)
     @viewport.z = 99999
-    @lastCmd  = Array.new(@battle.battlers.length,0)
-    @lastMove = Array.new(@battle.battlers.length,0)
+    @lastCmd = Array.new(@battle.battlers.length, 0)
+    @lastMove = Array.new(@battle.battlers.length, 0)
     pbInitSprites
     pbBattleIntroAnimation
   end
 
   def pbInitSprites
     @sprites = {}
+    # The background image and each side's base graphic
     pbCreateBackdropSprites
-
     # Create message box graphic
-    messageGraphic = "Graphics/Pictures/Battle/overlay_message"
-
-    if $PokemonSystem.battlegui == 1 && $PokemonSystem.darkmode == 0
-      messageGraphic += "_M2"
-    elsif $PokemonSystem.battlegui == 2 && $PokemonSystem.darkmode == 0
-      messageGraphic += "_M2"
-    end
-
-    messageGraphic += "_darkmode" if $PokemonSystem.darkmode == 1
-
-    # Create message box graphic
-    messageBox = pbAddSprite("messageBox", 0, Graphics.height - 96, messageGraphic, @viewport)
+    messageBox = pbAddSprite("messageBox", 0, Graphics.height - 96,
+                             "Graphics/Pictures/Battle/overlay_message", @viewport)
     messageBox.z = 195
-
     # Create message window (displays the message)
     msgWindow = Window_AdvancedTextPokemon.newWithSize("",
-      16, Graphics.height - 96 + 2, Graphics.width - 32, 96, @viewport)
-    msgWindow.z              = 200
-    msgWindow.opacity        = 0
-
-    if $PokemonSystem.darkmode && $PokemonSystem.darkmode == 1
-      msgWindow.baseColor    = PokeBattle_SceneConstants::DARKMODE_MESSAGE_BASE_COLOR
-    elsif $PokemonSystem.battlegui && $PokemonSystem.battlegui == 2
-      msgWindow.baseColor    = Color.new(40, 40, 44)
-    else
-      msgWindow.baseColor    = PokeBattle_SceneConstants::MESSAGE_BASE_COLOR
-    end
-	
-    msgWindow.shadowColor    = PokeBattle_SceneConstants::MESSAGE_SHADOW_COLOR
+                                                       16, Graphics.height - 96 + 2, Graphics.width - 32, 96, @viewport)
+    msgWindow.z = 200
+    msgWindow.opacity = 0
+    msgWindow.baseColor = PokeBattle_SceneConstants::MESSAGE_BASE_COLOR
+    msgWindow.shadowColor = PokeBattle_SceneConstants::MESSAGE_SHADOW_COLOR
     msgWindow.letterbyletter = true
     @sprites["messageWindow"] = msgWindow
     # Create command window
-    @sprites["commandWindow"] = CommandMenuDisplay.new(@viewport,200)
+    @sprites["commandWindow"] = CommandMenuDisplay.new(@viewport, 200)
     # Create fight window
-    @sprites["fightWindow"] = FightMenuDisplay.new(@viewport,200)
+    @sprites["fightWindow"] = FightMenuDisplay.new(@viewport, 200)
     # Create targeting window
-    @sprites["targetWindow"] = TargetMenuDisplay.new(@viewport,200,@battle.sideSizes)
+    @sprites["targetWindow"] = TargetMenuDisplay.new(@viewport, 200, @battle.sideSizes)
     pbShowWindow(MESSAGE_BOX)
     # The party lineup graphics (bar and balls) for both sides
     for side in 0...2
-      partyBar = pbAddSprite("partyBar_#{side}",0,0,
-         "Graphics/Pictures/Battle/overlay_lineup",@viewport)
-      partyBar.z       = 120
-      partyBar.mirror  = true if side==0   # Player's lineup bar only
+      partyBar = pbAddSprite("partyBar_#{side}", 0, 0,
+                             "Graphics/Pictures/Battle/overlay_lineup", @viewport)
+      partyBar.z = 120
+      partyBar.mirror = true if side == 0 # Player's lineup bar only
       partyBar.visible = false
       for i in 0...PokeBattle_SceneConstants::NUM_BALLS
-        ball = pbAddSprite("partyBall_#{side}_#{i}",0,0,nil,@viewport)
-        ball.z       = 121
+        ball = pbAddSprite("partyBall_#{side}_#{i}", 0, 0, nil, @viewport)
+        ball.z = 121
         ball.visible = false
       end
       # Ability splash bars
       if PokeBattle_SceneConstants::USE_ABILITY_SPLASH
-        @sprites["abilityBar_#{side}"] = AbilitySplashBar.new(side,@viewport)
+        @sprites["abilityBar_#{side}"] = AbilitySplashBar.new(side, @viewport)
         if $game_switches[SWITCH_DOUBLE_ABILITIES]
-          @sprites["ability2Bar_#{side}"] = AbilitySplashBar.new(side,@viewport,true)
-          @sprites["ability2Bar_#{side}"].y = @sprites["ability2Bar_#{side}"].y+30
+          @sprites["ability2Bar_#{side}"] = AbilitySplashBar.new(side, @viewport, true)
+          @sprites["ability2Bar_#{side}"].y = @sprites["ability2Bar_#{side}"].y + 30
         end
       end
     end
     # Player's and partner trainer's back sprite
-    @battle.player.each_with_index do |p,i|
-      pbCreateTrainerBackSprite(i,p.trainer_type,@battle.player.length)
+    @battle.player.each_with_index do |p, i|
+      pbCreateTrainerBackSprite(i, p.trainer_type, @battle.player.length)
     end
     # Opposing trainer(s) sprites
     if @battle.trainerBattle?
-      @battle.opponent.each_with_index do |p,i|
-        pbCreateTrainerFrontSprite(i,p.trainer_type,@battle.opponent.length,p.sprite_override)
+      @battle.opponent.each_with_index do |p, i|
+        pbCreateTrainerFrontSprite(i, p.trainer_type, @battle.opponent.length, p.sprite_override, p.custom_appearance)
       end
     end
     # Data boxes and Pokémon sprites
-    @battle.battlers.each_with_index do |b,i|
+    @battle.battlers.each_with_index do |b, i|
       next if !b
-      @sprites["dataBox_#{i}"] = PokemonDataBox.new(b,@battle.pbSideSize(i),@viewport)
+      @sprites["dataBox_#{i}"] = PokemonDataBox.new(b, @battle.pbSideSize(i), @viewport)
       pbCreatePokemonSprite(i)
     end
     # Wild battle, so set up the Pokémon sprite(s) accordingly
     if @battle.wildBattle?
-      @battle.pbParty(1).each_with_index do |pkmn,i|
-        index = i*2+1
-        pbChangePokemon(index,pkmn)
+      @battle.pbParty(1).each_with_index do |pkmn, i|
+        index = i * 2 + 1
+        pbChangePokemon(index, pkmn)
         pkmnSprite = @sprites["pokemon_#{index}"]
-        pkmnSprite.tone    = Tone.new(-80,-80,-80)
+        pkmnSprite.tone = Tone.new(-80, -80, -80)
         pkmnSprite.visible = true
       end
     end
@@ -143,7 +124,7 @@ class PokeBattle_Scene
     time = getBackdropTimeSuffix()
     base_path = getBackdropBasePath(backdrop_type)
     default_name = base_path + filename
-    time_adjusted_name = _INTL("{1}{2}_{3}",base_path,filename,time)
+    time_adjusted_name = "#{base_path}#{filename}_#{time}"
     if pbResolveBitmap(time_adjusted_name)
       return time_adjusted_name
     end
@@ -189,30 +170,59 @@ class PokeBattle_Scene
   end
 
   def pbCreateTrainerBackSprite(idxTrainer, trainerType, numTrainers = 1)
-    x = 100
-    y = 410
 
-    sprite = IconSprite.new(x,y,@viewport)
-
-    allowEasterEggPokeball = pbInSafari? #Never allow except in Safari Zone - add more conditions if needed
-    sprite.setBitmapDirectly(generate_front_trainer_sprite_bitmap(allowEasterEggPokeball))
-    sprite.zoom_x=2
-    sprite.zoom_y=2
-    sprite.z=100 + idxTrainer
-
-    sprite.mirror =true
-    @sprites["player_#{idxTrainer + 1}"] = sprite
-    return sprite
 
     #trainer = pbAddSprite("player_#{idxTrainer + 1}", spriteX, spriteY, trainerFile, @viewport)
     #
-    # if idxTrainer == 0 # Player's sprite
-    #   #trainerFile = GameData::TrainerType.player_back_sprite_filename(trainerType)
-    #   trainerFile = generate_front_trainer_sprite_bitmap()
-    # else
-    #   # Partner trainer's sprite
-    #   trainerFile = GameData::TrainerType.back_sprite_filename(trainerType)
-    # end
+    if idxTrainer == 0 # Player's sprite
+      x = 100
+      y = 410
+
+      sprite = IconSprite.new(x,y,@viewport)
+
+      allowEasterEggPokeball = pbInSafari? #Never allow except in Safari Zone - add more conditions if needed
+      sprite.setBitmapDirectly(generate_front_trainer_sprite_bitmap(allowEasterEggPokeball))
+      sprite.zoom_x=2
+      sprite.zoom_y=2
+      sprite.z=100 + idxTrainer
+
+      sprite.mirror =true
+       @sprites["player_#{idxTrainer + 1}"] = sprite
+    else
+      x = 200
+      y = 380
+      # Partner trainer's sprite
+      trainerFile = GameData::TrainerType.front_sprite_filename(trainerType)
+      echoln ""
+      echoln "-------"
+      echoln trainerFile
+
+      trainer_sprite = IconSprite.new(x,y,@viewport)
+      trainer_sprite.setBitmap(trainerFile)
+      trainer_sprite.zoom_x=2
+      trainer_sprite.zoom_y=2
+      trainer_sprite.z = 30 + idxTrainer
+      trainer_sprite.mirror =true
+      if trainer_sprite.bitmap.width > trainer_sprite.bitmap.height * 2
+        trainer_sprite.src_rect.x = 0
+        trainer_sprite.src_rect.width = trainer_sprite.bitmap.width / 5
+      end
+      trainer_sprite.ox = trainer_sprite.src_rect.width / 2
+      trainer_sprite.oy = trainer_sprite.bitmap.height
+
+      @sprites["player_#{idxTrainer + 1}"] = trainer_sprite
+
+      #
+      #
+      # trainer.z = 30 + idxTrainer
+      # if trainer.bitmap.width > trainer.bitmap.height * 2
+      #   trainer.src_rect.x = 0
+      #   trainer.src_rect.width = trainer.bitmap.width / 5
+      # end
+      # trainer.ox = trainer.src_rect.width / 2
+      # trainer.oy = trainer.bitmap.height
+
+    end
     # spriteX, spriteY = PokeBattle_SceneConstants.pbTrainerPosition(0, idxTrainer, numTrainers)
     # trainer = pbAddSprite("player_#{idxTrainer + 1}", spriteX, spriteY, trainerFile, @viewport)
     # return if !trainer.bitmap
@@ -226,7 +236,7 @@ class PokeBattle_Scene
     # trainer.oy = trainer.bitmap.height
   end
 
-  def pbCreateTrainerFrontSprite(idxTrainer, trainerType, numTrainers = 1, sprite_override = nil)
+  def pbCreateTrainerFrontSprite(idxTrainer, trainerType, numTrainers = 1, sprite_override = nil, custom_appearance=nil)
     trainerFile = GameData::TrainerType.front_sprite_filename(trainerType)
     trainerFile = sprite_override if sprite_override
 
@@ -234,7 +244,7 @@ class PokeBattle_Scene
     trainer = pbAddSprite("trainer_#{idxTrainer + 1}", spriteX, spriteY, trainerFile, @viewport)
     spriteOverrideBitmap = setTrainerSpriteOverrides(trainerType)
     trainer.bitmap = spriteOverrideBitmap if spriteOverrideBitmap
-
+    trainer.bitmap = generate_front_trainer_sprite_bitmap_from_appearance(custom_appearance,true).bitmap if custom_appearance
     return if !trainer.bitmap
     # Alter position of sprite
     trainer.z = 7 + idxTrainer
@@ -244,10 +254,10 @@ class PokeBattle_Scene
 
   def setTrainerSpriteOverrides(trainer_type)
     if TYPE_EXPERTS_APPEARANCES.keys.include?(trainer_type)
-      return generate_front_trainer_sprite_bitmap_from_appearance(TYPE_EXPERTS_APPEARANCES[trainer_type]).bitmap
+      return generate_front_trainer_sprite_bitmap_from_appearance(TYPE_EXPERTS_APPEARANCES[trainer_type],false).bitmap
     end
   end
-  
+
   def pbCreatePokemonSprite(idxBattler)
     sideSize = @battle.pbSideSize(idxBattler)
     batSprite = PokemonBattlerSprite.new(@viewport, sideSize, idxBattler, @animations)

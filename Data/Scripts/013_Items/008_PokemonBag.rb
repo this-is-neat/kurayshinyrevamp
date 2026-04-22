@@ -121,6 +121,7 @@ class PokemonBag
 
   def pbQuantity(item)
     item = GameData::Item.get(item)
+    return 0 unless item
     pocket = item.pocket
     return ItemStorageHelper.pbQuantity(@pockets[pocket], item.id)
   end
@@ -227,28 +228,6 @@ class PokemonBag
     echoln $PokemonGlobal.pokemonSelectionOriginalBag
     @pockets = $PokemonGlobal.pokemonSelectionOriginalBag
   end
-
-  #Sylvi Items
-  def cloneItems(pockets, registeredItems)
-    @pockets = pockets.map { |pocket| pocket.clone }
-    @registeredItems = registeredItems.clone
-  end
-
-  #Sylvi Items
-  def clone
-    ret = super
-    ret.cloneItems(@pockets, @registeredItems)
-    return ret
-  end
-
-  #Sylvi Items
-  def make_vanilla
-    @pockets.each do |pocket|
-      pocket.delete_if { |slot| item = GameData::Item.try_get(slot[0]); item && item.modded? }
-    end
-    @registeredItems.delete_if { |item| item = GameData::Item.try_get(item); item && item.modded? }
-    return self
-  end
 end
 
 
@@ -270,11 +249,6 @@ class PCItemStorage
 
   def [](i)
     return @items[i]
-  end
-
-  #Sylvi Items
-  def []=(i,value)
-    @items[i] = value
   end
 
   def length
@@ -315,20 +289,6 @@ class PCItemStorage
   def pbDeleteItem(item, qty = 1)
     item = GameData::Item.get(item).id
     return ItemStorageHelper.pbDeleteItem(@items, item, qty)
-  end
-
-  #Sylvi Items
-  def clone
-    ret = PCItemStorage.new
-    @items.each_index { |i| ret[i] = [@items[i][0], @items[i][1]] }
-    return ret
-  end
-
-  #Sylvi Items
-  def make_vanilla
-    @items.delete_if { |slot| item = GameData::Item.try_get(slot[0]); item && item.modded? }
-    @items.compact!
-    return self
   end
 end
 
@@ -409,6 +369,10 @@ module ItemStorageHelper
     end
     return false
   end
+
+
+
+
 end
 
 

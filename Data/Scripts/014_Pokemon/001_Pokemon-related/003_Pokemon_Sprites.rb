@@ -59,7 +59,7 @@ class PokemonSprite < SpriteWrapper
     if pokemon.hat
       new_bitmap = Bitmap.new(base_bitmap.width, base_bitmap.height)
       new_bitmap.blt(0, 0, base_bitmap.bitmap, base_bitmap.bitmap.rect)
-      add_hat_to_bitmap(new_bitmap, pokemon.hat, pokemon.hat_x, pokemon.hat_y)
+      add_hat_to_bitmap(new_bitmap, pokemon.hat, pokemon.hat_x, pokemon.hat_y, 1, pokemon.hat_mirrored_horizontal,pokemon.hat_mirrored_vertical)
       @_iconbitmap = SpriteWrapper.new
       @_iconbitmap.bitmap = new_bitmap
     else
@@ -73,11 +73,16 @@ class PokemonSprite < SpriteWrapper
     changeOrigin
   end
 
-  #KurayX - KURAYX_ABOUT_SHINIES
-  # def setPokemonBitmapFromId(id, back = false, shiny=false, bodyShiny=false, headShiny=false,spriteform_body=nil,spriteform_head=nil, pokeHue = 0, pokeR = 0, pokeG = 1, pokeB = 2)
-  def setPokemonBitmapFromId(id, back = false, shiny=false, bodyShiny=false, headShiny=false, pokeHue = 0, pokeR = 0, pokeG = 1, pokeB = 2, pokeKRS = [0, 0, 0, 0, 0, 0, 0, 0, 0], pokeOmega = {})
+
+  # Accept all possible arguments for fusion/shiny variants
+  def setPokemonBitmapFromId(id, back = false, shiny = false, bodyShiny = false, headShiny = false, spriteform_body = nil, spriteform_head = nil, shinyValue = nil, shinyR = nil, shinyG = nil, shinyB = nil, shinyKRS = nil, shinyOmega = nil)
     @_iconbitmap.dispose if @_iconbitmap
-    @_iconbitmap = GameData::Species.sprite_bitmap_from_pokemon_id(id, back,shiny, bodyShiny,headShiny, pokeHue, pokeR, pokeG, pokeB, pokeKRS, pokeOmega)
+    # Forward all arguments to the sprite_bitmap_from_pokemon_id method if it supports them
+    if GameData::Species.method(:sprite_bitmap_from_pokemon_id).arity.abs >= 12
+      @_iconbitmap = GameData::Species.sprite_bitmap_from_pokemon_id(id, back, shiny, bodyShiny, headShiny, spriteform_body, spriteform_head, shinyValue, shinyR, shinyG, shinyB, shinyKRS, shinyOmega)
+    else
+      @_iconbitmap = GameData::Species.sprite_bitmap_from_pokemon_id(id, back, shiny, bodyShiny, headShiny, spriteform_body, spriteform_head)
+    end
     self.bitmap = (@_iconbitmap) ? @_iconbitmap.bitmap : nil
     self.color = Color.new(0, 0, 0, 0)
     changeOrigin
@@ -117,9 +122,6 @@ class PokemonIconSprite < SpriteWrapper
   attr_accessor :selected
   attr_accessor :active
   attr_reader :pokemon
-  #Sylvi Big Icons
-  attr_accessor :icon_offset_x
-  attr_accessor :icon_offset_y
 
   def initialize(pokemon, viewport = nil)
     super(viewport)
@@ -128,15 +130,11 @@ class PokemonIconSprite < SpriteWrapper
     @numFrames = 0
     @currentFrame = 0
     @counter = 0
-    #self.pokemon = pokemon
+    self.pokemon = pokemon
     @logical_x = 0 # Actual x coordinate
     @logical_y = 0 # Actual y coordinate
     @adjusted_x = 0 # Offset due to "jumping" animation in party screen
     @adjusted_y = 0 # Offset due to "jumping" animation in party screen
-    #Sylvi Big Icons
-    @icon_offset_x = -16 # Offset to center big sprite icons (if enabled)
-    @icon_offset_y = 0 # Offset to center big sprite icons (if enabled)
-    self.pokemon = pokemon
   end
 
   def dispose
@@ -154,43 +152,18 @@ class PokemonIconSprite < SpriteWrapper
 
   def x=(value)
     @logical_x = value
-    #Sylvi Big Icons
-    ret = @logical_x + @adjusted_x
-    if self.use_big_icon?
-      if @pokemon && @pokemon.egg?
-        ret += (@icon_offset_x / 2)
-      else
-        ret += @icon_offset_x
-      end
-    end
-    super(ret)
+    super(@logical_x + @adjusted_x)
   end
 
   def y=(value)
     @logical_y = value
-    #Sylvi Big Icons
-    ret = @logical_y + @adjusted_y
-    if self.use_big_icon?
-      if @pokemon && @pokemon.egg?
-        ret += (@icon_offset_y / 2)
-      else
-        ret += @icon_offset_y
-      end
-    end
-    super(ret)
+    super(@logical_y + @adjusted_y)
   end
 
   def animBitmap=(value)
     @animBitmap = value
   end
 
-  #Sylvi Big Icons
-  def use_big_icon?
-    return $PokemonSystem.kuraybigicons == 1 || $PokemonSystem.kuraybigicons == 2
-  end
-
-  #KurayX - KURAYX_ABOUT_SHINIES
-  #KuraIcon
   def pokemon=(value)
     @pokemon = value
     @animBitmap.dispose if @animBitmap
@@ -201,54 +174,12 @@ class PokemonIconSprite < SpriteWrapper
       @counter = 0
       return
     end
-
-    if self.use_big_icon?
-      #Sylvi Big Icons
-      if $PokemonSystem.shiny_icons_kuray == 1
-        if @pokemon.kuraycustomfile? == nil
-          @animBitmap = GameData::Species.sprite_bitmap_from_pokemon(@pokemon)
-        else
-          if pbResolveBitmap(@pokemon.kuraycustomfile?) && !@pokemon.egg? && (!$PokemonSystem.kurayindividcustomsprite || $PokemonSystem.kurayindividcustomsprite == 0)
-            filename = @pokemon.kuraycustomfile?
-            @animBitmap = (filename) ? AnimatedBitmap.new(filename) : nil
-            if @pokemon.shiny?
-              @animBitmap.pbGiveFinaleColor(@pokemon.shinyR?, @pokemon.shinyG?, @pokemon.shinyB?, @pokemon.shinyValue?, @pokemon.shinyKRS?, @pokemon.shinyOmega?)
-            end
-          else
-            @animBitmap = GameData::Species.sprite_bitmap_from_pokemon(@pokemon)
-          end
-        end
-      else
-        if @pokemon.kuraycustomfile? == nil
-          @animBitmap = GameData::Species.sprite_bitmap_from_pokemon(@pokemon, false, nil, false)
-        else
-          if pbResolveBitmap(@pokemon.kuraycustomfile?) && !@pokemon.egg? && (!$PokemonSystem.kurayindividcustomsprite || $PokemonSystem.kurayindividcustomsprite == 0)
-            filename = @pokemon.kuraycustomfile?
-            @animBitmap = (filename) ? AnimatedBitmap.new(filename) : nil
-          else
-            @animBitmap = GameData::Species.sprite_bitmap_from_pokemon(@pokemon, false, nil, false)
-          end
-        end
-      end
-      if @pokemon.egg?
-        @animBitmap.scale_bitmap(1.0/2.0)
-      else
-        @animBitmap.recognizeDims()
-        @animBitmap.scale_bitmap(1.0/3.0)
-      end
-    elsif @pokemon.egg?
-      @animBitmap = AnimatedBitmap.new(GameData::Species.icon_filename_from_pokemon(@pokemon))
-    elsif useRegularIcon(@pokemon.species)
-      # @animBitmap = AnimatedBitmap.new(GameData::Species.icon_filename(@pokemon.species, @pokemon.form, @pokemon.gender, @pokemon.shiny?))
-      @animBitmap = AnimatedBitmap.new(GameData::Species.icon_filename_from_pokemon(@pokemon))
-      if @pokemon.shiny? && $PokemonSystem.shiny_icons_kuray == 1 && access_deprecated_kurayshiny() != 1
-        # @animBitmap.shiftColors(colorshifting)
-        @animBitmap.pbGiveFinaleColor(@pokemon.shinyR?, @pokemon.shinyG?, @pokemon.shinyB?, @pokemon.shinyValue?, @pokemon.shinyKRS?, @pokemon.shinyOmega?)
-      end
+    if useRegularIcon(@pokemon.species) || @pokemon.egg?
+      @animBitmap = AnimatedBitmap.new(GameData::Species.icon_filename_from_pokemon(value))
     elsif useTripleFusionIcon(@pokemon.species)
       @animBitmap = AnimatedBitmap.new(pbResolveBitmap(sprintf("Graphics/Icons/iconDNA")))
     else
-      @animBitmap = createFusionIcon(@pokemon)
+      @animBitmap = createFusionIcon()
     end
     self.bitmap = @animBitmap.bitmap
     self.src_rect.width = @animBitmap.height
@@ -257,68 +188,6 @@ class PokemonIconSprite < SpriteWrapper
     @currentFrame = 0 if @currentFrame >= @numFrames
     changeOrigin
   end
-
-  #KurayX Custom icons
-  def customIcons(dex_number)
-    return nil if dex_number == nil
-    if dex_number <= Settings::NB_POKEMON
-      return get_notfusedicon_sprite_path(dex_number)
-    else
-      if dex_number >= Settings::ZAPMOLCUNO_NB
-        specialPath = getSpecialIconName(dex_number)
-        if !pbResolveBitmap(specialPath)
-          specialPath = sprintf("Graphics/Battlers/special/000")
-        end
-        return pbResolveBitmap(specialPath)
-        head_id=nil
-      else
-        body_id = getBodyID(dex_number)
-        head_id = getHeadID(dex_number, body_id)
-        return get_customicons_sprite_path(head_id,body_id)
-        # folder = head_id.to_s
-        # filename = sprintf("%s.%s.png", head_id, body_id)
-      end
-    end
-  end
-
-  #KurayX Custom icons
-  def getSpecialIconName(dexNum)
-    return kuray_global_triples(dexNum)
-  end
-
-  #Just in case (KurayX) KurayX Custom icons
-  def get_notfusedicon_sprite_path(dex_number)
-    folder = dex_number.to_s
-    filename = sprintf("%s_i.png", dex_number)
-  
-    if alt_sprites_substitutions_available && $PokemonGlobal.alt_sprite_substitutions.keys.include?(dex_number)
-      return $PokemonGlobal.alt_sprite_substitutions[dex_number]
-    end
-  
-    normal_path = Settings::BATTLERS_FOLDER + folder + "/" + filename
-    lightmode_path = Settings::BATTLERS_FOLDER + filename
-    return normal_path if pbResolveBitmap(normal_path)
-    return lightmode_path
-  end
-
-  #Just in case (KurayX) KurayX Custom icons
-  def get_customicons_sprite_path(head_id,body_id)
-    #Swap path if alt is selected for this pokemon
-    dex_num = getSpeciesIdForFusion(head_id,body_id)
-    if alt_sprites_substitutions_available && $PokemonGlobal.alt_sprite_substitutions.keys.include?(dex_num)
-      heredoing = $PokemonGlobal.alt_sprite_substitutions[dex_num]
-      heredoing = heredoing[0..-5] + "_i.png"
-      return heredoing if pbResolveBitmap(heredoing)
-      return false
-    end
-  
-    #Try local custom sprite
-    filename = sprintf("%s.%s_i.png", head_id, body_id)
-    local_custom_path = Settings::CUSTOM_BATTLERS_FOLDER_INDEXED + head_id.to_s + "/" +filename
-    return local_custom_path if pbResolveBitmap(local_custom_path)
-    return false
-  end
-
   def useTripleFusionIcon(species)
     dexNum = getDexNumberForSpecies(species)
     return isTripleFusion?(dexNum)
@@ -335,12 +204,10 @@ class PokemonIconSprite < SpriteWrapper
   end
 
   SPRITE_OFFSET = 10
-  #KurayX - KURAYX_ABOUT_SHINIES
-  #KuraIcon
-  def createFusionIcon(pokemon)
+
+  def createFusionIcon()
     bodyPoke_number = getBodyID(pokemon.species)
     headPoke_number = getHeadID(pokemon.species, bodyPoke_number)
-
 
     bodyPoke = GameData::Species.get(bodyPoke_number).species
     headPoke = GameData::Species.get(headPoke_number).species
@@ -348,34 +215,20 @@ class PokemonIconSprite < SpriteWrapper
     icon1 = AnimatedBitmap.new(GameData::Species.icon_filename(headPoke, @pokemon.spriteform_head))
     icon2 = AnimatedBitmap.new(GameData::Species.icon_filename(bodyPoke, @pokemon.spriteform_body))
 
-    #KurayX Github
-    directory_name = "Graphics/Pokemon/FusionIcons"
-    Dir.mkdir(directory_name) unless File.exists?(directory_name)
     dexNum = getDexNumberForSpecies(@pokemon.species)
-    #KurayX Custom icons
-    if dexNum.is_a?(Symbol)
-      dexNum = GameData::Species.get(dexNum).id_number
-    end
-    customiconname = customIcons(dexNum)
-    if customiconname
-      result_icon = AnimatedBitmap.new(customiconname)
-    else
-      bitmapFileName = sprintf("Graphics/Pokemon/FusionIcons/icon%03d", dexNum)
-      headPokeFileName = GameData::Species.icon_filename(headPoke, @pokemon.spriteform_head)
-      bitmapPath = sprintf("%s.png", bitmapFileName)
-      IO.copy_stream(headPokeFileName, bitmapPath)
-      result_icon = AnimatedBitmap.new(bitmapPath)
+    ensureFusionIconExists
+    bitmapFileName = sprintf("Graphics/Pokemon/FusionIcons/icon%03d", dexNum)
+    headPokeFileName = GameData::Species.icon_filename(headPoke, @pokemon.spriteform_head)
 
-      for i in 0..icon1.width-1
-        for j in ((icon1.height / 2) + Settings::FUSION_ICON_SPRITE_OFFSET)..icon1.height-1
-          temp = icon2.bitmap.get_pixel(i, j)
-          result_icon.bitmap.set_pixel(i, j, temp)
-        end
+    bitmapPath = sprintf("%s.png", bitmapFileName)
+    generated_new_icon = generateFusionIcon(headPokeFileName, bitmapPath)
+    result_icon = generated_new_icon ? AnimatedBitmap.new(bitmapPath) : icon1
+
+    for i in 0..icon1.width - 1
+      for j in ((icon1.height / 2) + Settings::FUSION_ICON_SPRITE_OFFSET)..icon1.height - 1
+        temp = icon2.bitmap.get_pixel(i, j)
+        result_icon.bitmap.set_pixel(i, j, temp)
       end
-    end
-    if @pokemon.shiny? && $PokemonSystem.shiny_icons_kuray == 1 && access_deprecated_kurayshiny() != 1
-      # result_icon.shiftColors(colorshifting)
-      result_icon.pbGiveFinaleColor(@pokemon.shinyR?, @pokemon.shinyG?, @pokemon.shinyB?, @pokemon.shinyValue?, @pokemon.shinyKRS?, @pokemon.shinyOmega?)
     end
     return result_icon
   end
@@ -419,7 +272,6 @@ class PokemonIconSprite < SpriteWrapper
     elsif @pokemon.hp <= @pokemon.totalhp / 2;
       ret *= 2 # Yellow HP - 0.5 seconds
     end
-    @numFrames = 1 if @numFrames == 0
     ret /= @numFrames
     ret = 1 if ret < 1
     return ret
@@ -543,7 +395,6 @@ class PokemonSpeciesIconSprite < SpriteWrapper
     # ret is initially the time a whole animation cycle lasts. It is divided by
     # the number of frames in that cycle at the end.
     ret = Graphics.frame_rate / 4 # 0.25 seconds
-    @numFrames = 1 if @numFrames == 0
     ret /= @numFrames
     ret = 1 if ret < 1
     return ret

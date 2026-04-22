@@ -221,13 +221,10 @@ class PokemonPartyPanel < SpriteWrapper
     @hpbgsprite.addBitmap("able", "Graphics/Pictures/Party/overlay_hp_back")
     @hpbgsprite.addBitmap("fainted", "Graphics/Pictures/Party/overlay_hp_back_faint")
     @hpbgsprite.addBitmap("swap", "Graphics/Pictures/Party/overlay_hp_back_swap")
-    #Sylvi Big Icons
-    if $PokemonSystem.kuraybigicons == 0 || !@pokemon then
-      @ballsprite = ChangelingSprite.new(0, 0, viewport)
-      @ballsprite.z = self.z + 1
-      @ballsprite.addBitmap("desel", "Graphics/Pictures/Party/icon_ball")
-      @ballsprite.addBitmap("sel", "Graphics/Pictures/Party/icon_ball_sel")
-    end
+    @ballsprite = ChangelingSprite.new(0, 0, viewport)
+    @ballsprite.z = self.z + 1
+    @ballsprite.addBitmap("desel", "Graphics/Pictures/Party/icon_ball")
+    @ballsprite.addBitmap("sel", "Graphics/Pictures/Party/icon_ball_sel")
     @pkmnsprite = PokemonIconSprite.new(pokemon, viewport)
     @pkmnsprite.setOffset(PictureOrigin::Center)
     @pkmnsprite.active = @active
@@ -237,7 +234,7 @@ class PokemonPartyPanel < SpriteWrapper
     @overlaysprite = BitmapSprite.new(Graphics.width, Graphics.height, viewport)
     @overlaysprite.z = self.z + 4
     @hpbar = AnimatedBitmap.new("Graphics/Pictures/Party/overlay_hp")
-    @statuses = AnimatedBitmap.new(_INTL("Graphics/Pictures/statuses"))
+    @statuses = AnimatedBitmap.new("Graphics/Pictures/statuses")
     @selected = false
     @preselected = false
     @switching = false
@@ -250,7 +247,7 @@ class PokemonPartyPanel < SpriteWrapper
   def dispose
     @panelbgsprite.dispose
     @hpbgsprite.dispose
-    @ballsprite.dispose if @ballsprite #Sylvi Big Icons
+    @ballsprite.dispose
     @pkmnsprite.dispose
     @helditemsprite.dispose
     @overlaysprite.bitmap.dispose
@@ -423,40 +420,16 @@ class PokemonPartyPanel < SpriteWrapper
           end
         end
         # Draw gender symbol
-        #KurayNewSymbolGender
-        imagePos = []
-        kuraygender1t = "♂"
-        kuraygender2t = "♀"
-        # kuraygender3t = "♃"
-        # kuraygender4t = "♄"
-        kuraygender1r = [55, 148, 229]
-        kuraygender1s = [68, 98, 125]
-        kuraygender2r = [229, 55, 203]
-        kuraygender2s = [137, 73, 127]
-        # kuraygender3r = [55, 229, 81]
-        # kuraygender3s = [68, 127, 76]
-        # kuraygender4r = [229, 127, 55]
-        # kuraygender4s = [135, 95, 69]
-        if @pokemon.pizza?
-          imagePos.push(["Graphics/Pictures/Storage/gender4", 206, 15])
-          # textpos.push([_INTL(kuraygender4t), 224, 10, 0, Color.new(kuraygender4r[0], kuraygender4r[1], kuraygender4r[2]), Color.new(kuraygender4s[0], kuraygender4s[1], kuraygender4s[2])])
-        elsif @pokemon.male?
-          textpos.push([_INTL(kuraygender1t), 224, 10, 0, Color.new(kuraygender1r[0], kuraygender1r[1], kuraygender1r[2]), Color.new(kuraygender1s[0], kuraygender1s[1], kuraygender1s[2])])
+        if @pokemon.male?
+          textpos.push(["♂", 224, 10, 0, Color.new(0, 112, 248), Color.new(120, 184, 232)])
         elsif @pokemon.female?
-          textpos.push([_INTL(kuraygender2t), 224, 10, 0, Color.new(kuraygender2r[0], kuraygender2r[1], kuraygender2r[2]), Color.new(kuraygender2s[0], kuraygender2s[1], kuraygender2s[2])])
-        elsif @pokemon.genderless?
-          imagePos.push(["Graphics/Pictures/Storage/gender3", 210, 24])
-          # textpos.push([_INTL(kuraygender3t), 224, 10, 0, Color.new(kuraygender3r[0], kuraygender3r[1], kuraygender3r[2]), Color.new(kuraygender3s[0], kuraygender3s[1], kuraygender3s[2])])
+          textpos.push(["♀", 224, 10, 0, Color.new(232, 32, 16), Color.new(248, 168, 184)])
         end
         # Draw shiny icon
-        if @pokemon.shiny? || @pokemon.fakeshiny?
-          # imagePos=[]
-          #KurayX new ShinyStars
-          addShinyStarsToGraphicsArray(imagePos,80,48,@pokemon.bodyShiny?,@pokemon.headShiny?,@pokemon.debugShiny?,0,0,16,16,false,false,@pokemon.fakeshiny?,[@pokemon.shinyR?,@pokemon.shinyG?,@pokemon.shinyB?,@pokemon.shinyKRS?])
-          # pbDrawImagePositions(@overlaysprite.bitmap,imagePos)
-        end
-        if imagePos
-          pbDrawImagePositions(@overlaysprite.bitmap,imagePos)
+        if @pokemon.shiny?
+          imagePos = []
+          addShinyStarsToGraphicsArray(imagePos, 80, 48, @pokemon.bodyShiny?, @pokemon.headShiny?, @pokemon.debugShiny?, 0, 0, 16, 16)
+          pbDrawImagePositions(@overlaysprite.bitmap, imagePos)
         end
       end
       pbDrawTextPositions(@overlaysprite.bitmap, textpos)
@@ -1060,12 +1033,11 @@ class PokemonPartyScreen
     ret = nil
     addedEntry = false
     for i in 0...@party.length
-      # statuses[i] = (ruleset.isPokemonValid?(@party[i])) ? 1 : 2
       statuses[i] = (ruleset.isPokemonValid?(@party[i],ableProc)) ? 1 : 2
     end
 
 
-    
+
     for i in 0...@party.length
       annot[i] = ordinals[statuses[i]]
     end
@@ -1193,6 +1165,7 @@ class PokemonPartyScreen
     return ret
   end
 
+
   def pbPokemonHat(pokemon)
     cmd = 0
     msg = "What should you do?"
@@ -1214,6 +1187,61 @@ class PokemonPartyScreen
       else
         break
       end
+    end
+  end
+
+  def pbRememberMoves(pokemon)
+    learnable_moves = pokemon.learned_moves
+    learnable_moves = [] if !learnable_moves
+    #exclude current moves
+    echoln "learned moves: #{learnable_moves}"
+    for current_move in pokemon.moves
+      if learnable_moves.include?(current_move.id)
+        learnable_moves.delete(current_move.id)
+      end
+    end
+    move_ids = []
+    for move in learnable_moves
+      if move.is_a?(Symbol)
+        move_ids << move if pokemon.compatible_with_move?(move)
+      end
+    end
+
+    if move_ids.empty?
+      pbMessage(_INTL("{1} has no moves to remember!",pokemon.name))
+      return false
+    end
+
+    echoln move_ids
+
+    retval = true
+    pbFadeOutIn {
+      scene = MoveRelearner_Scene.new
+      screen = MoveRelearnerScreen.new(scene)
+      if !learnable_moves.empty?
+        retval = screen.pbStartScreen(pokemon, move_ids)
+      else
+        return false
+      end
+    }
+    return retval
+  end
+
+  def fuseFromParty(pokemon)
+    splicerItem = selectSplicer()
+    return unless splicerItem
+    if pbDNASplicing(pokemon,@scene,splicerItem)
+      echoln splicerItem
+      $PokemonBag.pbDeleteItem(splicerItem, 1) unless splicerItem == :INFINITESPLICERS || splicerItem == :INFINITESPLICERS2
+    end
+  end
+
+  def unfuseFromParty(pokemon,index)
+    splicerItem = selectSplicer()
+    return unless splicerItem
+    isSuperSplicer = [:SUPERSPLICERS,:INFINITESPLICERS2].include?(splicerItem)
+    if pbUnfuse(pokemon,@scene,isSuperSplicer)
+      $PokemonBag.pbDeleteItem(splicerItem, 1) unless splicerItem == :INFINITESPLICERS || splicerItem == :INFINITESPLICER2
     end
   end
 
@@ -1267,6 +1295,10 @@ class PokemonPartyScreen
       cmdMail = -1
       cmdItem = -1
       cmdHat = -1
+      cmdLearnMove = -1
+      cmdUnfuse = -1
+      cmdFuse = -1
+
 
       # Build the commands
       commands[cmdSummary = commands.length] = _INTL("Summary")
@@ -1290,6 +1322,17 @@ class PokemonPartyScreen
         end
       end
       commands[cmdNickname = commands.length] = _INTL("Nickname") if !pkmn.egg?
+      commands[cmdLearnMove = commands.length] = _INTL("Remember moves")
+
+      if playerHasFusionItems
+        if pkmn.isFusion?
+          commands[cmdUnfuse = commands.length] = _INTL("Unfuse")
+        else
+          commands[cmdFuse = commands.length] = _INTL("Fuse")
+        end
+      end
+
+
       commands[commands.length] = _INTL("Cancel")
       command = @scene.pbShowCommands(_INTL("Do what with {1}?", pkmn.name), commands)
       havecommand = false
@@ -1351,8 +1394,14 @@ class PokemonPartyScreen
         }
       elsif cmdHat >= 0 && command == cmdHat
         pbPokemonHat(pkmn)
+      elsif cmdLearnMove > 0 && command == cmdLearnMove
+        pbRememberMoves(pkmn)
       elsif cmdNickname >= 0 && command == cmdNickname
-        pbPokemonRename(pkmn,pkmnid)
+        pbPokemonRename(pkmn, pkmnid)
+      elsif cmdFuse >= 0 && command == cmdFuse
+        fuseFromParty(pkmn)
+      elsif cmdUnfuse >= 0 && command == cmdUnfuse
+        unfuseFromParty(pkmn,pkmnid)
       elsif cmdDebug >= 0 && command == cmdDebug
         pbPokemonDebug(pkmn, pkmnid)
       elsif cmdSwitch >= 0 && command == cmdSwitch
@@ -1460,6 +1509,9 @@ class PokemonPartyScreen
     @scene.pbEndScene
     return nil
   end
+
+
+
 end
 
 #===============================================================================
@@ -1483,11 +1535,7 @@ def pbChoosePokemon(variableNumber, nameVarNumber, ableProc = nil, allowIneligib
   chosen = 0
   pbFadeOutIn {
     scene = PokemonParty_Scene.new
-    if ($PokemonGlobal.pokemonSelectionOriginalParty!=nil)
-      screen = PokemonPartyScreen.new(scene, $PokemonGlobal.pokemonSelectionOriginalParty)
-    else
-      screen = PokemonPartyScreen.new(scene, $Trainer.party)
-    end
+    screen = PokemonPartyScreen.new(scene, $Trainer.party)
     if ableProc
       chosen = screen.pbChooseAblePokemon(ableProc, allowIneligible)
     else
@@ -1498,11 +1546,7 @@ def pbChoosePokemon(variableNumber, nameVarNumber, ableProc = nil, allowIneligib
   }
   pbSet(variableNumber, chosen)
   if chosen >= 0
-    if ($PokemonGlobal.pokemonSelectionOriginalParty!=nil)
-      pbSet(nameVarNumber, $PokemonGlobal.pokemonSelectionOriginalParty[chosen].name)
-    else
-      pbSet(nameVarNumber, $Trainer.party[chosen].name)
-    end
+    pbSet(nameVarNumber, $Trainer.party[chosen].name)
   else
     pbSet(nameVarNumber, "")
   end

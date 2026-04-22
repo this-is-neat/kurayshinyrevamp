@@ -5,11 +5,12 @@
 class Pokemon
   attr_accessor :spriteform_body
   attr_accessor :spriteform_head
+
   # @return [Symbol] this Pokémon's species
   attr_reader :species
   # If defined, this Pokémon's form will be this value even if a MultipleForms
   # handler tries to say otherwise.
-  # @return [Integer, nil] this Pokémon's form
+  # @return [Integer, nil] this Pokémon's formspriteform
   attr_accessor :forced_form
   # If defined, is the time (in Integer form) when this Pokémon's form was set.
   # @return [Integer, nil] the time this Pokémon's form was set
@@ -24,6 +25,8 @@ class Pokemon
   attr_accessor :hat
   attr_accessor :hat_x
   attr_accessor :hat_y
+  attr_accessor :hat_mirrored_horizontal
+  attr_accessor :hat_mirrored_vertical
 
   # @return [Integer] the number of steps until this Pokémon hatches, 0 if this Pokémon is not an egg
   attr_accessor :steps_to_hatch
@@ -43,7 +46,6 @@ class Pokemon
   attr_accessor :debug_shiny
   attr_accessor :natural_shiny
   attr_accessor :fakeshiny
-  #KurayX - KURAYX_ABOUT_SHINIES
   attr_accessor :head_shinyhue
   attr_accessor :body_shinyhue
   attr_accessor :head_shinyr
@@ -56,7 +58,6 @@ class Pokemon
   attr_accessor :body_shinykrs
   attr_accessor :head_gender
   attr_accessor :head_nickname
-  #KurayX - KURAYX_ABOUT_SHINIES
   attr_accessor :shinyValue
   attr_accessor :shinyR
   attr_accessor :shinyG
@@ -65,19 +66,13 @@ class Pokemon
   attr_accessor :kuray_no_evo
   attr_accessor :kuraygender
   attr_accessor :imported
-  #KurayX - Custom Filenames
   attr_accessor :kuraycustomfile
   attr_accessor :oldkuraycustomfile
   attr_accessor :veryunique
-
   attr_accessor :type1kuray
   attr_accessor :type2kuray
   attr_accessor :typeoverwrite
-
-
-
   attr_accessor :shinyimprovpif
-
   attr_accessor :head_shinyimprovpif
   attr_accessor :body_shinyimprovpif
 
@@ -91,6 +86,10 @@ class Pokemon
 
   # @return [Array<Pokemon::Move>] the moves known by this Pokémon
   attr_accessor :moves
+
+  # @return [Array<Symbol>] All the move (ids) ever learned by this Pokémon
+  attr_reader :learned_moves
+
   # @return [Array<Integer>] the IDs of moves known by this Pokémon when it was obtained
   attr_accessor :first_moves
   # @return [Array<Symbol>] an array of ribbons owned by this Pokémon
@@ -157,7 +156,6 @@ class Pokemon
   # Maximum number of moves a Pokémon can know at once
   MAX_MOVES = 4
 
-  # S_CHANCE_VALIDATOR = 16
   S_CHANCE_VALIDATOR = 16
 
   def print_all_attributes
@@ -219,6 +217,7 @@ class Pokemon
     echoln("Personal ID: #{@personalID}")
     echoln("Hidden Power Type: #{@hiddenPowerType}")
     echoln("Scale: #{sprite_scale}")
+
     # Add other attribute print statements here
   end
 
@@ -235,13 +234,6 @@ class Pokemon
     str << format(' %s Lv.%s>', @species, @level.to_s || '???')
     return str
   end
-
-  # def species_data
-  #   if !@species_data || @species != @species_data.species
-  #     @species_data = GameData::Species.get(@species)
-  #   end
-  #   return @species_data #GameData::Species.get(@species)
-  # end
 
   def species_data
     @species_data = GameData::Species.get(@species)
@@ -290,7 +282,6 @@ class Pokemon
   def size_category=(category)
     @size_category = category
   end
-
   # @param check_species [Integer, Symbol, String] id of the species to check for
   # @return [Boolean] whether this Pokémon is of the specified species
   def isSpecies?(check_species)
@@ -298,12 +289,13 @@ class Pokemon
       @species == GameData::Species.get(check_species).species)
   end
 
+
   def hasBodyOf?(check_species)
     if !self.isFusion?
       return isSpecies?(check_species)
     end
     bodySpecies = getBodyID(species)
-    checkSpeciesId = getID(nil,check_species)
+    checkSpeciesId = getID(nil, check_species)
     return bodySpecies == checkSpeciesId
   end
 
@@ -312,7 +304,7 @@ class Pokemon
       return isSpecies?(check_species)
     end
     headSpecies = getHeadID(species)
-    checkSpeciesId = getID(nil,check_species)
+    checkSpeciesId = getID(nil, check_species)
     return headSpecies == checkSpeciesId
   end
 
@@ -324,168 +316,95 @@ class Pokemon
     return get_body_id_from_symbol(@species)
   end
 
-  def fakeshiny=(value)
-    @fakeshiny=value
-  end
-
   def shiny=(value)
-    @shiny=value
-    #KurayX - KURAYX_ABOUT_SHINIES
-    # if value && Settings::SHINY_POKEMON_CHANCE != S_CHANCE_VALIDATOR
-      # @debug_shiny=true
-    # end
-  end
-
-  def kuray_no_evo=(value)
-    @kuray_no_evo=value
-  end
-
-  def kuray_no_evo?
-    if @kuray_no_evo
-      return @kuray_no_evo
-    else
-      return 0
+    @shiny = value
+    if value && Settings::SHINY_POKEMON_CHANCE != S_CHANCE_VALIDATOR
+      @debug_shiny = true
     end
   end
 
-  #KurayX - KURAYX_ABOUT_GENDER
-  def kuraygender=(value)
-    @kuraygender=value
+  def naturalShiny?
+    return @natural_shiny
   end
 
-  def imported=(value)
-    @imported=value
+  def debugShiny?
+    return !@natural_shiny || @debug_shiny
   end
 
-  def imported?
-    if @imported
-      return @imported
-    else
-      @imported=false
-      return @imported
-    end
+  def fakeshiny?
+    return !!@fakeshiny
   end
 
-  #KurayX - KURAYX_ABOUT_SHINIES
-  def shinyValue=(value)
-    @shinyValue=value
+  def bodyShiny?
+    return @body_shiny
   end
 
-  def veryunique=(value)
-    @veryunique=value
+  def headShiny?
+    return @head_shiny
   end
 
-  #KurayX - Custom Filenames
-  def kuraycustomfile=(value)
-    @kuraycustomfile=value
-  end
-
-  #KurayX - Custom Filenames
-  def oldkuraycustomfile=(value)
-    @oldkuraycustomfile=value
-  end
-
-  def shinyKRS=(value)
-    @shinyKRS=value
-  end
-
-  def shinyimprovpif=(value)
-    @shinyimprovpif=value
-  end
-
-  #KurayX - KURAYX_ABOUT_SHINIES
-  def shinyR=(value)
-    @shinyR=value
-  end
-
-  #KurayX - KURAYX_ABOUT_SHINIES
-  def shinyG=(value)
-    @shinyG=value
-  end
-
-  #KurayX - KURAYX_ABOUT_SHINIES
-  def shinyB=(value)
-    @shinyB=value
-  end
-
-  #KurayX - KURAYX_ABOUT_GENDER
-  def kuraygender?
-    if @kuraygender
-      return @kuraygender
-    else
-      @kuraygender=rand(65536)
-      return @kuraygender
-    end
-  end
-
-  #KurayX - KURAYX_ABOUT_SHINIES
   def shinyValue?
     if @shinyValue
       return @shinyValue
-    else
-      @shinyValue=rand(0..360)-180
-      return @shinyValue
     end
+    @shinyValue = rand(0..360) - 180
+    return @shinyValue
   end
 
   def shinyimprovpif?
     if @shinyimprovpif
       return @shinyimprovpif
-    else
-      @shinyimprovpif=rollimproveshiny()
-      return @shinyimprovpif
     end
+    @shinyimprovpif = rollimproveshiny()
+    return @shinyimprovpif
   end
 
-  #KurayX - KURAYX_ABOUT_SHINIES
   def shinyR?
     if @shinyR
       if $PokemonSystem.shinyadvanced != nil && $PokemonSystem.shinyadvanced != 2 && @shinyR > 11
-        @shinyR=kurayRNGforChannels
+        @shinyR = kurayRNGforChannels
       end
       return @shinyR
-    else
-      @shinyR=kurayRNGforChannels
-      return @shinyR
     end
+    @shinyR = kurayRNGforChannels
+    return @shinyR
   end
 
-  #KurayX - Custom Filenames
   def oldkuraycustomfile?
     if @oldkuraycustomfile
       return @oldkuraycustomfile
-    else
-      return nil
     end
+    return nil
   end
 
   def veryunique?
     if @veryunique
       return @veryunique
-    else
-      @veryunique = createVeryUnique()
-      return @veryunique
     end
+    @veryunique = createVeryUnique()
+    return @veryunique
+  end
+
+  def createVeryUnique()
+    characters = ('0'..'9').to_a
+    random_id = (1..24).map { characters.sample }.join
+    return random_id
   end
 
   def kuraycustomfilereset
-    #We don't have one, need to generate one
-    #If oldkuraycustomfile is temporarily holding a customfile, kuraycustomfile? check cannot generate a sprite by itself to prevent bugs.
     if species_data.id_number
-      @kuraycustomfile=kurayGetCustomSprite(species_data.id_number)
+      @kuraycustomfile = kurayGetCustomSprite(species_data.id_number)
     else
       return nil
     end
   end
 
-  #KurayX - Custom Filenames
   def kuraycustomfile?
     if @kuraycustomfile
-      #We have one, need to resolve it
       return nil if @kuraycustomfile == "none"
       if !pbResolveBitmap(@kuraycustomfile)
         if species_data.id_number
-          @kuraycustomfile=kurayGetCustomSprite(species_data.id_number)
+          @kuraycustomfile = kurayGetCustomSprite(species_data.id_number)
         else
           return nil
         end
@@ -493,17 +412,14 @@ class Pokemon
         return @kuraycustomfile
       end
     else
-      #We don't have one, need to generate one
-      #If oldkuraycustomfile is temporarily holding a customfile, kuraycustomfile? check cannot generate a sprite by itself to prevent bugs.
       if species_data.id_number && @oldkuraycustomfile != nil
-        @kuraycustomfile=kurayGetCustomSprite(species_data.id_number)
+        @kuraycustomfile = kurayGetCustomSprite(species_data.id_number)
       else
         return nil
       end
     end
   end
 
-  # give more data to shiny nexus without passing 10000 arguments 'cause it's getting annoying
   def shinyOmega?
     return {
       "pif_shiny" => self.shinyimprovpif?,
@@ -516,261 +432,134 @@ class Pokemon
   def shinyKRS?
     if @shinyKRS
       return @shinyKRS
-    else
-      @shinyKRS=kurayKRSmake
-      return @shinyKRS
     end
+    @shinyKRS = kurayKRSmake
+    return @shinyKRS
   end
 
-  #KurayX - KURAYX_ABOUT_SHINIES
   def shinyG?
     if @shinyG
       if $PokemonSystem.shinyadvanced != nil && $PokemonSystem.shinyadvanced != 2 && @shinyG > 11
-        @shinyG=kurayRNGforChannels
+        @shinyG = kurayRNGforChannels
       end
       return @shinyG
-    else
-      @shinyG=kurayRNGforChannels
-      return @shinyG
     end
+    @shinyG = kurayRNGforChannels
+    return @shinyG
   end
 
-  #KurayX - KURAYX_ABOUT_SHINIES
   def shinyB?
     if @shinyB
       if $PokemonSystem.shinyadvanced != nil && $PokemonSystem.shinyadvanced != 2 && @shinyB > 11
-        @shinyB=kurayRNGforChannels
+        @shinyB = kurayRNGforChannels
       end
       return @shinyB
-    else
-      @shinyB=kurayRNGforChannels
-      return @shinyB
     end
+    @shinyB = kurayRNGforChannels
+    return @shinyB
   end
 
-
-  ############
-  #KurayX##### - KURAYX_ABOUT_SHINIES
   def head_shinyhue?
     if @head_shinyhue
       return @head_shinyhue
-    else
-      @head_shinyhue=rand(0..360)-180
-      return @head_shinyhue
     end
+    @head_shinyhue = rand(0..360) - 180
+    return @head_shinyhue
   end
 
   def body_shinyhue?
     if @body_shinyhue
       return @body_shinyhue
-    else
-      @body_shinyhue=rand(0..360)-180
-      return @body_shinyhue
     end
+    @body_shinyhue = rand(0..360) - 180
+    return @body_shinyhue
   end
 
   def head_shinyimprovpif?
     if @head_shinyimprovpif
       return @head_shinyimprovpif
-    else
-      @head_shinyimprovpif=rollimproveshiny()
-      return @head_shinyimprovpif
     end
+    @head_shinyimprovpif = rollimproveshiny()
+    return @head_shinyimprovpif
   end
 
   def body_shinyimprovpif?
     if @body_shinyimprovpif
       return @body_shinyimprovpif
-    else
-      @body_shinyimprovpif=rollimproveshiny()
-      return @body_shinyimprovpif
     end
+    @body_shinyimprovpif = rollimproveshiny()
+    return @body_shinyimprovpif
   end
 
   def head_shinyr?
     if @head_shinyr
       return @head_shinyr
-    else
-      @head_shinyr=kurayRNGforChannels
-      return @head_shinyr
     end
+    @head_shinyr = kurayRNGforChannels
+    return @head_shinyr
   end
 
   def body_shinyr?
     if @body_shinyr
       return @body_shinyr
-    else
-      @body_shinyr=kurayRNGforChannels
-      return @body_shinyr
     end
+    @body_shinyr = kurayRNGforChannels
+    return @body_shinyr
   end
 
   def head_shinykrs?
     if @head_shinykrs
       return @head_shinykrs
-    else
-      @head_shinykrs=kurayKRSmake
-      return @head_shinykrs
     end
+    @head_shinykrs = kurayKRSmake
+    return @head_shinykrs
   end
 
   def body_shinykrs?
     if @body_shinykrs
       return @body_shinykrs
-    else
-      @body_shinykrs=kurayKRSmake
-      return @body_shinykrs
     end
+    @body_shinykrs = kurayKRSmake
+    return @body_shinykrs
   end
 
   def head_shinyg?
     if @head_shinyg
       return @head_shinyg
-    else
-      @head_shinyg=kurayRNGforChannels
-      return @head_shinyg
     end
+    @head_shinyg = kurayRNGforChannels
+    return @head_shinyg
   end
 
   def body_shinyg?
     if @body_shinyg
       return @body_shinyg
-    else
-      @body_shinyg=kurayRNGforChannels
-      return @body_shinyg
     end
+    @body_shinyg = kurayRNGforChannels
+    return @body_shinyg
   end
 
   def head_shinyb?
     if @head_shinyb
       return @head_shinyb
-    else
-      @head_shinyb=kurayRNGforChannels
-      return @head_shinyb
     end
+    @head_shinyb = kurayRNGforChannels
+    return @head_shinyb
   end
 
   def body_shinyb?
     if @body_shinyb
       return @body_shinyb
-    else
-      @body_shinyb=kurayRNGforChannels
-      return @body_shinyb
     end
-  end
-
-  def body_shinya
-    return @body_shinya
-  end
-
-  def body_shinyb
+    @body_shinyb = kurayRNGforChannels
     return @body_shinyb
   end
 
-  def body_shinyc
-    return @body_shinyc
-  end
-
-  def body_shinyhue
-    return @body_shinyhue
-  end
-
-  def head_shinya
-    return @head_shinya
-  end
-
-  def head_shinyb
-    return @head_shinyb
-  end
-
-  def head_shinyc
-    return @head_shinyc
-  end
-
-  def head_shinyhue
-    return @head_shinyhue
-  end
-  #KurayX##### - KURAYX_ABOUT_SHINIES
-  ############
-
-  #KurayX - KURAYX_ABOUT_GENDER
-  def kuraygender
-    return @kuraygender
-  end
-
-  def imported
-    return @imported
-  end
-
-  def shinyimprovpif
-    return @shinyimprovpif
-  end
-
-  #KurayX - KURAYX_ABOUT_SHINIES
-  def shinyValue
-    return @shinyValue
-  end
-
-  #KurayX - KURAYX_ABOUT_SHINIES
-  def shinyR
-    return @shinyR
-  end
-
-  #KurayX - Custom Filenames
-  def kuraycustomfile
-    return nil if @kuraycustomfile == "none"
-    return @kuraycustomfile
-  end
-
-  def veryunique
-    return nil if !@veryunique
-    return @veryunique
-  end
-
-  #KurayX - Custom Filenames
-  def kuraycustomfiledefault?
-    return true if @kuraycustomfile == "none"
-    return false
-  end
-
-  #KurayX - Custom Filenames
-  def oldkuraycustomfile
-    return @oldkuraycustomfile
-  end
-
-  def shinyKRS
-    return @shinyKRS
-  end
-
-  #KurayX - KURAYX_ABOUT_SHINIES
-  def shinyG
-    return @shinyG
-  end
-
-  #KurayX - KURAYX_ABOUT_SHINIES
-  def shinyB
-    return @shinyB
-  end
-
-  def naturalShiny?
-    return @natural_shiny
-  end
-
-  def debugShiny?
-    return !@natural_shiny || @debug_shiny
-  end
-
-  def bodyShiny?
-    return @body_shiny
-  end
-
-  def headShiny?
-    return @head_shiny
-  end
 
   def isFusionOf(check_species)
     return hasBodyOf?(check_species) || hasHeadOf?(check_species)
   end
+
 
   def dexNum
     return species_data.id_number
@@ -797,13 +586,17 @@ class Pokemon
   end
 
   def changeFormSpecies(oldForm, newForm)
+
     is_already_old_form = self.isFusionOf(oldForm) #A 466
     is_already_new_form = self.isFusionOf(newForm) #P
 
     #reverse the fusion if it's a meloA and meloP fusion
     # There's probably a smarter way to do this but laziness lol
     if is_already_old_form && is_already_new_form
-      if self.species_data.get_body_species() == oldForm
+      body_id = self.species_data.get_body_species()
+      body_species = GameData::Species.get(body_id)
+
+      if body_species == oldForm
         changeSpeciesSpecific(self, getFusedPokemonIdFromSymbols(newForm, oldForm))
       else
         changeSpeciesSpecific(self, getFusedPokemonIdFromSymbols(oldForm, newForm))
@@ -865,122 +658,7 @@ class Pokemon
   # @return [Integer] this Pokémon's level
   def level
     @level = growth_rate.level_from_exp(@exp) if !@level
-    #Kurayx LevelCAP
-    calc_stats
     return @level
-  end
-
-  # Original level method from Pokemon Infinite Fusion
-  # For when levelcapping or recalculating stats isn't wanted or needed
-  # @return [Integer] this Pokémon's level
-  def level_simple
-    # @level = growth_rate.level_from_exp(@exp) if !@level
-    @level = growth_rate.level_from_exp(@exp)
-    return @level
-  end
-
-  #Kurayx LevelCAP
-  # Recalculates this Pokémon's stats.
-  # @param value [Integer] (between 1 and the maximum level) calc stats at this level instead
-  def calc_stats(this_level = self.level_simple)
-    if $PokemonSystem.kuraylevelcap != 0 && player_owned?
-      levelcap = getkuraylevelcap()
-      if this_level > levelcap
-        this_level = levelcap
-      end
-      if $PokemonSystem.levelcapbehavior == 1
-        @exp = [growth_rate.minimum_exp_for_level(getkuraylevelcap()), @exp].min
-      elsif $PokemonSystem.levelcapbehavior == 2
-        @exp = [growth_rate.minimum_exp_for_level(getkuraylevelcap()+1), @exp].min
-      end
-    end
-    base_stats = self.baseStats
-    this_IV = self.calcIV
-
-    if $game_switches[SWITCH_NO_LEVELS_MODE]
-      # this_level = Settings::NO_LEVEL_MODE_LEVEL
-      this_level = adjust_level_for_base_stats_mode()
-    end
-
-    # Format stat multipliers due to nature
-    nature_mod = {}
-    GameData::Stat.each_main { |s| nature_mod[s.id] = 100 }
-    this_nature = self.nature_for_stats
-    if this_nature
-      this_nature.stat_changes.each { |change| nature_mod[change[0]] += change[1] }
-    end
-    #KurayX boost self-fusion
-    kuraystat = 0
-    if self.isSelfFusion?
-      GameData::Stat.each_main do |s|
-        kuraystat += base_stats[s.id]
-      end
-      # File.open('KurayLogV' + ".txt", 'a') { |f| f.write("Self Fusion: " + self.speciesName.to_s + " |Sum stats: " + kuraystat.to_s + "\r") } if File.exists?("Kurayami.krs")
-    end
-    kurayboost = 1.0
-    if kuraystat != 0
-      if kuraystat >= 800
-        kurayboost = 1.02
-      elsif kuraystat >= 700
-        kurayboost = 1.04
-      elsif kuraystat >= 600
-        kurayboost = 1.06
-      elsif kuraystat >= 500
-        kurayboost = 1.09
-      elsif kuraystat >= 400
-        kurayboost = 1.13
-      elsif kuraystat >= 300
-        kurayboost = 1.19
-      elsif kuraystat >= 200
-        kurayboost = 1.47
-      elsif kuraystat >= 100
-        kurayboost = 1.81
-      else
-        kurayboost = 2.8
-      end
-      # let's modify kurayboost depending on kuraystat sums here
-    end
-    # DemICE tying the self-fusion buff to an option
-    kurayboost =1.0 if $PokemonSystem.self_fusion_boost==0
-    # DemICE (And also disabling it for the endgame challenge)
-    if $game_switches && $game_switches[850] &&
-      ($game_map.map_id == 314 ||  # Pokemon League Lobby
-        $game_map.map_id == 315 || # Lorelei
-        $game_map.map_id == 316 || # Bruno
-        $game_map.map_id == 317 || # Agatha
-        $game_map.map_id == 318 || # Lance
-        $game_map.map_id == 328 || # Champion Room
-        $game_map.map_id == 546 || # Vermillion Fight Arena
-        $game_map.map_id == 783 || # Mt. Silver Summit (Cynthia)
-        $game_map.map_id == 784 )  # Mt. Silver Summit Future (Gold)
-          kurayboost=1.0
-    end
-    # Calculate stats
-    stats = {}
-    GameData::Stat.each_main do |s|
-      if $PokemonSystem.noevsmode && $PokemonSystem.noevsmode > 0
-        ev_use = 0
-      else
-        ev_use = @ev[s.id]
-      end
-      if s.id == :HP
-        stats[s.id] = calcHP((base_stats[s.id]*kurayboost).round, this_level, this_IV[s.id], ev_use)
-      else
-        stats[s.id] = calcStat((base_stats[s.id]*kurayboost).round, this_level, this_IV[s.id], ev_use, nature_mod[s.id])
-      end
-    end
-    #End KurayX
-    hpDiff = @totalhp - @hp
-    #@totalhp = stats[:HP]
-    @level = this_level unless $game_switches[SWITCH_NO_LEVELS_MODE]
-    @totalhp = adjustHPForWonderGuard(stats)
-    calculated_hp = @totalhp - hpDiff
-    @hp = calculated_hp > 0 ? calculated_hp : 0
-    @attack = stats[:ATTACK]
-    @defense = stats[:DEFENSE]
-    @spatk = stats[:SPECIAL_ATTACK]
-    @spdef = stats[:SPECIAL_DEFENSE]
-    @speed = stats[:SPEED]
   end
 
   # Sets this Pokémon's level. The given level must be between 1 and the
@@ -992,10 +670,6 @@ class Pokemon
     end
     @exp = growth_rate.minimum_exp_for_level(value)
     @level = value
-  end
-
-  def exp
-    return @exp
   end
 
   # Sets this Pokémon's Exp. Points.
@@ -1105,18 +779,8 @@ class Pokemon
 
   # @return [Symbol] this Pokémon's first type
   def type1
-    if self.type1kuraypure && self.type1kuraypure != :NONE && self.typeoverwrite
-      return self.type1kuraypure
-    end
     if @ability == :MULTITYPE && species_data.type1 == :NORMAL
       return getHeldPlateType()
-    end
-    if pbDominantFusionTypes?
-      return :ICE if self.species == :DEWGONG
-      return :WATER if [:OMANYTE,:OMASTAR].include?(self.species)
-      return :STEEL if [:SCIZOR,:MAGNEZONE,:EMPOLEON,:FERROTHORN].include?(self.species)
-      return :GRASS if self.species == :CELEBI
-      return :GROUND if self.species == :GASTRODON # Lookking out for the future, heh
     end
     return @type1 if @type1
     return species_data.type1
@@ -1124,21 +788,8 @@ class Pokemon
 
   # @return [Symbol] this Pokémon's second type, or the first type if none is defined
   def type2
-    if self.type2kuraypure && self.type2kuraypure != :NONE && self.typeoverwrite
-      return self.type2kuraypure
-    end
     if @ability == :MULTITYPE && species_data.type2 == :NORMAL
       return getHeldPlateType()
-    end
-    if pbDominantFusionTypes?
-      return :WATER if self.species == :DEWGONG
-      return :ROCK if [:OMANYTE,:OMASTAR].include?(self.species)
-      return :BUG if self.species == :SCIZOR
-      return :ELECTRIC if self.species == :MAGNEZONE
-      return :WATER if self.species == :EMPOLEON
-      return :GRASS if self.species == :FERROTHORN
-      return :PSYCHIC if self.species == :CELEBI
-      return :WATER if self.species == :GASTRODON # Lookking out for the future, heh
     end
     sp_data = species_data
     return sp_data.type2 || sp_data.type1
@@ -1158,42 +809,6 @@ class Pokemon
     ret = [sp_data.type1]
     ret.push(sp_data.type2) if sp_data.type2 && sp_data.type2 != sp_data.type1
     return ret
-  end
-
-  # KurayX types overwrite
-  def type1kuray=(value)
-    @type1kuray = value
-  end
-
-  def type2kuray=(value)
-    @type2kuray = value
-  end
-
-  def type1kuraypure
-    return @type1kuray if @type1kuray
-  end
-
-  def type2kuraypure
-    return @type2kuray if @type2kuray
-  end
-
-  def type1kuray
-    return @type1kuray if @type1kuray
-    return self.type1
-  end
-
-  def type2kuray
-    return @type2kuray if @type2kuray
-    return self.type2
-  end
-
-  def typeoverwrite
-    return @typeoverwrite if @typeoverwrite
-    return false
-  end
-
-  def typeoverwrite=(value)
-    @typeoverwrite = value
   end
 
   # @param type [Symbol, String, Integer] type to check
@@ -1230,46 +845,6 @@ class Pokemon
     return @gender
   end
 
-  def predict_gender(ratio)
-    case ratio
-    when :AlwaysMale then
-      outcome_ratio = 0
-    when :AlwaysFemale then
-      outcome_ratio = 1
-    when :Genderless then
-      outcome_ratio = 2
-    else
-      female_chance = GameData::GenderRatio.get(ratio).female_chance
-      outcome_ratio = ((@personalID & 0xFF) < female_chance) ? 1 : 0
-    end
-  return outcome_ratio
-  end
-
-  def head_nickname?
-    if @head_nickname
-      return @head_nickname
-    else
-      return nil
-    end
-  end
-
-  def head_nickname=(value)
-    @head_nickname = value
-  end
-
-  def head_gender?
-    if @head_gender
-      return @head_gender
-    else
-      # @head_gender=predict_gender(@species_data.head_pokemon.species_data.gender_ratio)
-      return nil
-    end
-  end
-
-  def head_gender=(value)
-    @head_gender = value
-  end
-
   # Sets this Pokémon's gender to a particular gender (if possible).
   # @param value [0, 1] new gender (0 = male, 1 = female)
   def gender=(value)
@@ -1277,49 +852,19 @@ class Pokemon
     @gender = value if value.nil? || value == 0 || value == 1
   end
 
-  #KurayX
-  def forceMale
-    @gender = 0
-  end
-
-  #KurayX
-  def forceFemale
-    @gender = 1
-  end
-
-  #KurayX
-  def forceGenderless
-    @gender = 2
-  end
-
-  def force_gender=(value)
-    @gender = value
-  end
-
   # Makes this Pokémon male.
   def makeMale
-    self.gender = 0;
+    @gender = 0
   end
 
   # Makes this Pokémon female.
   def makeFemale
-    self.gender = 1;
-  end
-
-  # Makes this Pokémon genderless.
-  #KurayX
-  def makeGenderless
-    self.gender = 2;
+    @gender = 1
   end
 
   # @return [Boolean] whether this Pokémon is male
   def male?
     return self.gender == 0;
-  end
-
-  # @return [Boolean] whether this Pokémon is male
-  def pizza?
-    return self.kuraygender? < 256;
   end
 
   # @return [Boolean] whether this Pokémon is female
@@ -1339,18 +884,9 @@ class Pokemon
     return [:AlwaysMale, :AlwaysFemale, :Genderless].include?(gender_ratio)
   end
 
-
-
   #=============================================================================
   # Shininess
   #=============================================================================
-
-  def fakeshiny?
-    if @fakeshiny.nil?
-      @fakeshiny=false
-    end
-    return @fakeshiny
-  end
 
   # @return [Boolean] whether this Pokémon is shiny (differently colored)
   def shiny?
@@ -1359,18 +895,16 @@ class Pokemon
       b = a & 0xFFFF
       c = (a >> 16) & 0xFFFF
       d = b ^ c
-      is_shiny = d < $PokemonSystem.shinyodds
-      # is_shiny = d < Settings::SHINY_POKEMON_CHANCE
+      is_shiny = d < Settings::SHINY_POKEMON_CHANCE
       if is_shiny
         @shiny = true
-        @natural_shiny=true
+        @natural_shiny = true
       end
 
     end
-    # if @shiny && Settings::SHINY_POKEMON_CHANCE != S_CHANCE_VALIDATOR
-    if @shiny && $PokemonSystem.shinyodds != S_CHANCE_VALIDATOR
-      @debug_shiny=true
-      @natural_shiny=false
+    if @shiny && Settings::SHINY_POKEMON_CHANCE != S_CHANCE_VALIDATOR
+      @debug_shiny = true
+      @natural_shiny = false
     end
     return @shiny
   end
@@ -1570,50 +1104,9 @@ class Pokemon
     return species_data.moves
   end
 
-  #KurayX Makes it so it also takes the pre-evo's moves.
-  def getMoveRelearnerList
-    kuraymoves = species_data.moves.clone
-    kuraychecking = species
-    while true
-      checkspecie = GameData::Species.get(kuraychecking).get_previous_species
-      if checkspecie.to_s == kuraychecking.to_s
-        break
-      end
-      kurayoldmoves = GameData::Species.get(checkspecie).moves
-      kuraymoves.unshift(*kurayoldmoves)
-      kuraychecking = checkspecie
-    end
-    return kuraymoves
-  end
-
-  # Includes event moves of both fused pokemon and all pre-evolutions
-  # @return [Array<Symbol>] a list of this Pokemon's event moves
-  def getEventMoveList
-    if self.isFusion?
-      body_id = getBasePokemonID(self.species, true)
-      head_id = getBasePokemonID(self.species, false)
-      body_species = GameData::Species.get(body_id).species
-      head_species = GameData::Species.get(head_id).species
-      return get_event_moves(body_species) | get_event_moves(head_species)
-    else
-      return get_event_moves(self.species)
-    end
-  end
-
-  # recursive helper function for getEventMoveList
-  # @return [Array<Symbol>] the event moves of given species and its pre-evolutions
-  def get_event_moves(species)
-    moves = EVENT_MOVES.fetch(species, [])
-    prev_species = GameData::Species.get(species).get_previous_species
-    if species.to_s == prev_species.to_s
-      return moves
-    end
-    return get_event_moves(prev_species) | moves
-  end
-
   # Sets this Pokémon's movelist to the default movelist it originally had.
   def reset_moves
-    this_level = self.level_simple
+    this_level = self.level
     # Find all level-up moves that self could have learned
     moveset = self.getMoveList
     knowable_moves = []
@@ -1627,9 +1120,25 @@ class Pokemon
     first_move_index = knowable_moves.length - MAX_MOVES
     first_move_index = 0 if first_move_index < 0
     for i in first_move_index...knowable_moves.length
-      @moves.push(Pokemon::Move.new(knowable_moves[i]))
+      move = Pokemon::Move.new(knowable_moves[i])
+      @moves.push(move)
+      add_learned_move(move)
     end
   end
+
+  def add_learned_move(move)
+    @learned_moves = [] if !@learned_moves
+    if move.is_a?(Symbol)
+      @learned_moves << move unless @learned_moves.include?(move)
+    else
+      move_id = move.id
+      if move_id
+        @learned_moves << move_id unless @learned_moves.include?(move_id)
+      end
+    end
+  end
+
+
 
   # Silently learns the given move. Will erase the first known move if it has to.
   # @param move_id [Symbol, String, Integer] ID of the move to learn
@@ -1643,10 +1152,12 @@ class Pokemon
       @moves.delete_at(i)
       return
     end
+    move = Pokemon::Move.new(move_data.id)
     # Move is not already known; learn it
-    @moves.push(Pokemon::Move.new(move_data.id))
+    @moves.push(move)
     # Delete the first known move if self now knows more moves than it should
     @moves.shift if numMoves > MAX_MOVES
+    add_learned_move(move)
   end
 
   # Deletes the given move from the Pokémon.
@@ -1654,17 +1165,23 @@ class Pokemon
   def forget_move(move_id)
     move_data = GameData::Move.try_get(move_id)
     return if !move_data
+    add_learned_move(move_id)
     @moves.delete_if { |m| m.id == move_data.id }
   end
 
   # Deletes the move at the given index from the Pokémon.
   # @param index [Integer] index of the move to be deleted
   def forget_move_at_index(index)
+    move_id = @moves[index].id
+    add_learned_move(move_id)
     @moves.delete_at(index)
   end
 
   # Deletes all moves from the Pokémon.
   def forget_all_moves
+    for move in @moves
+      add_learned_move(move)
+    end
     @moves.clear
   end
 
@@ -1702,23 +1219,24 @@ class Pokemon
       body_species_id = getBasePokemonID(species)
       head_species = GameData::Species.get(head_species_id)
       body_species = GameData::Species.get(body_species_id)
-      return move_data && (pokemon_can_learn_move(head_species,move_data) || pokemon_can_learn_move(body_species,move_data))
+      return move_data && (pokemon_can_learn_move(head_species, move_data) || pokemon_can_learn_move(body_species, move_data))
     else
-      return move_data && pokemon_can_learn_move(species_data,move_data)
+      return move_data && pokemon_can_learn_move(species_data, move_data)
     end
   end
 
   def pokemon_can_learn_move(species_data, move_data)
+    moveset = species_data.moves.map { |pair| pair[1] }
     return species_data.tutor_moves.include?(move_data.id) ||
-      species_data.moves.include?(move_data.id) ||
+      species_data.moves.include?(move_data.id) ||  ##this is formatted as such [[1, :PECK],[etc.]] so it never finds anything when move_data is just the symbol. Leaving it there in case something depends on that for some reason.
+      moveset.include?(move_data.id) ||
       species_data.egg_moves.include?(move_data.id)
   end
 
-  # MoveRelearner check
   def can_relearn_move?
     return false if egg? || shadowPokemon?
     this_level = self.level
-    getMoveRelearnerList.each { |m| return true if m[0] <= this_level && !hasMove?(m[1]) }
+    getMoveList.each { |m| return true if m[0] <= this_level && !hasMove?(m[1]) }
     @first_moves.each { |m| return true if !hasMove?(m) }
     return false
   end
@@ -1841,13 +1359,6 @@ class Pokemon
   #=============================================================================
   # Ownership, obtained information
   #=============================================================================
-
-  # checks if the player has the same trainer id as the pokemon, if it was obtained in a trade, a 
-  # fateful encounter, or imported into the game.
-  # @return [Boolean] whether the player owns the pokemon
-  def player_owned?()
-    return @owner.id == $Trainer.id || @obtain_method == 2 || @obtain_method == 4 || self.imported?
-  end
 
   # Changes this Pokémon's owner.
   # @param new_owner [Owner] the owner to change to
@@ -1982,7 +1493,7 @@ class Pokemon
     current_head = @species_data.head_pokemon
 
     choices = [
-      #_INTL("Evolve both!"),
+      # "Evolve both!",
       _INTL("Evolve head!"),
       _INTL("Evolve body!"),
       _INTL("Don't evolve")
@@ -2000,7 +1511,7 @@ class Pokemon
     return newspecies
   end
 
-  def check_evolution_on_level_up
+  def check_evolution_on_level_up(prompt_choice=true)
     if @species_data.is_a?(GameData::FusedSpecies)
       body = self.species_data.body_pokemon
       head = self.species_data.head_pokemon
@@ -2014,7 +1525,8 @@ class Pokemon
         next (success) ? new_species : nil
       }
       if body_evolution && head_evolution
-        return prompt_evolution_choice(body_evolution, head_evolution)
+        return prompt_evolution_choice(body_evolution, head_evolution) if prompt_choice
+        return [body_evolution,head_evolution].sample
       end
     end
 
@@ -2022,6 +1534,7 @@ class Pokemon
       success = GameData::Evolution.get(method).call_level_up(pkmn, parameter)
       next (success) ? new_species : nil
     }
+
   end
 
   # Checks whether this Pokemon can evolve because of using an item on it.
@@ -2098,21 +1611,16 @@ class Pokemon
       when :LARGE
         return { :HP => 75, :ATTACK => 95, :DEFENSE => 122, :SPECIAL_ATTACK => 58, :SPECIAL_DEFENSE => 75, :SPEED => 69}
       when :SUPER
-        return { :HP => 85, :ATTACK => 10, :DEFENSE => 122, :SPECIAL_ATTACK => 58, :SPECIAL_DEFENSE => 75, :SPEED => 54}
+        return { :HP => 85, :ATTACK => 100, :DEFENSE => 122, :SPECIAL_ATTACK => 58, :SPECIAL_DEFENSE => 75, :SPEED => 54}
       end
     end
     return nil
   end
 
+
   # @return [Hash<Integer>] this Pokémon's base stats, a hash with six key/value pairs
   def baseStats
-    if $PokemonSystem.custom_bst > 0 && species_data.is_a?(GameData::FusedSpecies) && player_owned?
-      this_base_stats = species_data.calculate_base_stats_custom($PokemonSystem.custom_bst, $PokemonSystem.custom_bst_sliders)
-    elsif $PokemonSystem.custom_bst_npc > 0 && species_data.is_a?(GameData::FusedSpecies) && !player_owned?
-      this_base_stats = species_data.calculate_base_stats_custom($PokemonSystem.custom_bst_npc, $PokemonSystem.custom_bst_sliders_npc)
-    else
-      this_base_stats = species_data.base_stats
-    end
+    this_base_stats = species_data.base_stats
     base_stats_exception = getBaseStatsFormException()
     this_base_stats = base_stats_exception if base_stats_exception
     ret = {}
@@ -2127,11 +1635,7 @@ class Pokemon
     this_ivs = self.iv
     ret = {}
     GameData::Stat.each_main do |s|
-      if $PokemonSystem.maxivsmode && $PokemonSystem.maxivsmode > 0
-        ret[s.id] = IV_STAT_LIMIT
-      else
-        ret[s.id] = (@ivMaxed[s.id]) ? IV_STAT_LIMIT : this_ivs[s.id]
-      end
+      ret[s.id] = (@ivMaxed[s.id]) ? IV_STAT_LIMIT : this_ivs[s.id]
     end
     return ret
   end
@@ -2153,8 +1657,6 @@ class Pokemon
     if this_level > Settings::MAXIMUM_LEVEL
       this_level = Settings::MAXIMUM_LEVEL
     end
-    # should fix lv / exp issue
-    # @exp = growth_rate.minimum_exp_for_level(this_level)
     return this_level
   end
 
@@ -2176,6 +1678,44 @@ class Pokemon
         end
       end
     end
+  end
+
+  # Recalculates this Pokémon's stats.
+  def calc_stats
+    base_stats = self.baseStats
+      this_level = self.level
+    this_IV = self.calcIV
+
+    if $game_switches[SWITCH_NO_LEVELS_MODE]
+      this_level = adjust_level_for_base_stats_mode()
+    end
+
+    # Format stat multipliers due to nature
+    nature_mod = {}
+    GameData::Stat.each_main { |s| nature_mod[s.id] = 100 }
+    this_nature = self.nature_for_stats
+    if this_nature
+      this_nature.stat_changes.each { |change| nature_mod[change[0]] += change[1] }
+    end
+    # Calculate stats
+    stats = {}
+    GameData::Stat.each_main do |s|
+      if s.id == :HP
+        stats[s.id] = calcHP(base_stats[s.id], this_level, this_IV[s.id], @ev[s.id])
+      else
+        stats[s.id] = calcStat(base_stats[s.id], this_level, this_IV[s.id], @ev[s.id], nature_mod[s.id])
+      end
+    end
+    hpDiff = @totalhp - @hp
+    #@totalhp = stats[:HP]
+    @totalhp = adjustHPForWonderGuard(stats)
+    calculated_hp = @totalhp - hpDiff
+    @hp = calculated_hp > 0 ? calculated_hp : 0
+    @attack = stats[:ATTACK]
+    @defense = stats[:DEFENSE]
+    @spatk = stats[:SPECIAL_ATTACK]
+    @spdef = stats[:SPECIAL_DEFENSE]
+    @speed = stats[:SPEED]
   end
 
   #=============================================================================
@@ -2202,6 +1742,12 @@ class Pokemon
     return ret
   end
 
+  # Creates a new Pokémon object.
+  # @param species [Symbol, String, Integer] Pokémon species
+  # @param level [Integer] Pokémon level
+  # @param owner [Owner, Player, NPCTrainer] Pokémon owner (the player by default)
+  # @param withMoves [TrueClass, FalseClass] whether the Pokémon should have moves
+  # @param rechech_form [TrueClass, FalseClass] whether to auto-check the form
   def determine_scale
     return :AVERAGE if !@size_category
     size_roll = rand(100) # Random number between 0-99
@@ -2231,334 +1777,6 @@ class Pokemon
     end
   end
 
-  #KurayX
-  def as_json(options={})
-    {
-      "json_version" => "0.9",
-      "species" => @species,
-      "form" => @form,
-      "forced_form" => @forced_form,
-      "time_form_set" => @time_form_set,
-      "exp" => @exp,
-      "level" => @level,
-      "steps_to_hatch" => @steps_to_hatch,
-      "heal_status" => heal_status,
-      "gender" => @gender,
-      "shiny" => @shiny,
-      "fakeshiny" => @fakeshiny,
-      "kuraygender" => @kuraygender,
-      "shinyValue" => @shinyValue,
-      "veryunique" => @veryunique,
-      "kuraycustomfile" => @kuraycustomfile,
-      "oldkuraycustomfile" => @oldkuraycustomfile,
-      "shinyimprovpif" => @shinyimprovpif,
-      "head_shinyimprovpif" => @head_shinyimprovpif,
-      "body_shinyimprovpif" => @body_shinyimprovpif,
-      "shinyR" => @shinyR,
-      "shinyG" => @shinyG,
-      "shinyB" => @shinyB,
-      "shinyKRS" => @shinyKRS.clone,
-      "ability_index" => @ability_index,
-      "ability" => @ability,
-      "ability2_index" => @ability2_index,
-      "ability2" => @ability2,
-      "nature" => @nature,
-      "nature_for_stats" => @nature_for_stats,
-      "item" => @item,
-      "mail" => @mail,
-      "cool" => @cool,
-      "beauty" => @beauty,
-      "cute" => @cute,
-      "smart" => @smart,
-      "tough" => @tough,
-      "sheen" => @sheen,
-      "pokerus" => @pokerus,
-      "name" => @name,
-      "happiness" => @happiness,
-      "poke_ball" => @poke_ball,
-      "markings" => @markings,
-      "iv" => @iv,
-      "ivMaxed" => @ivMaxed,
-      "ev" => @ev,
-      "hiddenPowerType" => @hiddenPowerType,
-      "glitter" => @glitter,
-      "obtain_method" => @obtain_method,
-      "obtain_map" => @obtain_map,
-      "obtain_level" => @obtain_level,
-      "obtain_text" => @obtain_text,
-      "hatched_map" => @hatched_map,
-      "timeReceived" => @timeReceived,
-      "timeEggHatched" => @timeEggHatched,
-      "fused" => @fused,
-      "personalID" => @personalID,
-      "hp" => @hp,
-      "totalhp" => @totalhp,
-      "first_moves" => @first_moves.clone,
-      "owner" => @owner.as_json,
-      "head_gender" => @head_gender,
-      "head_nickname" => @head_nickname,
-      "head_shiny" => @head_shiny,
-      "head_shinyhue" => @head_shinyhue,
-      "head_shinyr" => @head_shinyr,
-      "head_shinyg" => @head_shinyg,
-      "head_shinyb" => @head_shinyb,
-      "head_shinykrs" => @head_shinykrs.clone,
-      "body_shiny" => @body_shiny,
-      "body_shinyhue" => @body_shinyhue,
-      "body_shinyr" => @body_shinyr,
-      "body_shinyg" => @body_shinyg,
-      "body_shinyb" => @body_shinyb,
-      "body_shinykrs" => @body_shinykrs.clone,
-      "kuray_no_evo" => @kuray_no_evo,
-      "ribbons" => @ribbons.clone,
-      "spriteform_body" => @spriteform_body,
-      "spriteform_head" => @spriteform_head,
-      "type1kuray" => self.type1kuray,
-      "type2kuray" => self.type2kuray,
-      "typeoverwrite" => self.typeoverwrite,
-      "sprite_scale" => @sprite_scale,
-      "size_category" => @size_category,
-    }
-    # "half_specie" => species_data.as_json
-  end
-
-  #KurayX
-  def to_json(*options)
-    current = as_json(*options)
-    checkmoves = []
-    @moves.each_with_index { |m, i| checkmoves[i] = m.as_json }
-    current['moves'] = checkmoves
-    return current
-  end
-
-  def convertjsonver(jsonparse)
-    if jsonparse.key?('json_version')
-      json_version = jsonparse['json_version']
-      case json_version
-      when '0.0'
-        return -1
-      when '0.1'
-        return 1
-      when '0.2'
-        return 2
-      when '0.3'
-        return 3
-      when '0.4'
-        return 4
-      when '0.5'
-        return 5
-      when '0.6'
-        return 6
-      when '0.7'
-        return 7
-      when '0.8'
-        return 8
-      when '0.9'
-        return 9
-      end
-    else
-      return 0
-    end
-  end
-
-  def jsonload1(jsonparse)
-    json_ver = convertjsonver(jsonparse)
-    if json_ver > 1#V.2
-      @spriteform_body = jsonparse['spriteform_body']
-      @spriteform_head = jsonparse['spriteform_head']
-    end
-    if json_ver > 3#V.4
-      @shinyKRS = jsonparse['shinyKRS']
-      @head_shinykrs = jsonparse['head_shinykrs']
-      @body_shinykrs = jsonparse['body_shinykrs']
-    end
-    if json_ver > 4#V.5
-      @fakeshiny = jsonparse['fakeshiny']
-    end
-    if json_ver > 5#V.6
-      @type1kuray = jsonparse['type1kuray']
-      @type2kuray = jsonparse['type2kuray']
-      @typeoverwrite = jsonparse['typeoverwrite']
-    end
-    if json_ver > 6#V.7
-      @head_gender = jsonparse['head_gender']
-      @head_nickname = jsonparse['head_nickname']
-    end
-    if json_ver > 7#V.8
-      @sprite_scale = jsonparse['sprite_scale']
-      @size_category = jsonparse['size_category']
-    end
-    if json_ver > 8#V.9
-      @shinyimprovpif = jsonparse['shinyimprovpif']
-      @head_shinyimprovpif = jsonparse['head_shinyimprovpif']
-      @body_shinyimprovpif = jsonparse['body_shinyimprovpif']
-    end
-  end
-
-  def jsonload2(jsonparse)
-    json_ver = convertjsonver(jsonparse)
-    if json_ver > 2#V.3
-      # Load new variables from version 0.3
-      @species_data = GameData::Species.get(@species)
-      @species_data.load_json(jsonparse['half_specie'])
-    end
-  end
-
-
-  #KurayX
-  def load_json(jsonparse, jsonfile=nil, forcereadonly=false)
-    @imported = true
-    jsonload1(jsonparse)
-    @species = jsonparse['species']
-    json_ver = convertjsonver(jsonparse)
-    if json_ver >= 0
-      @form = jsonparse['form']
-      @forced_form = jsonparse['forced_form']
-      @time_form_set = jsonparse['time_form_set']
-      @exp = jsonparse['exp']
-      @level = jsonparse['level']
-      @steps_to_hatch = jsonparse['steps_to_hatch']
-      @heal_status = jsonparse['heal_status']
-      @gender = jsonparse['gender']
-      @shiny = jsonparse['shiny']
-      @kuraygender = jsonparse['kuraygender']
-      @shinyValue = jsonparse['shinyValue']
-      @veryunique = jsonparse['veryunique']
-      @kuraycustomfile = jsonparse['kuraycustomfile']
-      @oldkuraycustomfile = jsonparse['oldkuraycustomfile']
-      @shinyR = jsonparse['shinyR']
-      @shinyG = jsonparse['shinyG']
-      @shinyB = jsonparse['shinyB']
-      @ability = jsonparse['ability']
-      @ability2 = jsonparse['ability2']
-      @ability_index = jsonparse['ability_index']
-      @ability2_index = jsonparse['ability2_index']
-      @nature = jsonparse['nature']
-      @nature_for_stats = jsonparse['nature_for_stats']
-      @item = jsonparse['item']
-      @mail = jsonparse['mail']
-      @cool = jsonparse['cool']
-      @beauty = jsonparse['beauty']
-      @cute = jsonparse['cute']
-      @smart = jsonparse['smart']
-      @tough = jsonparse['tough']
-      @sheen = jsonparse['sheen']
-      @pokerus = jsonparse['pokerus']
-      @name = jsonparse['name']
-      @happiness = jsonparse['happiness']
-      @poke_ball = jsonparse['poke_ball']
-      @markings = jsonparse['markings']
-      @iv = jsonparse['iv']
-      @ivMaxed = jsonparse['ivMaxed']
-      @ev = jsonparse['ev']
-      @hiddenPowerType = jsonparse['hiddenPowerType']
-      @glitter = jsonparse['glitter']
-      @obtain_method = jsonparse['obtain_method']
-      @obtain_map = jsonparse['obtain_map']
-      @obtain_level = jsonparse['obtain_level']
-      @obtain_text = jsonparse['obtain_text']
-      @hatched_map = jsonparse['hatched_map']
-      @timeReceived = jsonparse['timeReceived']
-      @timeEggHatched = jsonparse['timeEggHatched']
-      @fused = jsonparse['fused']
-      @personalID = jsonparse['personalID']
-      @hp = jsonparse['hp']
-      @totalhp = jsonparse['totalhp']
-      @first_moves = jsonparse['first_moves']
-      @owner.load_json(jsonparse['owner'])
-      @ribbons = jsonparse['ribbons']
-      @head_shiny = jsonparse['head_shiny']
-      @body_shiny = jsonparse['body_shiny']
-      @head_shinyhue = jsonparse['head_shinyhue']
-      @head_shinyr = jsonparse['head_shinyr']
-      @head_shinyg = jsonparse['head_shinyg']
-      @head_shinyb = jsonparse['head_shinyb']
-      @body_shinyhue = jsonparse['body_shinyhue']
-      @body_shinyr = jsonparse['body_shinyr']
-      @body_shinyg = jsonparse['body_shinyg']
-      @body_shinyb = jsonparse['body_shinyb']
-      @kuray_no_evo = jsonparse['kuray_no_evo']
-      # jsonparse['moves'].split('},')
-      @moves = []
-      jsonparse['moves'].each_with_index { |m, i| @moves.push(Pokemon::Move.new(m['id'])) }
-      jsonparse['moves'].each_with_index { |m, i| @moves[i].load_json(m) }
-    end
-
-    # type handling changed
-    # jsonload2(jsonparse)
-
-    noimport = 0
-    if jsonfile && jsonfile != nil
-      if $PokemonSystem.nopngimport
-        noimport = $PokemonSystem.nopngimport
-      end
-      if File.file?(jsonfile[0..-6] + ".png")
-        if noimport == 0 && !forcereadonly
-          Dir.mkdir('Graphics/Imported') unless File.exists?('Graphics/Imported')
-          # import and copy .png
-          # addincra = 0
-          # nextfilename = File.basename(jsonfile)
-          # nextfilename = 'Graphics/Imported/' + nextfilename[0..-6]
-          # finalname = nextfilename
-          # while File.file?(finalname + ".png")
-          #   finalname = nextfilename + "(" + addincra.to_s + ")"
-          #   addincra += 1
-          #   if addincra > 9999
-          #     break
-          #   end
-          # end
-          # nextfilename = File.basename(jsonfile)
-          # nextfilename = 'Graphics/Imported/' + nextfilename[0..-6]
-          filewant = 'Graphics/Imported/' + veryunique?.to_s + "_" + @personalID.to_s + "_" + @owner.id.to_s + "_" + speciesName.to_s + ".png"
-          if File.exist?(filewant)
-            # If it exists, delete it to replace it with the source file
-            File.delete(filewant)
-          end
-          begin
-            File.copy(jsonfile[0..-6] + ".png", filewant)
-            @kuraycustomfile = filewant
-          rescue => e
-            @kuraycustomfile = jsonfile[0..-6] + ".png"
-          end
-        elsif noimport == 1 || forcereadonly
-          # only import .png to kuraycustomfile
-          @kuraycustomfile = jsonfile[0..-6] + ".png"
-        end
-      end
-    end
-  end
-
-  #Sylvi Items
-  def make_vanilla
-    @item = nil if hasItem? && item.modded?
-    mail # Resets mail, if the held item was mail
-    @poke_ball = :POKEBALL if GameData::Item.get(@poke_ball).modded?
-    return self
-  end
-
-  def createVeryUnique()
-    # Define the characters to choose from
-    characters = ('0'..'9').to_a
-
-    # Generate a random ID of the specified length
-    random_id = (1..24).map { characters.sample }.join
-
-    return random_id
-  end
-
-  #PIF added that empty function, idk why, what the hell? need investigation
-  # KIF TODO
-  def totalIv()  
-  
-  end
-
-  #KurayX - KURAYX_ABOUT_SHINIES
-  # Creates a new Pokémon object.
-  # @param species [Symbol, String, Integer] Pokémon species
-  # @param level [Integer] Pokémon level
-  # @param owner [Owner, Player, NPCTrainer] Pokémon owner (the player by default)
-  # @param withMoves [TrueClass, FalseClass] whether the Pokémon should have moves
-  # @param rechech_form [TrueClass, FalseClass] whether to auto-check the form
   def initialize(species, level, owner = $Trainer, withMoves = true, recheck_form = true)
     @species_data = GameData::Species.get(species)
     @species = @species_data.species
@@ -2572,10 +1790,8 @@ class Pokemon
     @gender = nil
     @shiny = nil
     @fakeshiny = nil
-    #KurayX - KURAYX_ABOUT_SHINIES
     @shinyValue = rand(0..360) - 180
     @kuraygender = rand(65536)
-    #KurayX - Custom Filenames
     @kuraycustomfile = kurayGetCustomSprite(species_data.id_number)
     @veryunique = createVeryUnique()
     @oldkuraycustomfile = nil
@@ -2586,14 +1802,17 @@ class Pokemon
     @shinyKRS = kurayKRSmake
     @ability_index = nil
     @ability2_index = nil
+
     @ability = nil
     @ability2 = nil
+
     @nature = nil
-    @kuray_no_evo = 0
     @nature_for_stats = nil
+    @kuray_no_evo = 0
     @item = nil
     @mail = nil
     @moves = []
+    @learned_moves = []
     reset_moves if withMoves
     @first_moves = []
     @ribbons = []
@@ -2612,7 +1831,7 @@ class Pokemon
     @ivMaxed = {}
     @ev = {}
     @hiddenPowerType = nil
-    @glitter=nil
+    @glitter = nil
     GameData::Stat.each_main do |s|
       @iv[s.id] = rand(IV_STAT_LIMIT + 1)
       @ev[s.id] = 0
@@ -2630,7 +1849,6 @@ class Pokemon
     @obtain_text = nil
     @obtain_level = level
     @hatched_map = 0
-    # @timeReceived = pbGetTimeNow.to_i
     @timeReceived = Time.new.to_i
     @timeEggHatched = nil
     @fused = nil
@@ -2639,17 +1857,15 @@ class Pokemon
     @totalhp = 1
     @spriteform_body = nil
     @spriteform_head = nil
-    @type1kuray = nil
-    @type2kuray = nil
-    @typeoverwrite = false
 
     @hat = nil
     @hat_x = 0
     @hat_y = 0
+    @hat_mirrored_horizontal = false
+    @hat_mirrored_vertical = false
+
     @size_category = determine_size_category()
     @sprite_scale=determine_scale()
-    echoln @sprite_scale
-
     calc_stats
     if @form == 0 && recheck_form
       f = MultipleForms.call("getFormOnCreation", self)
@@ -2658,5 +1874,107 @@ class Pokemon
         reset_moves if withMoves
       end
     end
+  end
+
+  def totalIv()
+
+  end
+
+  def as_json(_options = {})
+    data = {}
+    instance_variables.each do |ivar|
+      next if ivar == :@species_data
+      key = ivar.to_s.delete_prefix("@")
+      data[key] = serialize_json_value(instance_variable_get(ivar))
+    end
+    return data
+  end
+
+  def to_json(options = {})
+    return as_json(options)
+  end
+
+  def load_json(jsonparse, jsonfile = nil, forcereadonly = false)
+    return self if !jsonparse.is_a?(Hash)
+    jsonparse.each do |key, value|
+      next if key.to_s.start_with?("__")
+      instance_variable_set("@#{key}", deserialize_json_value(value))
+    end
+    @species_data = GameData::Species.get(@species) if @species
+    @moves ||= []
+    @learned_moves ||= []
+    @first_moves ||= []
+    @ribbons ||= []
+    @iv ||= {}
+    @ivMaxed ||= {}
+    @ev ||= {}
+    return self
+  end
+
+  private
+
+  def serialize_json_value(value)
+    case value
+    when NilClass, String, Integer, Float, TrueClass, FalseClass, Symbol
+      return value
+    when Array
+      return value.map { |entry| serialize_json_value(entry) }
+    when Hash
+      result = {}
+      value.each do |entry_key, entry_value|
+        result[entry_key.to_s] = serialize_json_value(entry_value)
+      end
+      return result
+    else
+      ivars = {}
+      value.instance_variables.each do |ivar|
+        ivars[ivar.to_s.delete_prefix("@")] = serialize_json_value(value.instance_variable_get(ivar))
+      end
+      return {
+        "__class__" => value.class.name,
+        "__ivars__" => ivars
+      }
+    end
+  end
+
+  def deserialize_json_value(value)
+    case value
+    when Array
+      return value.map { |entry| deserialize_json_value(entry) }
+    when Hash
+      class_name = value["__class__"]
+      ivars = value["__ivars__"]
+      if class_name && ivars.is_a?(Hash)
+        object = instantiate_json_object(class_name)
+        if object
+          ivars.each do |ivar_name, ivar_value|
+            object.instance_variable_set("@#{ivar_name}", deserialize_json_value(ivar_value))
+          end
+          if object.is_a?(Pokemon)
+            object.instance_variable_set(:@species_data, GameData::Species.get(object.instance_variable_get(:@species))) if object.instance_variable_get(:@species)
+          end
+          return object
+        end
+      end
+      result = {}
+      value.each do |entry_key, entry_value|
+        result[entry_key] = deserialize_json_value(entry_value)
+      end
+      return result
+    else
+      return value
+    end
+  end
+
+  def instantiate_json_object(class_name)
+    klass = Object
+    class_name.to_s.split("::").each do |part|
+      return nil if part.nil? || part.empty?
+      return nil if !klass.const_defined?(part, false)
+      klass = klass.const_get(part, false)
+    end
+    return klass.allocate
+  rescue
+    return nil
   end
 end

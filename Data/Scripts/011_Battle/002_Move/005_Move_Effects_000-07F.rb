@@ -49,7 +49,9 @@ class PokeBattle_Move_003 < PokeBattle_SleepMove
     #reverse the fusion if it's a meloA and meloP fusion
     # There's probably a smarter way to do this but laziness lol
     if is_meloetta_A && is_meloetta_P
-      if user.pokemon.species_data.get_body_species() == :MELOETTA_A
+      body_id = user.pokemon.species_data.get_body_species()
+      body_species = GameData::Species.get(body_id)
+      if body_species == :MELOETTA_A
         changeSpeciesSpecific(user.pokemon,:B467H466)
       else
         changeSpeciesSpecific(user.pokemon,:B466H467)
@@ -75,13 +77,9 @@ class PokeBattle_Move_004 < PokeBattle_Move
     return false
   end
 
-  def pbEffectAgainstTarget(user,target)
+  def pbEffectAgainstTarget(user, target)
     target.effects[PBEffects::Yawn] = 2
-    if (!$PokemonSystem.drowsy || $PokemonSystem.drowsy == 0)
-      then @battle.pbDisplay(_INTL("{1} made {2} drowsy!",user.pbThis,target.pbThis(true)))
-    elsif ($PokemonSystem.drowsy && $PokemonSystem.drowsy != 0)
-      then @battle.pbDisplay(_INTL("{2} is getting tired!",user.pbThis,target.pbThis(true)))
-    end
+    @battle.pbDisplay(_INTL("{1} made {2} drowsy!", user.pbThis, target.pbThis(true)))
   end
 end
 
@@ -398,12 +396,10 @@ class PokeBattle_Move_019 < PokeBattle_Move
       failed = false
       break
     end
-    if !failed
-      @battle.pbParty(user.index).each do |pkmn|
-        next if !pkmn || !pkmn.able? || pkmn.status == :NONE
-        failed = false
-        break
-      end
+    @battle.pbParty(user.index).each do |pkmn|
+      next if !pkmn || !pkmn.able? || pkmn.status == :NONE
+      failed = false
+      break
     end
     if failed
       @battle.pbDisplay(_INTL("But it failed!"))
@@ -416,34 +412,26 @@ class PokeBattle_Move_019 < PokeBattle_Move
     return target.status == :NONE
   end
 
-  def pbAromatherapyHeal(pkmn,battler=nil)
+  def pbAromatherapyHeal(pkmn, battler = nil)
     oldStatus = (battler) ? battler.status : pkmn.status
     curedName = (battler) ? battler.pbThis : pkmn.name
     if battler
       battler.pbCureStatus(false)
     else
-      pkmn.status      = :NONE
+      pkmn.status = :NONE
       pkmn.statusCount = 0
     end
     case oldStatus
     when :SLEEP
-      if (!$PokemonSystem.drowsy || $PokemonSystem.drowsy == 0)
-        then @battle.pbDisplay(_INTL("{1} was woken from sleep.",curedName))
-      elsif ($PokemonSystem.drowsy && $PokemonSystem.drowsy != 0)
-        then @battle.pbDisplay(_INTL("{1} is awake.",curedName))
-      end
+      @battle.pbDisplay(_INTL("{1} was woken from sleep.", curedName))
     when :POISON
-      @battle.pbDisplay(_INTL("{1} was cured of its poisoning.",curedName))
+      @battle.pbDisplay(_INTL("{1} was cured of its poisoning.", curedName))
     when :BURN
-      @battle.pbDisplay(_INTL("{1}'s burn was healed.",curedName))
+      @battle.pbDisplay(_INTL("{1}'s burn was healed.", curedName))
     when :PARALYSIS
-      @battle.pbDisplay(_INTL("{1} was cured of paralysis.",curedName))
+      @battle.pbDisplay(_INTL("{1} was cured of paralysis.", curedName))
     when :FROZEN
-      if (!$PokemonSystem.frostbite || $PokemonSystem.frostbite == 0)
-        then @battle.pbDisplay(_INTL("{1} was thawed out.",curedName))
-      elsif ($PokemonSystem.frostbite && $PokemonSystem.frostbite != 0)
-        then @battle.pbDisplay(_INTL("{1}'s frostbite was healed.",curedName))
-      end
+      @battle.pbDisplay(_INTL("{1} was thawed out.", curedName))
     end
   end
 
@@ -504,7 +492,7 @@ end
 # User passes its status problem to the target. (Psycho Shift)
 #===============================================================================
 class PokeBattle_Move_01B < PokeBattle_Move
-  def pbMoveFailed?(user,targets)
+  def pbMoveFailed?(user, targets)
     if user.status == :NONE
       @battle.pbDisplay(_INTL("But it failed!"))
       return true
@@ -512,38 +500,34 @@ class PokeBattle_Move_01B < PokeBattle_Move
     return false
   end
 
-  def pbFailsAgainstTarget?(user,target)
-    if !target.pbCanInflictStatus?(user.status,user,false,self)
+  def pbFailsAgainstTarget?(user, target)
+    if !target.pbCanInflictStatus?(user.status, user, false, self)
       @battle.pbDisplay(_INTL("But it failed!"))
       return true
     end
     return false
   end
 
-  def pbEffectAgainstTarget(user,target)
+  def pbEffectAgainstTarget(user, target)
     msg = ""
     case user.status
     when :SLEEP
       target.pbSleep
-      msg = _INTL("{1} woke up.",user.pbThis)
+      msg = _INTL("{1} woke up.", user.pbThis)
     when :POISON
-      target.pbPoison(user,nil,user.statusCount!=0)
-      msg = _INTL("{1} was cured of its poisoning.",user.pbThis)
+      target.pbPoison(user, nil, user.statusCount != 0)
+      msg = _INTL("{1} was cured of its poisoning.", user.pbThis)
     when :BURN
       target.pbBurn(user)
-      msg = _INTL("{1}'s burn was healed.",user.pbThis)
+      msg = _INTL("{1}'s burn was healed.", user.pbThis)
     when :PARALYSIS
       target.pbParalyze(user)
-      msg = _INTL("{1} was cured of paralysis.",user.pbThis)
+      msg = _INTL("{1} was cured of paralysis.", user.pbThis)
     when :FROZEN
       target.pbFreeze
-      if (!$PokemonSystem.frostbite || $PokemonSystem.frostbite == 0)
-        then msg = _INTL("{1} was thawed out.",user.pbThis)
-      elsif ($PokemonSystem.frostbite && $PokemonSystem.frostbite != 0)
-        then msg = _INTL("{1}'s frostbite was healed.",user.pbThis)
-      end
+      msg = _INTL("{1} was thawed out.", user.pbThis)
     end
-    if msg!=""
+    if msg != ""
       user.pbCureStatus(false)
       @battle.pbDisplay(msg)
     end
@@ -1769,7 +1753,7 @@ class PokeBattle_Move_060 < PokeBattle_Move
     end
     if !checkedTerrain
       case @battle.environment
-      when :Grass, :TallGrass, :Grass_alt1,:Grass_alt2,:Grass_alt3
+      when :Grass, :TallGrass, :Grass_alt1,:Grass_alt2,:Grass_alt3,
         @newType = :GRASS
       when :MovingWater, :StillWater, :Puddle, :Underwater
         @newType = :WATER
@@ -2558,7 +2542,7 @@ end
 # class PokeBattle_Move_XXX < PokeBattle_Move
 #   def pbMoveFailed?(user,targets)
 #     if targets[0].effects[PBEffects::Transform]
-#       @battle.pbDisplay(_INTL("But it failed!"))
+#       @battle.pbDisplay("But it failed!")
 #       return true
 #     end
 #     return false
@@ -2568,7 +2552,7 @@ end
 #     if target.effects[PBEffects::Transform] ||
 #       target.effects[PBEffects::Illusion] ||
 #       !target.pokemon.isFusion?
-#       @battle.pbDisplay(_INTL("But it failed!"))
+#       @battle.pbDisplay("But it failed!")
 #       return true
 #     end
 #     return false

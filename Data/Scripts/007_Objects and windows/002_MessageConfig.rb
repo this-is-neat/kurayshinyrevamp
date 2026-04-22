@@ -7,12 +7,12 @@ module MessageConfig
   BLUE_TEXT_MAIN_COLOR    =  Color.new(35, 130, 200)
   BLUE_TEXT_SHADOW_COLOR  =  Color.new(20, 75, 115)
 
-  FONT_NAME               = "Power Green" #Power Red and Green
-  FONT_SIZE               = 29 #26
+  FONT_NAME               = "Power Green"
+  FONT_SIZE               = 29
   SMALL_FONT_NAME         = "Power Green Small"
   SMALL_FONT_SIZE         = 25
-  NARROW_FONT_NAME        = "Power Green Narrow" #Power Green Small
-  NARROW_FONT_SIZE        = 29 #26
+  NARROW_FONT_NAME        = "Power Green Narrow"
+  NARROW_FONT_SIZE        = 29
 
   BUBBLE_TEXT_BASE   =  Color.new(248,248,248)#(72,80,88)#DIALOG
   BUBBLE_TEXT_SHADOW= Color.new(166,160,151)
@@ -30,9 +30,9 @@ module MessageConfig
   @@systemFont      = nil
   @@smallFont       = nil
   @@narrowFont      = nil
-  @@narrowSize      = 29
-  @@smallSize       = 25
-  @@systemSize      = 29
+  @@systemSize      = nil
+  @@smallSize       = nil
+  @@narrowSize      = nil
 
   def self.pbDefaultSystemFrame
     if $PokemonSystem
@@ -139,31 +139,32 @@ module MessageConfig
     return @@narrowFont
   end
 
-  def self.pbGetNarrowFontSize
-    @@narrowSize = 29 if !@@narrowSize
-    return @@narrowSize
-  end
-
-  def self.pbGetSmallFontSize
-    @@smallSize = 25 if !@@smallSize
-    return @@smallSize
-  end
-
   def self.pbGetSystemFontSize
-    @@systemSize = 29 if !@@systemSize
+    @@systemSize = FONT_SIZE if !@@systemSize
     return @@systemSize
   end
 
-  def self.pbGetNarrowFontSizeset(value)
-    @@narrowSize = value
+  def self.pbGetSmallFontSize
+    @@smallSize = SMALL_FONT_SIZE if !@@smallSize
+    return @@smallSize
+  end
+
+  def self.pbGetNarrowFontSize
+    @@narrowSize = NARROW_FONT_SIZE if !@@narrowSize
+    return @@narrowSize
+  end
+
+  # Compatibility wrappers retained for older option/introscreen callers.
+  def self.pbGetSystemFontSizeset(value)
+    @@systemSize = value
   end
 
   def self.pbGetSmallFontSizeset(value)
     @@smallSize = value
   end
 
-  def self.pbGetSystemFontSizeset(value)
-    @@systemSize = value
+  def self.pbGetNarrowFontSizeset(value)
+    @@narrowSize = value
   end
 
   def self.pbSetSystemFontName(value)
@@ -237,7 +238,7 @@ def pbPositionFaceWindow(facewindow,msgwindow)
   end
 end
 
-def pbPositionNearMsgWindow(cmdwindow,msgwindow,side)
+def pbPositionNearMsgWindow(cmdwindow,msgwindow,side, x_offset=nil,y_offset=nil)
   return if !cmdwindow
   if msgwindow
     height=[cmdwindow.height,Graphics.height-msgwindow.height].min
@@ -264,6 +265,10 @@ def pbPositionNearMsgWindow(cmdwindow,msgwindow,side)
     cmdwindow.x=0
     cmdwindow.y=0
   end
+  cmdwindow.x+= x_offset if x_offset
+  cmdwindow.y+= y_offset if y_offset
+
+
 end
 
 # internal function
@@ -451,19 +456,19 @@ end
 # Sets a bitmap's font to the system font.
 def pbSetSystemFont(bitmap)
   bitmap.font.name = MessageConfig.pbGetSystemFontName
-  bitmap.font.size = MessageConfig::pbGetSystemFontSize
+  bitmap.font.size = MessageConfig.pbGetSystemFontSize
 end
 
 # Sets a bitmap's font to the system small font.
 def pbSetSmallFont(bitmap)
   bitmap.font.name = MessageConfig.pbGetSmallFontName
-  bitmap.font.size = MessageConfig::pbGetSmallFontSize
+  bitmap.font.size = MessageConfig.pbGetSmallFontSize
 end
 
 # Sets a bitmap's font to the system narrow font.
 def pbSetNarrowFont(bitmap)
   bitmap.font.name = MessageConfig.pbGetNarrowFontName
-  bitmap.font.size = MessageConfig::pbGetNarrowFontSize
+  bitmap.font.size = MessageConfig.pbGetNarrowFontSize
 end
 
 #===============================================================================
@@ -771,6 +776,7 @@ def addBackgroundPlane(sprites,planename,background,viewport=nil)
       end
     end
   end
+  return sprites[planename]
 end
 
 # Adds a background to the sprite hash.

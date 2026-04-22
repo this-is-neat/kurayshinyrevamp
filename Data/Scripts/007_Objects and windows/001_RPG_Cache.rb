@@ -35,8 +35,8 @@ module RPG
       return @cache.size >= 100
     end
 
-    #KurayX - KURAYX_ABOUT_SHINIES
-    def self.load_bitmap(folder_name, filename, hue = 0, rcode=0, gcode=1, bcode=2, pifshiny=0, kifshiny=0)
+
+    def self.load_bitmap(folder_name, filename, hue = 0, rcode = 0, gcode = 1, bcode = 2, pifshiny = 0, kifshiny = 0)
       path = folder_name + filename
       cached = true
       ret = fromCache(path)
@@ -49,31 +49,23 @@ module RPG
         @cache[path] = ret
         cached = false
       end
-      #KurayX - KURAYX_ABOUT_SHINIES
-      # if hue == 0
-      # if hue == 0 && rcode == 0 && gcode == 1 && bcode == 2
       if hue == 0
         ret.addRef if cached
         return ret
       end
-      #KurayX - KURAYX_ABOUT_SHINIES
       key = [path, hue]
-      # key = [path, hue, rcode, gcode, bcode]
-      # key = [path, hue]
       ret2 = fromCache(key)
       if ret2
         ret2.addRef
       else
         ret2 = ret.copy
-        # puts hue.to_s + " is hue.to_s"
         ret2.hue_change(hue)
         @cache[key] = ret2
       end
       return ret2
     end
 
-    #KurayX - KURAYX_ABOUT_SHINIES
-    def self.load_bitmap_path(path, hue = 0, rcode=0, gcode=1, bcode=2, pifshiny=0, kifshiny=0)
+    def self.load_bitmap_path(path, hue = 0, rcode = 0, gcode = 1, bcode = 2, pifshiny = 0, kifshiny = 0)
       cached = true
       ret = fromCache(path)
       if !ret
@@ -85,14 +77,10 @@ module RPG
         @cache[path] = ret
         cached = false
       end
-      #KurayX - KURAYX_ABOUT_SHINIES
       if hue == 0
-      # if hue == 0 && rcode == 0 && gcode == 1 && bcode == 2
         ret.addRef if cached
         return ret
       end
-      #KurayX - KURAYX_ABOUT_SHINIES
-      # key = [path, hue, rcode, gcode, bcode]
       key = [path, hue]
       ret2 = fromCache(key)
       if ret2
