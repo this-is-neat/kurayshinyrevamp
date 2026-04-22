@@ -59,8 +59,19 @@ internal static class ReleasePayloadManifest
         SourceMode: PayloadSourceMode.EmbeddedOrSidecarOnly,
         SidecarArchiveName: "PIF-player-build-20260422-no-csf-update1.7z");
 
-    public static IReadOnlyList<PayloadPackageManifest> GetPackagesForInstall(string installRoot)
+    public static IReadOnlyList<PayloadPackageManifest> GetPackagesForInstall(string installRoot, bool updateOnly)
     {
+        if (updateOnly)
+        {
+            if (!LooksLikeGameInstall(installRoot))
+            {
+                throw new InvalidOperationException(
+                    "Update Only needs an existing Kuray Infinite Fusion install folder. Pick the folder that already contains Game.exe, Data, Graphics, and Mods, or use Install / Repair instead.");
+            }
+
+            return new[] { CurrentUpdatePackage };
+        }
+
         var packages = new List<PayloadPackageManifest>();
         if (!LooksLikeBaseInstall(installRoot))
         {
@@ -71,14 +82,20 @@ internal static class ReleasePayloadManifest
         return packages;
     }
 
-    public static bool LooksLikeBaseInstall(string installRoot)
+    public static bool LooksLikeGameInstall(string installRoot)
     {
         var fullInstallRoot = Path.GetFullPath(installRoot);
         return File.Exists(Path.Combine(fullInstallRoot, "Game.exe")) &&
                File.Exists(Path.Combine(fullInstallRoot, "Game.ini")) &&
-               File.Exists(Path.Combine(fullInstallRoot, "PACKAGED_BUILD_MANIFEST.txt")) &&
                Directory.Exists(Path.Combine(fullInstallRoot, "Data")) &&
                Directory.Exists(Path.Combine(fullInstallRoot, "Graphics")) &&
                Directory.Exists(Path.Combine(fullInstallRoot, "Mods"));
+    }
+
+    public static bool LooksLikeBaseInstall(string installRoot)
+    {
+        var fullInstallRoot = Path.GetFullPath(installRoot);
+        return LooksLikeGameInstall(fullInstallRoot) &&
+               File.Exists(Path.Combine(fullInstallRoot, "PACKAGED_BUILD_MANIFEST.txt"));
     }
 }

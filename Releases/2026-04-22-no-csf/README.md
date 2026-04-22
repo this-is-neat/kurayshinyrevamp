@@ -20,6 +20,7 @@ This release packages the current playable client from the updated `kurayshinyre
 - `PIF-player-build-20260422-no-csf-WebSetup.exe` is the GitHub-friendly installer. It now carries the latest changed-file overlay inside the installer itself.
 - If your target folder already looks like the public 2026-04-22 no-CSF release, the installer applies only the embedded changed files update.
 - If your target folder is empty or missing the base release, the installer downloads the original 2026-04-22 no-CSF base package from GitHub first and then applies the embedded changed files update.
+- The installer now has a dedicated `Update Only` button for existing installs, so players can skip the base download on purpose and apply just the latest bundled changed files.
 - Payload files are split into GitHub-safe parts because GitHub cannot host this build as one single 11+ GB release asset.
 
 ## Installer refresh
@@ -48,15 +49,15 @@ This release packages the current playable client from the updated `kurayshinyre
 
 1. Download `PIF-player-build-20260422-no-csf-WebSetup.exe`.
 2. Run it.
-3. If you already installed the public 2026-04-22 no-CSF release, let it apply the embedded update over that install.
-4. If this is a fresh install, let it download the original base payload from GitHub and then finish the install in your `Games` folder.
+3. Use `Update Only` if you already have Kuray Infinite Fusion installed in that folder and only want the latest changed files.
+4. Use `Install / Repair` if this is a fresh install or if that folder may still need the base release files.
 
 ## Checksums
 
 - The web installer checksum is provided in `PIF-player-build-20260422-no-csf-WebSetup.sha256.txt`.
 - The packaged build manifest is included as `PIF-player-build-20260422-no-csf.manifest.txt`.
 - The current changed-file overlay manifest is included as `PIF-player-build-20260422-no-csf-update1.manifest.txt`.
-- Current web installer SHA-256: `f94ea7008924c1bd0bb9b6358e62ee78b7a6bddce1848c019de6975f3f2af1aa`
+- Current web installer SHA-256: `16b22012adf9af87413e956ff9756966e0c17cc7556088dbcbfc4806ebe822df`
 
 ## Comparison Notes
 

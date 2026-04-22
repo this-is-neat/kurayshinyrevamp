@@ -21,7 +21,7 @@ internal static class InstallerEngine
         var installRoot = Path.GetFullPath(options.TargetDirectory);
         InstallWorkspace.CleanupStaleStageDirectories(installRoot);
 
-        foreach (var package in ReleasePayloadManifest.GetPackagesForInstall(installRoot))
+        foreach (var package in ReleasePayloadManifest.GetPackagesForInstall(installRoot, options.UpdateOnly))
         {
             cancellationToken.ThrowIfCancellationRequested();
             InstallPackage(package, installRoot, progress, cancellationToken);

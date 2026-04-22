@@ -5,12 +5,14 @@ internal sealed class InstallerOptions
     public string TargetDirectory { get; init; } = GetDefaultInstallDirectory();
     public bool Silent { get; init; }
     public bool SkipShortcuts { get; init; }
+    public bool UpdateOnly { get; init; }
 
     public static InstallerOptions Parse(string[] args)
     {
         var targetDirectory = GetDefaultInstallDirectory();
         var silent = false;
         var skipShortcuts = false;
+        var updateOnly = false;
 
         foreach (var arg in args)
         {
@@ -25,6 +27,13 @@ internal sealed class InstallerOptions
                 arg.Equals("--skip-shortcuts", StringComparison.OrdinalIgnoreCase))
             {
                 skipShortcuts = true;
+                continue;
+            }
+
+            if (arg.Equals("/updateonly", StringComparison.OrdinalIgnoreCase) ||
+                arg.Equals("--update-only", StringComparison.OrdinalIgnoreCase))
+            {
+                updateOnly = true;
                 continue;
             }
 
@@ -44,7 +53,8 @@ internal sealed class InstallerOptions
         {
             TargetDirectory = targetDirectory,
             Silent = silent,
-            SkipShortcuts = skipShortcuts
+            SkipShortcuts = skipShortcuts,
+            UpdateOnly = updateOnly
         };
     }
 
