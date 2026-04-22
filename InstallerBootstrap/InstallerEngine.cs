@@ -18,26 +18,41 @@ internal static class InstallerEngine
         IProgress<InstallProgress>? progress,
         CancellationToken cancellationToken)
     {
-        InstallWorkspace.CleanupStaleStageDirectories(options.TargetDirectory);
-        using var workspace = new InstallWorkspace(options.TargetDirectory);
+        var installRoot = Path.GetFullPath(options.TargetDirectory);
+        InstallWorkspace.CleanupStaleStageDirectories(installRoot);
+
+        foreach (var package in ReleasePayloadManifest.GetPackagesForInstall(installRoot))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            InstallPackage(package, installRoot, progress, cancellationToken);
+        }
+
+        EnsureWritableDirectories(installRoot);
+
+        if (!options.SkipShortcuts)
+        {
+            progress?.Report(new InstallProgress("Creating shortcuts...", string.Empty, 100, 100));
+            CreateShortcuts(installRoot);
+        }
+
+        progress?.Report(new InstallProgress("Installation complete.", installRoot, 100, 100));
+    }
+
+    private static void InstallPackage(
+        PayloadPackageManifest package,
+        string installRoot,
+        IProgress<InstallProgress>? progress,
+        CancellationToken cancellationToken)
+    {
+        using var workspace = new InstallWorkspace(installRoot);
         workspace.Prepare();
-        using var source = PayloadLocator.OpenPayloadSource(progress, cancellationToken);
-        var installRoot = workspace.InstallRoot;
+        using var source = PayloadLocator.OpenPayloadSource(package, progress, cancellationToken);
 
         if (BundledSevenZip.CanUseFastExtraction(source, installRoot))
         {
             BundledSevenZip.ExtractArchiveToStageRoot(source.ArchiveFilePath!, workspace.StagingRoot, progress, cancellationToken);
             EnsureWritableDirectories(workspace.ExtractedRoot);
-            DeployStagedInstall(workspace, progress);
-            EnsureWritableDirectories(installRoot);
-
-            if (!options.SkipShortcuts)
-            {
-                progress?.Report(new InstallProgress("Creating shortcuts...", string.Empty, 100, 100));
-                CreateShortcuts(installRoot);
-            }
-
-            progress?.Report(new InstallProgress("Installation complete.", installRoot, 100, 100));
+            DeployStagedInstall(workspace, progress, package);
             return;
         }
 
@@ -50,13 +65,13 @@ internal static class InstallerEngine
 
         if (entries.Count == 0)
         {
-            throw new InvalidOperationException("The embedded payload does not contain any files.");
+            throw new InvalidOperationException($"The payload for '{package.DisplayName}' does not contain any files.");
         }
 
         long totalBytes = entries.Sum(entry => entry.Size);
         long extractedBytes = 0;
         long nextProgressBytes = ManagedExtractProgressStepBytes;
-        progress?.Report(new InstallProgress("Preparing files...", string.Empty, 0, totalBytes));
+        progress?.Report(new InstallProgress("Preparing files...", package.DisplayName, 0, totalBytes));
 
         foreach (var entry in entries)
         {
@@ -104,16 +119,7 @@ internal static class InstallerEngine
         }
 
         EnsureWritableDirectories(workspace.ExtractedRoot);
-        DeployStagedInstall(workspace, progress);
-        EnsureWritableDirectories(installRoot);
-
-        if (!options.SkipShortcuts)
-        {
-            progress?.Report(new InstallProgress("Creating shortcuts...", string.Empty, totalBytes, totalBytes));
-            CreateShortcuts(installRoot);
-        }
-
-        progress?.Report(new InstallProgress("Installation complete.", installRoot, totalBytes, totalBytes));
+        DeployStagedInstall(workspace, progress, package);
     }
 
     private static string NormalizeEntryPath(string? key)
@@ -154,9 +160,12 @@ internal static class InstallerEngine
         }
     }
 
-    private static void DeployStagedInstall(InstallWorkspace workspace, IProgress<InstallProgress>? progress)
+    private static void DeployStagedInstall(
+        InstallWorkspace workspace,
+        IProgress<InstallProgress>? progress,
+        PayloadPackageManifest package)
     {
-        progress?.Report(new InstallProgress("Finalizing installation...", string.Empty, 100, 100));
+        progress?.Report(new InstallProgress("Finalizing installation...", package.DisplayName, 100, 100));
         DeployStagedInstall(workspace.ExtractedRoot, workspace.InstallRoot);
     }
 

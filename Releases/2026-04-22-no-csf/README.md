@@ -17,7 +17,9 @@ This release packages the current playable client from the updated `kurayshinyre
 
 ## Download options
 
-- `PIF-player-build-20260422-no-csf-WebSetup.exe` is the GitHub-friendly installer. It downloads the game payload from this release and installs to your `Games` folder with shortcuts.
+- `PIF-player-build-20260422-no-csf-WebSetup.exe` is the GitHub-friendly installer. It now carries the latest changed-file overlay inside the installer itself.
+- If your target folder already looks like the public 2026-04-22 no-CSF release, the installer applies only the embedded changed files update.
+- If your target folder is empty or missing the base release, the installer downloads the original 2026-04-22 no-CSF base package from GitHub first and then applies the embedded changed files update.
 - Payload files are split into GitHub-safe parts because GitHub cannot host this build as one single 11+ GB release asset.
 
 ## Installer refresh
@@ -26,6 +28,15 @@ This release packages the current playable client from the updated `kurayshinyre
 - The installer window layout was also adjusted so the action buttons are no longer clipped at the bottom on the affected display scale.
 - The web installer was refreshed again later on 2026-04-22 to clean up canceled installs more safely, stage extraction before deployment, and remove stale temp payload files instead of leaving large leftovers behind.
 - This refresh is meant to make download-and-install testing safer for players by reducing partial installs and wasted disk space after a cancel or failed run.
+- The current installer refresh turns the public download into a cumulative overlay installer: only the changed packaged files are bundled into the new download, while clean installs still work because the installer can fetch the older base release automatically when needed.
+
+## Current changed-file update
+
+- The current embedded overlay contains `56` changed packaged files, about `4.432 MB` before compression and about `676 KB` as the embedded archive.
+- Updated data files include `Data/pokedex/dex.json`, `Data/REMOTE_VERSION`, `Data/Scripts/DownloadedSettings.rb`, and `Data/sprites/CUSTOM_SPRITES`.
+- Added art/content for new packaged species ids `1207` through `1211`, including battlers, EBDX sprites, icons, and imported `mongratis_community_sampler` Pokemon assets.
+- Updated `Mods/counterfeit_shinies/002_Core.rb` and `Mods/counterfeit_shinies/004_Hooks.rb`.
+- The full overlay file list is recorded in `PIF-player-build-20260422-no-csf-update1.manifest.txt`.
 
 ## Exclusions
 
@@ -37,13 +48,15 @@ This release packages the current playable client from the updated `kurayshinyre
 
 1. Download `PIF-player-build-20260422-no-csf-WebSetup.exe`.
 2. Run it.
-3. Let it download the release payload from GitHub and install the game to your `Games` folder.
+3. If you already installed the public 2026-04-22 no-CSF release, let it apply the embedded update over that install.
+4. If this is a fresh install, let it download the original base payload from GitHub and then finish the install in your `Games` folder.
 
 ## Checksums
 
 - The web installer checksum is provided in `PIF-player-build-20260422-no-csf-WebSetup.sha256.txt`.
 - The packaged build manifest is included as `PIF-player-build-20260422-no-csf.manifest.txt`.
-- Current web installer SHA-256: `4ae51e7315ac926edeb7224132880b480ced835f5f88a783cd3437fa307a650c`
+- The current changed-file overlay manifest is included as `PIF-player-build-20260422-no-csf-update1.manifest.txt`.
+- Current web installer SHA-256: `f94ea7008924c1bd0bb9b6358e62ee78b7a6bddce1848c019de6975f3f2af1aa`
 
 ## Comparison Notes
 

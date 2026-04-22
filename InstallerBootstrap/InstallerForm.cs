@@ -32,7 +32,7 @@ internal sealed class InstallerForm : Form
             Top = 20,
             Width = 640,
             Height = 48,
-            Text = "Install Kuray Infinite Fusion to your Games folder. If the game files are not bundled with this installer, it will download them from GitHub first."
+            Text = "Install Kuray Infinite Fusion to your Games folder. This installer applies the latest changed files directly and downloads the big base game package only if your install folder still needs it."
         };
 
         var pathLabel = new Label

@@ -13,7 +13,7 @@ internal static class BundledSevenZip
 
     public static bool CanUseFastExtraction(PayloadSource source, string installRoot)
     {
-        return !string.IsNullOrWhiteSpace(source.ArchiveFilePath) && IsDirectoryEmptyOrMissing(installRoot);
+        return !string.IsNullOrWhiteSpace(source.ArchiveFilePath);
     }
 
     public static void ExtractArchiveToStageRoot(
@@ -155,10 +155,5 @@ internal static class BundledSevenZip
                 tail.Remove(0, tail.Length - 64);
             }
         }
-    }
-
-    private static bool IsDirectoryEmptyOrMissing(string path)
-    {
-        return !Directory.Exists(path) || !Directory.EnumerateFileSystemEntries(path).Any();
     }
 }
