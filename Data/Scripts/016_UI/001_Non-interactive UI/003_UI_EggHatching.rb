@@ -52,10 +52,7 @@ class PokemonEggHatch_Scene
     pbFadeInAndShow(@sprites)
   end
 
-  #KurayX sent hatched to PC asking
-  def pbMain(eggindex)
-    nb_eggs_hatched = pbGet(VAR_NB_EGGS_HATCHED)
-    pbSet(VAR_NB_EGGS_HATCHED,nb_eggs_hatched+1)
+  def pbMain
     pbBGMPlay("Evolution")
     # Egg animation
     updateScene(Graphics.frame_rate*15/10)
@@ -116,23 +113,15 @@ class PokemonEggHatch_Scene
       @pokemon.name = nickname
       @nicknamed = true
     end
-    #KurayX sent hatched to PC asking
-    if pbConfirmMessage(
-      _INTL("Do you wish to send {1} to the PC?", @pokemon.name)) { update }
-      $PokemonStorage.pbStoreCaught(@pokemon)
-      $Trainer.party[eggindex] = nil
-      $Trainer.party.compact!
-      pbMessage(_INTL("{1} was sent to the PC.", @pokemon.name)) { update }
-    end
+
     if !$Trainer.pokedex.owned?(@pokemon.species)
       $Trainer.pokedex.register(@pokemon)
       $Trainer.pokedex.set_owned(@pokemon.species)
       pbMessage(_INTL("{1}'s data was added to the Pokédex", @pokemon.name))
       pbShowPokedex(@pokemon.species)
     end
-    $Trainer.pokedex.register_unfused_pkmn(@pokemon).each do |unfused|
-      pbMessage(_INTL("{1}'s data was added to the Pokédex", GameData::Species.get(unfused).name))
-    end
+    nb_eggs_hatched = pbGet(VAR_NB_EGGS_HATCHED)
+    pbSet(VAR_NB_EGGS_HATCHED,nb_eggs_hatched+1)
   end
 
   def pbEndScene
@@ -191,10 +180,9 @@ class PokemonEggHatchScreen
     @scene=scene
   end
 
-  #KurayX sent hatched to PC asking
-  def pbStartScreen(pokemon, eggindex)
+  def pbStartScreen(pokemon)
     @scene.pbStartScene(pokemon)
-    @scene.pbMain(eggindex)
+    @scene.pbMain
     @scene.pbEndScene
   end
 end
@@ -202,20 +190,17 @@ end
 #===============================================================================
 #
 #===============================================================================
-#KurayX sent hatched to PC asking
-def pbHatchAnimation(pokemon, eggindex)
+def pbHatchAnimation(pokemon)
   pbMessage(_INTL("Huh?\1"))
   pbFadeOutInWithMusic {
     scene=PokemonEggHatch_Scene.new
     screen=PokemonEggHatchScreen.new(scene)
-    #KurayX sent hatched to PC asking
-    screen.pbStartScreen(pokemon, eggindex)
+    screen.pbStartScreen(pokemon)
   }
   return true
 end
 
-#KurayX sent hatched to PC asking
-def pbHatch(pokemon, eggindex)
+def pbHatch(pokemon, eggindex=nil)
   speciesname = pokemon.speciesName
   pokemon.name           = nil
   pokemon.owner          = Pokemon::Owner.new_from_trainer($Trainer)
@@ -225,14 +210,13 @@ def pbHatch(pokemon, eggindex)
   pokemon.hatched_map    = $game_map.map_id
   if player_on_hidden_ability_map
     chosenAbility = pokemon.getAbilityList.sample #format: [[:ABILITY, index],...]
-    # pokemon.ability = chosenAbility[0]
+    #pokemon.ability = chosenAbility[0]
     pokemon.ability_index = chosenAbility[1]
   end
 
 
   pokemon.record_first_moves
-  #KurayX sent hatched to PC asking
-  if !pbHatchAnimation(pokemon, eggindex)
+  if !pbHatchAnimation(pokemon)
     pbMessage(_INTL("Huh?\1"))
     pbMessage(_INTL("...\1"))
     pbMessage(_INTL("... .... .....\1"))
@@ -242,22 +226,12 @@ def pbHatch(pokemon, eggindex)
                                     0, Pokemon::MAX_NAME_SIZE, "", pokemon)
       pokemon.name = nickname
     end
-    #KurayX sent hatched to PC asking
-    if pbConfirmMessage(
-      _INTL("Do you wish to send {1} to the PC?", pokemon.name))
-      $PokemonStorage.pbStoreCaught(pokemon)
-      $Trainer.party[eggindex] = nil
-      $Trainer.party.compact!
-      pbMessage(_INTL("{1} was sent to the PC.", pokemon.name))
-    end
   end
+
 end
 
-#KurayX sent hatched to PC asking
 Events.onStepTaken += proc { |_sender,_e|
-  egglocation = -1
   for egg in $Trainer.party
-    egglocation += 1
     next if egg.steps_to_hatch <= 0
     egg.steps_to_hatch -= 1
     egg.steps_to_hatch -= 1 if isWearingClothes(CLOTHES_BREEDER)
@@ -268,7 +242,7 @@ Events.onStepTaken += proc { |_sender,_e|
     end
     if egg.steps_to_hatch <= 0
       egg.steps_to_hatch = 0
-      pbHatch(egg, egglocation)
+      pbHatch(egg)
     end
   end
 }

@@ -256,6 +256,10 @@ def isSpeciesFusion(species)
   return isFusion(num)
 end
 
+def gotFusedPokemonAsStarter()
+  return $game_switches[SWITCH_RANDOM_WILD_TO_FUSION] || $game_switches[SWITCH_LEGENDARY_MODE]
+end
+
 def getRandomLocalFusion()
   spritesList = []
   $PokemonGlobal.alt_sprite_substitutions.each_value do |value|

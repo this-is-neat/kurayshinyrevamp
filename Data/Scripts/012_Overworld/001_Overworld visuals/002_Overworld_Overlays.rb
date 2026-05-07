@@ -232,6 +232,7 @@ class LightEffect_GlowPlant < LightEffect
 end
 
 
+
 class LightEffect_DayNight < LightEffect
   def update
     return if !@light || !@event

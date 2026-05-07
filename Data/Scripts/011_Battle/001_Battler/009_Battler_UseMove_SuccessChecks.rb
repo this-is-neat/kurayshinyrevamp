@@ -205,40 +205,14 @@ class PokeBattle_Battler
       if @statusCount<=0
         pbCureStatus
       else
-        if !move.usableWhenAsleep? && (!$PokemonSystem.drowsy || $PokemonSystem.drowsy == 0)  # Snore/Sleep Talk
-          pbContinueStatus
-          @lastMoveFailed = true
-          return false
-        elsif !move.usableWhenAsleep? && ($PokemonSystem.drowsy && $PokemonSystem.drowsy != 0)
-          if @battle.pbWeather == :Hail
-            if @battle.pbRandom(100)<75
-              pbContinueStatus
-              @lastMoveFailed = true
-              return false
-            end
-          else
-            if @battle.pbRandom(100)<50
-              pbContinueStatus
-              @lastMoveFailed = true
-              return false
-            end
-          end
-        end
-    end
-    when :FROZEN
-      if !move.thawsUser? && (!$PokemonSystem.frostbite || $PokemonSystem.frostbite == 0)
-        if @battle.pbRandom(100)<20
-          pbCureStatus
-        else
-          pbContinueStatus
-          @lastMoveFailed = true
-          return false
-        end
+        pbContinueStatus
         if !move.usableWhenAsleep?   # Snore/Sleep Talk
           @lastMoveFailed = true
           return false
         end
-      elsif !move.thawsUser?
+      end
+    when :FROZEN
+      if !move.thawsUser?
         if @battle.pbRandom(100)<20
           pbCureStatus
         else

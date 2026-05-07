@@ -53,27 +53,6 @@ class Scene_Credits
   # Start Editing
   CREDIT = <<_END_
 
---- KIF CREDITS ---
-
-Kuray Infinite Fusion
-by Kurayami Blackheart (Reïzod)
-brought to you by all the programmers from the KurayHub community
-
-DemICE Endgame Challenge + Smart AI
-by DemICE
-
-Based on Pokemon Essential by Maruno
-Fork of Pokemon Infinite Fusion by Chardub (Frogman)
-
-With the generous contributions of our beloved programmers
-Sylvi, DemICE, NoamRTD, Hungry Pickle, bluewuppo
-and our dictator Reïzod (Kurayami Blackheart)
-
-also Cody, our moderator that gambles in the general chat on Balatro
-
-
---- PIF CREDITS ---
-
 Pokémon Infinite Fusion
 By Chardub (Frogzilla)
 
@@ -98,6 +77,9 @@ BenGames, Zeak6464
 Gameplay / Story :
 Chardub
 Kiwikelly
+
+Title screen and logo
+Doctor Miawoo
 
 Custom sprites collecting and handling
 Kiwikelly, Payapon, Thornsoflight
@@ -124,6 +106,14 @@ Other custom graphics:
 Kiwikelly<s>Knuckles
 UnworthyPie<s>Doctor Miawoo
 Chardub<s>TCGrunler#4583
+
+Elite 4 rematch teams
+duskrd<s>anaconja<s>taraline
+
+French translation
+anthonygourmand
+locpic_
+blood.wolf58 (Willi)
 
 The following free ressources were also used 
 with their respective authors' consent:
@@ -204,7 +194,7 @@ _END_
     @trim = Graphics.height / 10
     # Number of game frames per background frame
     @realOY = -(Graphics.height - @trim)
-    # @customSpritesList = getSpritesList()
+    @customSpritesList = getSpritesList()
     #-------------------------------
     # Credits text Setup
     #-------------------------------
@@ -308,21 +298,21 @@ _END_
     pbBGMPlay(previousBGM)
   end
 
-  # def getSpritesList()
-  #   spritesList = []
-  #   $PokemonGlobal.alt_sprite_substitutions.each_value do |value|
-  #     if value.is_a?(PIFSprite)
-  #       spritesList << value
-  #     end
-  #   end
-  #   selected_spritesList = spritesList.sample(NB_SPRITES_TO_PRELOAD)
-  #   spriteLoader = BattleSpriteLoader.new
-  #   for sprite in selected_spritesList
-  #     spriteLoader.preload(sprite)
-  #   end
+  def getSpritesList()
+    spritesList = []
+    $PokemonGlobal.alt_sprite_substitutions.each_value do |value|
+      if value.is_a?(PIFSprite)
+        spritesList << value
+      end
+    end
+    selected_spritesList = spritesList.sample(NB_SPRITES_TO_PRELOAD)
+    spriteLoader = BattleSpriteLoader.new
+    for sprite in selected_spritesList
+      spriteLoader.preload(sprite)
+    end
 
-  #   return selected_spritesList
-  # end
+    return selected_spritesList
+  end
 
   # Check if the credits should be cancelled
   def cancel?
@@ -348,67 +338,48 @@ _END_
     return false
   end
 
-  # def update
-  #   delta = Graphics.delta_s
-  #   @counter += delta
-  #   @sprites_counter = 0 if !@sprites_counter
-  #   #@background_sprite.setBitmap("Graphics/Titles/" + BACKGROUNDS_LIST[@bg_index])
-  #   # # Go to next slide
-  #   @frames_counter = 0 if !@frames_counter
-  #   @frames_counter+=1
-
-  #   stopShowingSprites = @frames_counter >= (TOTAL_NB_FRAMES-300)
-  #   pbBGSStop if @frames_counter > TOTAL_NB_FRAMES
-
-  #   spriteLoader = BattleSpriteLoader.new
-  #   if @counter >= SECONDS_PER_BACKGROUND && @customSpritesList.length > 0 && !stopShowingSprites
-  #     @sprites_counter=0
-  #     randomSprite = @customSpritesList.sample
-  #     @customSpritesList.delete(randomSprite)
-  #     @background_sprite.setBitmapDirectly(spriteLoader.load_pif_sprite(randomSprite))
-  #     @background_sprite.x = rand(0..300)
-  #     @background_sprite.y = rand(0..200)
-  #     @counter -= SECONDS_PER_BACKGROUND
-  #     @background_sprite.opacity = 50
-  #     @fadingIn=true
-  #   end
-  #   if @fadingIn
-  #     if @background_sprite.opacity < FUSION_SPRITES_MAX_OPACITY
-  #       @background_sprite.opacity +=5
-  #     else
-  #       @fadingIn=false
-  #     end
-
-  #   else
-  #     @sprites_counter += 1
-  #     if @sprites_counter >= NB_FRAMES_AT_MAX_OPACITY
-  #       @background_sprite.opacity-=3
-  #     end
-  #   end
-
-
-  #   return if cancel?
-  #   return if last?
-  #   @realOY += SCROLL_SPEED * delta
-  #   @credit_sprites.each_with_index { |s, i| s.oy = @realOY - @bitmap_height * i }
-  # end
-
   def update
     delta = Graphics.delta_s
     @counter += delta
-    @background_sprite.setBitmap("Graphics/Titles/" + BACKGROUNDS_LIST[@bg_index])
-
+    @sprites_counter = 0 if !@sprites_counter
+    #@background_sprite.setBitmap("Graphics/Titles/" + BACKGROUNDS_LIST[@bg_index])
     # # Go to next slide
-    # if @counter >= SECONDS_PER_BACKGROUND
-    #   @counter -= SECONDS_PER_BACKGROUND
-    #   @bg_index += 1
-    #   @bg_index = 0 if @bg_index >= BACKGROUNDS_LIST.length
-    #   @background_sprite.setBitmap("Graphics/Titles/" + BACKGROUNDS_LIST[@bg_index])
-    # end
+    @frames_counter = 0 if !@frames_counter
+    @frames_counter+=1
+
+    stopShowingSprites = @frames_counter >= (TOTAL_NB_FRAMES-300)
+    pbBGSStop if @frames_counter > TOTAL_NB_FRAMES
+
+    spriteLoader = BattleSpriteLoader.new
+    if @counter >= SECONDS_PER_BACKGROUND && @customSpritesList.length > 0 && !stopShowingSprites
+      @sprites_counter=0
+      randomSprite = @customSpritesList.sample
+      @customSpritesList.delete(randomSprite)
+      @background_sprite.setBitmapDirectly(spriteLoader.load_pif_sprite(randomSprite))
+      @background_sprite.x = rand(0..300)
+      @background_sprite.y = rand(0..200)
+      @counter -= SECONDS_PER_BACKGROUND
+      @background_sprite.opacity = 50
+      @fadingIn=true
+    end
+    if @fadingIn
+      if @background_sprite.opacity < FUSION_SPRITES_MAX_OPACITY
+        @background_sprite.opacity +=5
+      else
+        @fadingIn=false
+      end
+
+    else
+      @sprites_counter += 1
+      if @sprites_counter >= NB_FRAMES_AT_MAX_OPACITY
+        @background_sprite.opacity-=3
+      end
+    end
+
+
     return if cancel?
     return if last?
     @realOY += SCROLL_SPEED * delta
     @credit_sprites.each_with_index { |s, i| s.oy = @realOY - @bitmap_height * i }
   end
-
 end

@@ -183,63 +183,38 @@ class PokeBattle_Battler
         end
       end
     end
-    normallogic = true
-    isletdown = false
-    if $PokemonSystem.ch_letdown && $PokemonSystem.ch_letdown != 0 && !specialUsage
-      skipletdown = false
-      if $PokemonSystem.ch_letdownplayer && $PokemonSystem.ch_letdownplayer == 1 && !pbOwnedByPlayerSerious?
-        skipletdown = true
+    # Labels the move being used as "move"
+    move = choice[2]
+    return if !move # if move was not chosen somehow
+    # Try to use the move (inc. disobedience)
+    @lastMoveFailed = false
+    if !pbTryUseMove(choice, move, specialUsage, skipAccuracyCheck)
+      @lastMoveUsed = nil
+      @lastMoveUsedType = nil
+      if !specialUsage
+        @lastRegularMoveUsed = nil
+        @lastRegularMoveTarget = -1
       end
-      if !skipletdown
-        letdownrng = rand(1..100)
-        letdownprob = [0, 1, 5, 10, 25, 50, 50]#Just in case
-        if letdownprob[$PokemonSystem.ch_letdown] >= letdownrng
-          isletdown = true
-          normallogic = false
-          move = PokeBattle_Move.from_pokemon_move(@battle, Pokemon::Move.new(:SPLASH))
-        end
-      end
+      @battle.pbGainExp # In case self is KO'd due to confusion
+      pbCancelMoves
+      pbEndTurn(choice)
+      return
     end
-    if $PokemonSystem.ch_metronome && !usingMultiTurnAttack? && !specialUsage && !isletdown
-      if $PokemonSystem.ch_metronome == 1 || ($PokemonSystem.ch_metronome == 2 && pbOwnedByPlayerSerious?)
-        move = PokeBattle_Move.from_pokemon_move(@battle, Pokemon::Move.new(:METRONOME))
-        normallogic = false
-      end
-    end
-    if normallogic
-      # Labels the move being used as "move"
-      move = choice[2]
-      return if !move # if move was not chosen somehow
-      # Try to use the move (inc. disobedience)
-      @lastMoveFailed = false
-      if !pbTryUseMove(choice, move, specialUsage, skipAccuracyCheck)
+    move = choice[2] # In case disobedience changed the move to be used
+    return if !move # if move was not chosen somehow
+    # Subtract PP
+    if !specialUsage
+      if !pbReducePP(move)
+        @battle.pbDisplay(_INTL("{1} used {2}!", pbThis, move.name))
+        @battle.pbDisplay(_INTL("But there was no PP left for the move!"))
         @lastMoveUsed = nil
         @lastMoveUsedType = nil
-        if !specialUsage
-          @lastRegularMoveUsed = nil
-          @lastRegularMoveTarget = -1
-        end
-        @battle.pbGainExp # In case self is KO'd due to confusion
+        @lastRegularMoveUsed = nil
+        @lastRegularMoveTarget = -1
+        @lastMoveFailed = true
         pbCancelMoves
         pbEndTurn(choice)
         return
-      end
-      move = choice[2] # In case disobedience changed the move to be used
-      return if !move # if move was not chosen somehow
-      # Subtract PP
-      if !specialUsage
-        if !pbReducePP(move)
-          @battle.pbDisplay(_INTL("{1} used {2}!", pbThis, move.name))
-          @battle.pbDisplay(_INTL("But there was no PP left for the move!"))
-          @lastMoveUsed = nil
-          @lastMoveUsedType = nil
-          @lastRegularMoveUsed = nil
-          @lastRegularMoveTarget = -1
-          @lastMoveFailed = true
-          pbCancelMoves
-          pbEndTurn(choice)
-          return
-        end
       end
     end
     # Stance Change
@@ -462,8 +437,7 @@ class PokeBattle_Battler
         end
         realNumHits += 1
         break if user.fainted?
-        break if [:SLEEP].include?(user.status) && (!$PokemonSystem.drowsy || $PokemonSystem.drowsy == 0)
-        break if [:FROZEN].include?(user.status) && (!$PokemonSystem.frostbite || $PokemonSystem.frostbite == 0)
+        break if [:SLEEP, :FROZEN].include?(user.status)
         # NOTE: If a multi-hit move becomes disabled partway through doing those
         #       hits (e.g. by Cursed Body), the rest of the hits continue as
         #       normal.
@@ -621,8 +595,8 @@ class PokeBattle_Battler
     end
   end
 
-  def ensure_form_has_sprite(pokemon,spriteform_body,spriteform_head)
-    GameData::Species.sprite_filename(pokemon.dexNum, spriteform_body,spriteform_head)
+  def ensure_form_has_sprite(pokemon)
+    GameData::Species.sprite_filename(pokemon.dexNum)
   end
 
 
@@ -652,32 +626,14 @@ class PokeBattle_Battler
   def changeFormSpecies(oldForm, newForm,animation = "UltraBurst2")
     @pokemon.changeFormSpecies(oldForm,newForm)
     playChangeFormAnimation(animation)
-
-    # is_already_old_form = @pokemon.isFusionOf(oldForm)  #A 466
-    # is_already_new_form = @pokemon.isFusionOf(newForm)  #P
-    #
-    #
-    # #reverse the fusion if it's a meloA and meloP fusion
-    # # There's probably a smarter way to do this but laziness lol
-    # if is_already_old_form && is_already_new_form
-    #   if @pokemon.species_data.get_body_species() == oldForm
-    #     changeSpeciesSpecific(@pokemon,getFusedPokemonIdFromSymbols(newForm,oldForm))
-    #   else
-    #     changeSpeciesSpecific(@pokemon,getFusedPokemonIdFromSymbols(oldForm,newForm))
-    #   end
-    #   playChangeFormAnimation(animation)
-    # else
-    #   changeSpecies(@pokemon, oldForm, newForm, animation) if is_already_old_form
-    #   changeSpecies(@pokemon, newForm, oldForm, animation) if is_already_new_form
-    # end
   end
 
- 
+
   def changeForm(newForm, formChangingSpecies, animation = "UltraBurst2")
     spriteform_body = newForm if @pokemon.hasBodyOf?(formChangingSpecies)
     spriteform_head = newForm if @pokemon.hasHeadOf?(formChangingSpecies)
 
-    ensure_form_has_sprite(@pokemon,spriteform_body,spriteform_head)
+    #ensure_form_has_sprite(@pokemon)
 
     if self.isFusion?
       current_form_has_custom = customSpriteExistsSpecies(@pokemon.species)
@@ -691,9 +647,7 @@ class PokeBattle_Battler
       @pokemon.spriteform_body = spriteform_body
       @pokemon.spriteform_head = spriteform_head
     end
-    @battle.scene.pbChangePokemon(self, @pokemon)
-    @battle.scene.pbCommonAnimation(animation, self)
-    @battle.scene.pbRefreshOne(@index)
+    playChangeFormAnimation(animation)
   end
 
   #=============================================================================

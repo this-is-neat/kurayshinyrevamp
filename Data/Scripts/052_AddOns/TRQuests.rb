@@ -64,6 +64,17 @@ def finishTRQuest(id, status, silent = false)
   pbSetQuest(id, true)
 end
 
+def repairLegacyPinkanQuestProgress()
+  return if !$Trainer || !$game_switches
+  return if !$game_switches[SWITCH_PINKAN_FINISHED]
+  if isQuestAlreadyAccepted?("tr_pinkan") && !pbCompletedQuest?("tr_pinkan")
+    pbSetQuest("tr_pinkan", true)
+  end
+  if isQuestAlreadyAccepted?(66) && !pbCompletedQuest?(66)
+    pbSetQuest(66, true)
+  end
+end
+
 TR_QUESTS = {
   "tr_cerulean_1" => Quest.new(0, "Creepy Crawlies", "The Team Rocket Captain has tasked you with clearing the bug infestation in the temporary Rocket HQ in Cerulean City", QuestBranchRocket, "rocket_petrel", "Cerulean City", TRQuestColor),
   "tr_cerulean_2" => Quest.new(0, "No Fishing Zone", "Intimidate the fishermen at Nugget Bridge until they leave the area.", QuestBranchRocket, "rocket_petrel", "Cerulean City", TRQuestColor),

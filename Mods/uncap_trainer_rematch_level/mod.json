@@ -1,0 +1,15 @@
+{
+  "name": "Uncap Trainer Rematch Level",
+  "id": "uncap_trainer_rematch_level",
+  "version": "1.0.0",
+  "author": "An Unsocial Pigeon",
+  "description": [
+    "Removes the level cap applied to trainer rematch scaling.",
+    "Converted to the folder-based KIF mod loader format."
+  ],
+  "tags": ["Gameplay", "QoL"],
+  "dependencies": [],
+  "incompatible": [],
+  "settings": [],
+  "scripts": ["main.rb"]
+}

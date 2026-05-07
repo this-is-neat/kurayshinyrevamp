@@ -33,7 +33,13 @@ module GameData
       return other if other.is_a?(self)
       other = other.to_sym if other.is_a?(String)
 
+      #B1H1 - old format (still supported)
       if other.to_s.match?(/\AB\d+H\d+\z/)
+        species = GameData::FusedSpecies.new(other)
+        return species
+      end
+
+      if other.to_s.include?("/")
         species = GameData::FusedSpecies.new(other)
         return species
       end
@@ -48,13 +54,12 @@ module GameData
       end
 
       if !self::DATA.has_key?(other)
-        echoln _INTL("Unknown ID {1}.", other)
-        return self::get(:PIKACHU)
+        if self == GameData::Item
+          return nil
+        else
+          return self::get(:PIKACHU)
+        end
       end
-
-      #if other == :Species
-
-      #     end
       return self::DATA[other]
     end
 
@@ -65,10 +70,17 @@ module GameData
       validate other => [Symbol, self, String, Integer]
       return other if other.is_a?(self)
       other = other.to_sym if other.is_a?(String)
-      if other.to_s.match?(/\AB\d+H\d+\z/)
+
+      if other.to_s.match?(/\AB\d+H\d+\z/) #old format (still supported)
         species = GameData::FusedSpecies.new(other)
         return species
       end
+
+      if other.to_s.include?("_x_") #new format
+        species = GameData::FusedSpecies.new(other)
+        return species
+      end
+
       if other.is_a?(Integer) && self == GameData::Species
         if other > NB_POKEMON
           body_id = getBodyID(other)
@@ -77,10 +89,10 @@ module GameData
           return GameData::FusedSpecies.new(pokemon_id)
         end
       end
-      
-#      if other.is_a?(Integer)
-#        p "Please switch to symbols, thanks."
-#      end
+
+      #      if other.is_a?(Integer)
+      #        p "Please switch to symbols, thanks."
+      #      end
       return (self::DATA.has_key?(other)) ? self::DATA[other] : nil
     end
 
@@ -267,54 +279,5 @@ module GameData
     TrainerExpert.load
     Metadata.load
     MapMetadata.load
-
-    #Sylvi Items
-
-    # I just put item data here unless we get a better system for this
-    # Use ID numbers 1000 and above!!
-    # https://essentialsdocs.fandom.com/wiki/Defining_an_item?oldid=1031#PBS_file_%22items.txt%22
-
-    #Item.register({
-    #  :id               => :MARIO,
-    #  :id_number        => 1000,
-    #  :name             => "Mario",
-    #  :name_plural      => "Marios",
-    #  :pocket           => 1,
-    #  :price            => 1000,
-    #  :description      => "A Mario.",
-    #  :field_use        => 1,
-    #  :battle_use       => 0,
-    #  :type             => 7,
-    #  :move             => nil
-    #})
-    #MessageTypes.set(MessageTypes::Items,            1000, "Mario")
-    #MessageTypes.set(MessageTypes::ItemPlurals,      1000, "Marios")
-    #MessageTypes.set(MessageTypes::ItemDescriptions, 1000, "A Mario.")
-    
-    # Item.register({
-    #  :id               => :HPREINFORCER,
-    #  :id_number        => 2000,
-    #  :name             => "HP Reinforcer",
-    #  :name_plural      => "HP Reinforcers",
-    #  :pocket           => 1,
-    #  :price            => 1000,
-    #  :description      => "A Mario.",
-    #  :field_use        => 1,
-    #  :battle_use       => 0,
-    #  :type             => 7,
-    #  :move             => nil
-    # })
-    # MessageTypes.set(MessageTypes::Items,            1000, "Mario")
-    # MessageTypes.set(MessageTypes::ItemPlurals,      1000, "Marios")
-    # MessageTypes.set(MessageTypes::ItemDescriptions, 1000, "A Mario.")
-
-    # _INTL("Items"),
-    # _INTL("Medicine"),
-    # _INTL("Poké Balls"),
-    # _INTL("TMs & HMs"),
-    # _INTL("Berries"),
-    # _INTL("Mail"),
-    # _INTL("Battle Items"),
-    # _INTL("Key Items")
   end
 end

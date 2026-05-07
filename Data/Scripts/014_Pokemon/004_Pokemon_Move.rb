@@ -18,22 +18,6 @@ class Pokemon
       @pp   = total_pp
     end
 
-    #KurayX
-    def as_json(options={})
-      {
-        "id" => @id,
-        "pp" => @pp,
-        "ppup" => @ppup
-      }
-    end
-
-    #KurayX
-    def load_json(jsonparse)
-      @id = jsonparse['id']
-      @pp = jsonparse['pp']
-      @ppup = jsonparse['ppup']
-    end
-
     # Sets this move's ID, and caps the PP amount if it is now greater than this
     # move's total PP.
     # @param value [Symbol, String, Integer] the new move ID

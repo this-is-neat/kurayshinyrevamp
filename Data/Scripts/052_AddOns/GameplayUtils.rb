@@ -1,4 +1,22 @@
 #todo: make the flower disappear from the tileset somehow?
+def setDialogIconOff(eventId=nil)
+  eventId = @event_id if !eventId && defined?(@event_id)
+  return if !eventId || !$game_map || !$game_map.respond_to?(:events)
+  event = $game_map.events[eventId]
+  return if !event
+  event.setDialogIconManualOffValue(true) if event.respond_to?(:setDialogIconManualOffValue)
+  event.setTradeIconManualOffValue(true) if event.respond_to?(:setTradeIconManualOffValue)
+end
+
+def setDialogIconOn(eventId=nil)
+  eventId = @event_id if !eventId && defined?(@event_id)
+  return if !eventId || !$game_map || !$game_map.respond_to?(:events)
+  event = $game_map.events[eventId]
+  return if !event
+  event.setDialogIconManualOffValue(false) if event.respond_to?(:setDialogIconManualOffValue)
+  event.setTradeIconManualOffValue(false) if event.respond_to?(:setTradeIconManualOffValue)
+end
+
 def oricorioEventPickFlower(flower_color)
   quest_progression = pbGet(VAR_ORICORIO_FLOWERS)
   if flower_color == :PINK
@@ -1193,6 +1211,42 @@ def setRivalStarter(starterIndex1,starterIndex2)
   return starter
 end
 
+def setStarterEasterEgg()
+  should_apply_easter_egg = true
+  trainer_name = $Trainer && $Trainer.name ? $Trainer.name.downcase : ""
+  case trainer_name
+  when "ash"
+    starter = :PIKACHU
+    rival_starter_body = :EEVEE
+    rival_starter_head = :EEVEE
+  when "gary"
+    starter = :EEVEE
+    rival_starter_body = :PIKACHU
+    rival_starter_head = :PIKACHU
+  when "god"
+    starter = :BIDOOF
+    rival_starter_body = :ARCEUS
+    rival_starter_head = :OMANYTE
+  when "?"
+    starter = getSpecies(rand(NB_POKEMON))
+    rival_starter_body = getSpecies(rand(NB_POKEMON))
+    rival_starter_head = getSpecies(rand(NB_POKEMON))
+  when "schrroms", "frogman", "frogzilla", "chardub"
+    starter = fusionOf(:POLIWAG, :MACHAMP)
+    rival_starter_body = :POLIWAG
+    rival_starter_head = :MACHAMP
+  else
+    should_apply_easter_egg = false
+  end
+
+  if should_apply_easter_egg
+    pbSet(VAR_PLAYER_STARTER_CHOICE, getDexNumberForSpecies(starter))
+    pbSet(VAR_RIVAL_STARTER_HEAD_CHOICE, getDexNumberForSpecies(rival_starter_head))
+    pbSet(VAR_RIVAL_STARTER_BODY_CHOICE, getDexNumberForSpecies(rival_starter_body))
+    $game_switches[SWITCH_CUSTOM_STARTERS] = true
+  end
+end
+
 def ensureRandomHashInitialized()
   if $PokemonGlobal.psuedoBSTHash == nil
     psuedoHash = Hash.new
@@ -1232,6 +1286,45 @@ def getGameModeFromIndex(index)
   return "Species" if index == 4
   return "Debug" if index ==5
   return ""
+end
+
+def apply_selected_game_mode(mode)
+  $game_switches[SWITCH_MODERN_MODE] = false
+  $game_switches[SWITCH_EXPERT_MODE] = false
+  $game_switches[SWITCH_SINGLE_POKEMON_MODE] = false if defined?(SWITCH_SINGLE_POKEMON_MODE)
+  $game_switches[SWITCH_SINGLE_POKEMON_MODE_HEAD] = false if defined?(SWITCH_SINGLE_POKEMON_MODE_HEAD)
+  $game_switches[SWITCH_SINGLE_POKEMON_MODE_BODY] = false if defined?(SWITCH_SINGLE_POKEMON_MODE_BODY)
+  $game_switches[SWITCH_SINGLE_POKEMON_MODE_RANDOM] = false if defined?(SWITCH_SINGLE_POKEMON_MODE_RANDOM)
+  $game_switches[SWITCH_LEGENDARY_MODE] = false if defined?(SWITCH_LEGENDARY_MODE)
+  case mode
+  when :remix
+    $game_switches[SWITCH_MODERN_MODE] = true
+    selected_mode = 2
+  when :expert
+    $game_switches[SWITCH_EXPERT_MODE] = true
+    selected_mode = 3
+  else
+    selected_mode = 0
+  end
+  $Trainer.game_mode = selected_mode if $Trainer && $Trainer.respond_to?(:game_mode=)
+  return selected_mode
+end
+
+def select_game_mode
+  current_choice = 0
+  current_choice = 1 if $game_switches[SWITCH_MODERN_MODE]
+  current_choice = 2 if $game_switches[SWITCH_EXPERT_MODE]
+  commands = [_INTL("Classic"), _INTL("Remix"), _INTL("Expert")]
+  choice = pbMessage(_INTL("Choose a game mode."), commands, current_choice)
+  choice = current_choice if choice.nil? || choice < 0 || choice >= commands.length
+  case choice
+  when 1
+    return apply_selected_game_mode(:remix)
+  when 2
+    return apply_selected_game_mode(:expert)
+  else
+    return apply_selected_game_mode(:classic)
+  end
 end
 
 

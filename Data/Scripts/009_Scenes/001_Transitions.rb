@@ -1166,6 +1166,7 @@ module Transitions
       @bgsprite.bitmap = @buffer
       @frame = []
       @blacksprites = []
+      column_order = [0,4,1,6,7,2,5,3]
       for i in 0...cy
         for j in 0...cx
           k = i*cx+j
@@ -1174,7 +1175,7 @@ module Transitions
           @blacksprites[k].y = @blackbitmap.height*i
           @blacksprites[k].visible = false
           @blacksprites[k].bitmap = @blackbitmap
-          @frame[k] = (((cy-i-1)*8+[0,4,1,6,7,2,5,3][j])*(@numframes*0.75)/@numtiles).floor
+          @frame[k] = (((cy-i-1)*column_order.length+column_order[j % column_order.length])*(@numframes*0.75)/@numtiles).floor
         end
       end
       @ballsprites = []

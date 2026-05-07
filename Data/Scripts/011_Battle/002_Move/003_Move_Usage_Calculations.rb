@@ -265,7 +265,6 @@ class PokeBattle_Move
     damage  = (((2.0 * user.level / 5 + 2).floor * baseDmg * atk / defense).floor / 50).floor + 2
     damage  = [(damage  * multipliers[:final_damage_multiplier]).round, 1].max
     target.damageState.calcDamage = damage
-    echo("\n"+damage.to_s+" damage!\n")
   end
 
   def pbCalcDamageMultipliers(user,target,numTargets,type,baseDmg,multipliers)
@@ -399,10 +398,6 @@ class PokeBattle_Move
       if target.pbHasType?(:ROCK) && specialMove? && @function != "122"   # Psyshock
         multipliers[:defense_multiplier] *= 1.5
       end
-    when :Hail
-      if target.pbHasType?(:ICE) && (physicalMove? || @function = "122") && ($PokemonSystem.modernhail && $PokemonSystem.modernhail != 0)
-        multipliers[:defense_multiplier] *= 1.5
-      end
     end
     # Critical hits
     if target.damageState.critical
@@ -413,7 +408,7 @@ class PokeBattle_Move
       end
     end
     # Random variance
-    if !self.is_a?(PokeBattle_Confusion) && $PokemonSystem.damage_variance==1 && !$game_switches[850]
+    if !self.is_a?(PokeBattle_Confusion)
       random = 85+@battle.pbRandom(16)
       multipliers[:final_damage_multiplier] *= random / 100.0
     end
@@ -430,14 +425,6 @@ class PokeBattle_Move
     # Burn
     if user.status == :BURN && physicalMove? && damageReducedByBurn? &&
        !user.hasActiveAbility?(:GUTS)
-      multipliers[:final_damage_multiplier] /= 2
-    end
-    #Frostbite
-    if user.status == :FROZEN && ($PokemonSystem.frostbite && $PokemonSystem.frostbite != 0) && specialMove? && !user.hasActiveAbility?(:GUTS)
-      multipliers[:final_damage_multiplier] /= 2
-    end
-    #Drowsy
-    if user.status == :SLEEP && ($PokemonSystem.drowsy && $PokemonSystem.drowsy != 0) && !user.hasActiveAbility?(:GUTS)
       multipliers[:final_damage_multiplier] /= 2
     end
     # Aurora Veil, Reflect, Light Screen

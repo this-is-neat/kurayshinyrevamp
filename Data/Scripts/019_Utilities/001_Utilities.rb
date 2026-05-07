@@ -233,14 +233,9 @@ def pbTrainerName(name = nil, outfit = 0)
   if name.nil?
     name = pbEnterPlayerName(_INTL("Enter your name"), 0, Settings::MAX_PLAYER_NAME_SIZE)
     if name.nil? || name.empty?
-      # player_metadata = GameData::Metadata.get_player($Trainer.character_ID)
-      # trainer_type = (player_metadata) ? player_metadata[0] : nil
-      #  gender = pbGetTrainerTypeGender(trainer_type)
-      if $game_variables[52] == 0
-        name = "Green"
-      else
-        name = "Red"
-      end
+      gender = nil
+      gender = pbGetTrainerTypeGender($Trainer.trainer_type) rescue nil
+      name = getPlayerDefaultName(gender)
     end
   end
   $Trainer.name   = name
@@ -265,6 +260,16 @@ def pbSuggestTrainerName(gender)
   return userName
   # Unreachable
 #  return getRandomNameEx(gender, nil, 1, Settings::MAX_PLAYER_NAME_SIZE)
+end
+
+def getPlayerDefaultName(gender = nil)
+  gender = pbGet(VAR_TRAINER_GENDER) if gender.nil?
+  return "Green" if gender == GENDER_FEMALE
+  return "Red" if gender == GENDER_MALE
+  return ($game_variables[52] == 0) ? "Green" : "Red" if $game_variables && !$game_variables[52].nil?
+  suggested_name = pbSuggestTrainerName(gender)
+  return suggested_name if suggested_name && !suggested_name.empty?
+  return "Player"
 end
 
 def pbGetUserName
@@ -601,13 +606,4 @@ def pbScreenCapture
   capturefile = RTP.getSaveFileName(sprintf("%s.png", filestart))
   Graphics.screenshot(capturefile)
   pbSEPlay("Pkmn exp full") if FileTest.audio_exist?("Audio/SE/Pkmn exp full")
-end
-
-
-def pbDominantFusionTypes?
-  return true if $PokemonSystem.dominant_fusion_types==1 #|| $game_switches[850]
-  if !$game_switches.nil?
-    return true if $game_switches[850]
-  end
-  return false
 end

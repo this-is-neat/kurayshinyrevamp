@@ -1,3 +1,9 @@
+def pbDominantFusionTypes?
+  return false if !$PokemonSystem
+  return false if !$PokemonSystem.respond_to?(:dominant_fusion_types)
+  return $PokemonSystem.dominant_fusion_types == 1
+end
+
 module GameData
   class FusedSpecies < GameData::Species
     attr_reader :growth_rate

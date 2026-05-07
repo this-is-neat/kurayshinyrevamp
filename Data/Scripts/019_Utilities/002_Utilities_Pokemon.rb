@@ -7,11 +7,9 @@ end
 
 def pbNickname(pkmn)
   species_name = pkmn.speciesName
-  if $PokemonSystem.skipcaughtnickname != 1
-    if pbConfirmMessage(_INTL("Would you like to give a nickname to {1}?", species_name))
-      pkmn.name = pbEnterPokemonName(_INTL("{1}'s nickname?", species_name),
-                                    0, Pokemon::MAX_NAME_SIZE, "", pkmn)
-    end
+  if pbConfirmMessage(_INTL("Would you like to give a nickname to {1}?", species_name))
+    pkmn.name = pbEnterPokemonName(_INTL("{1}'s nickname?", species_name),
+                                   0, Pokemon::MAX_NAME_SIZE, "", pkmn)
   end
 end
 
@@ -22,7 +20,7 @@ def pbStorePokemon(pkmn)
     return
   end
   pkmn.record_first_moves
-  if ($Trainer.party_full? && $PokemonGlobal.pokemonSelectionOriginalParty==nil) || ($PokemonGlobal.pokemonSelectionOriginalParty!=nil && $PokemonGlobal.pokemonSelectionOriginalParty.length >= Settings::MAX_PARTY_SIZE)
+  if $Trainer.party_full?
     oldcurbox = $PokemonStorage.currentBox
     storedbox = $PokemonStorage.pbStoreCaught(pkmn)
     curboxname = $PokemonStorage[oldcurbox].name
@@ -33,23 +31,19 @@ def pbStorePokemon(pkmn)
       if creator
         pbMessage(_INTL("Box \"{1}\" on {2}'s PC was full.\1", curboxname, creator))
       else
-        pbMessage(_INTL("Box \"{1}\" on someone's PC was full.\1", curboxname))
+        pbMessage(_INTL("Box \"{1}\" on the PC was full.\1", curboxname))
       end
       pbMessage(_INTL("{1} was transferred to box \"{2}.\"", pkmn.name, boxname))
     else
       if creator
         pbMessage(_INTL("{1} was transferred to {2}'s PC.\1", pkmn.name, creator))
       else
-        pbMessage(_INTL("{1} was transferred to someone's PC.\1", pkmn.name))
+        pbMessage(_INTL("{1} was transferred to the PC.\1", pkmn.name))
       end
       pbMessage(_INTL("It was stored in box \"{1}.\"", boxname))
     end
   else
-    if $PokemonGlobal.pokemonSelectionOriginalParty!=nil
-      $PokemonGlobal.pokemonSelectionOriginalParty.push(pkmn)
-    else
-      $Trainer.party[$Trainer.party.length] = pkmn
-    end
+    $Trainer.party[$Trainer.party.length] = pkmn
   end
 end
 
@@ -63,8 +57,8 @@ def pbNicknameAndStore(pkmn)
   $Trainer.pokedex.set_owned(pkmn.species)
   pbNickname(pkmn)
   promptCaughtPokemonAction(pkmn)
-  
-  # pbStorePokemon(pkmn)
+
+  #pbStorePokemon(pkmn)
 end
 
 #===============================================================================
@@ -166,6 +160,45 @@ def pbGenerateEgg(pkmn, text = "")
 end
 alias pbAddEgg pbGenerateEgg
 alias pbGenEgg pbGenerateEgg
+
+def addLegendaryEggsToPC(count = nil)
+  return false if !$PokemonStorage
+
+  egg_count = count.to_i
+  if egg_count <= 0
+    configured_count = $PokemonSystem && $PokemonSystem.respond_to?(:gymrewardeggs) ? $PokemonSystem.gymrewardeggs.to_i : 0
+    egg_count = configured_count > 0 ? configured_count : 3
+  end
+
+  added = 0
+  egg_count.times do
+    break if $PokemonStorage.full?
+    species = nil
+    species = kurayeggs_choose(3, "Legendary") if defined?(kurayeggs_choose)
+    species = LEGENDARIES_LIST.sample if !species && defined?(LEGENDARIES_LIST) && LEGENDARIES_LIST.is_a?(Array) && !LEGENDARIES_LIST.empty?
+    next if !species
+
+    egg = Pokemon.new(species, Settings::EGG_LEVEL)
+    egg.name           = _INTL("Egg")
+    egg.steps_to_hatch = egg.species_data.hatch_steps
+    egg.obtain_text    = _INTL("Legendary reward egg")
+    egg.calc_stats
+    $PokemonStorage.pbStoreCaught(egg)
+    added += 1
+  end
+
+  if added == 0
+    Kernel.pbMessage(_INTL("There was no room to transfer any Legendary Eggs to the PC."))
+    return false
+  end
+
+  if added == 1
+    Kernel.pbMessage(_INTL("A Legendary Egg was transferred to the PC."))
+  else
+    Kernel.pbMessage(_INTL("{1} Legendary Eggs were transferred to the PC.", added))
+  end
+  return true
+end
 
 #===============================================================================
 # Analyse Pokémon in the party
@@ -275,8 +308,8 @@ def pbHasEgg?(species)
   evoSpecies = species_data.get_evolutions(true)
   compatSpecies = (evoSpecies && evoSpecies[0]) ? evoSpecies[0][0] : species
   species_data = GameData::Species.try_get(compatSpecies)
-  compat = Array(species_data.egg_groups)#make sure it's an array
-  return false if compat.include?(:Undiscovered) || compat.include?(:HeadUndiscovered) || compat.include?(:Ditto)
+  compat = species_data.egg_groups
+  return false if compat.include?(:Undiscovered) || compat.include?(:Ditto)
   baby = GameData::Species.get(species).get_baby_species
   return true if species == baby   # Is a basic species
   baby = GameData::Species.get(species).get_baby_species(true)

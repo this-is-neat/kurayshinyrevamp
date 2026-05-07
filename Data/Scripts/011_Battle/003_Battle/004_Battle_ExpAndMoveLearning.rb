@@ -59,11 +59,6 @@ class PokeBattle_Battle
   def pbGainEVsOne(idxParty, defeatedBattler)
     pkmn = pbParty(0)[idxParty] # The Pokémon gaining EVs from defeatedBattler
     evYield = defeatedBattler.pokemon.evYield
-    if $PokemonSystem.evstrain && $PokemonSystem.evstrain > 0
-      # Remove all yield EVs from opponents, except Power items.
-      evYield = {}
-      GameData::Stat.each_main { |s| evYield[s.id] = 0 }
-    end
     # Num of effort points pkmn already has
     evTotal = 0
     GameData::Stat.each_main { |s| evTotal += pkmn.ev[s.id] }
@@ -94,7 +89,7 @@ class PokeBattle_Battle
     end
   end
 
-  
+
   def pbGainExpOne(idxParty, defeatedBattler, numPartic, expShare, expAll, showMessages = true)
     pkmn = pbParty(0)[idxParty] # The Pokémon gaining EVs from defeatedBattler
     growth_rate = pkmn.growth_rate
@@ -121,46 +116,14 @@ class PokeBattle_Battle
       end
     elsif isPartic # Participated in battle, no Exp Shares held by anyone
       exp = a / (Settings::SPLIT_EXP_BETWEEN_GAINERS ? numPartic : 1)
-    # elsif expAll # Didn't participate in battle, gaining Exp due to Exp All
-    #   # NOTE: Exp All works like the Exp Share from Gen 6+, not like the Exp All
-    #   #       from Gen 1, i.e. Exp isn't split between all Pokémon gaining it.
-    #   exp = a / 2
-    # end
-    # Trapstarr's expAll redistribution
-    elsif expAll
-      total_exp = a / 2 # Total experience to be distributed among the party
-  
-      if $PokemonSystem.expall_redist == nil || $PokemonSystem.expall_redist == 0
-        exp = a / 2
-      else
-        # Determine the highest level Pokémon in the party
-        highest_level = $Trainer.party.max_by(&:level).level
-
-        # Check if all Pokémon are of the same level
-        if $Trainer.party.all? { |pokemon| pokemon.level == highest_level }
-          exp = a / 2
-        else
-          # Calculate the level differences, with a smoothly transitioning emphasis on redistribution
-          differences = $Trainer.party.map do |pokemon| 
-            diff = highest_level - pokemon.level
-            emphasis = 1 + (0.05 + $PokemonSystem.expall_redist ** 1.1 / 1000.0)
-            (diff ** emphasis)
-          end
-          normalized_diffs = differences.map { |diff| diff.to_f / differences.sum }
-          exp = (total_exp * normalized_diffs[$Trainer.party.index(pkmn)]).round
-        end
-      end
+    elsif expAll # Didn't participate in battle, gaining Exp due to Exp All
+      # NOTE: Exp All works like the Exp Share from Gen 6+, not like the Exp All
+      #       from Gen 1, i.e. Exp isn't split between all Pokémon gaining it.
+      exp = a / 2
     end
     return if exp <= 0
     # Pokémon gain more Exp from trainer battles
-    if !$PokemonSystem.trainerexpboost
-      k_expmult = 1.5
-    else
-      k_expmult = (100 + $PokemonSystem.trainerexpboost)/100.0
-    end
-    # puts "k_expmult: #{k_expmult}"
-    # exp = (exp * 1.5).floor if trainerBattle?
-    exp = (exp * k_expmult).floor if trainerBattle?
+    exp = (exp * 1.5).floor if trainerBattle?
     # Scale the gained Exp based on the gainer's level (or not)
     if Settings::SCALED_EXP_FORMULA
       exp /= 5
@@ -191,9 +154,15 @@ class PokeBattle_Battle
     end
     exp = i if i >= 0
     # Make sure Exp doesn't exceed the maximum
+
+    exp = 0 if $PokemonSystem.level_caps==1 && pokemonExceedsLevelCap(pkmn)
+
     expFinal = growth_rate.add_exp(pkmn.exp, exp)
-    # expFinal *= 10000
     expGained = expFinal - pkmn.exp
+
+
+
+
     return if expGained <= 0
     # "Exp gained" message
     if showMessages
@@ -205,12 +174,15 @@ class PokeBattle_Battle
     end
     curLevel = pkmn.level
     newLevel = growth_rate.level_from_exp(expFinal)
-    # if newLevel < curLevel
-    #   debugInfo = "Levels: #{curLevel}->#{newLevel} | Exp: #{pkmn.exp}->#{expFinal} | gain: #{expGained}"
-    #   raise RuntimeError.new(
-    #     _INTL("{1}'s new level is less than its\r\ncurrent level, which shouldn't happen.\r\n[Debug: {2}]",
-    #           pkmn.name, debugInfo))
-    # end
+    dontAnimate=false
+    if newLevel < curLevel
+      dontAnimate = true
+      # debugInfo = "Levels: #{curLevel}->#{newLevel} | Exp: #{pkmn.exp}->#{expFinal} | gain: #{expGained}"
+      # raise RuntimeError.new(
+      #   echoln  "{1}'s new level is less than its\r\ncurrent level, which shouldn't happen.\r\n[Debug: {2}]",
+      #         pkmn.name, debugInfo)
+      pbDisplayPaused(_INTL("{1}'s growth rate has changed to '{2}''. Its level will be adjusted to reflect its current exp.", pkmn.name, pkmn.growth_rate.real_name))
+    end
     # Give Exp
     if pkmn.shadowPokemon?
       pkmn.exp += expGained
@@ -226,6 +198,8 @@ class PokeBattle_Battle
       tempExp2 = (levelMaxExp < expFinal) ? levelMaxExp : expFinal
       pkmn.exp = tempExp2
 
+
+
       if pkmn.isFusion?
         if pkmn.exp_gained_since_fused == nil
           pkmn.exp_gained_since_fused = expGained
@@ -234,33 +208,13 @@ class PokeBattle_Battle
         end
 
       end
-      if $PokemonSystem.kuraylevelcap != 0 && pkmn.exp >= growth_rate.minimum_exp_for_level(getkuraylevelcap())
-        # if tempExp1 < levelMaxExp && $PokemonSystem.levelcapbehavior != 2
-        if tempExp1 < levelMaxExp && $PokemonSystem.levelcapbehavior != 2
-          @scene.pbEXPBar(battler, levelMinExp, levelMaxExp, tempExp1, levelMaxExp)
-          @scene.pbRefreshOne(battler.index) if battler
-        end
-        if $PokemonSystem.levelcapbehavior != 0
-          pkmn.exp = [growth_rate.minimum_exp_for_level(getkuraylevelcap()), expFinal].min
-        else
-          pkmn.exp = expFinal
-        end
-        if $PokemonSystem.levelcapbehavior != 2
-          break
-        # elsif pkmn.exp > growth_rate.minimum_exp_for_level(getkuraylevelcap()+1)
-          # break
-        end
-      end
-      @scene.pbEXPBar(battler, levelMinExp, levelMaxExp, tempExp1, tempExp2)
+      @scene.pbEXPBar(battler, levelMinExp, levelMaxExp, tempExp1, tempExp2) if !dontAnimate
+
+
       tempExp1 = tempExp2
       curLevel += 1
-      if curLevel > newLevel || curLevel > GameData::GrowthRate.max_level
+      if curLevel > newLevel
         # Gained all the Exp now, end the animation
-        if $PokemonSystem.kuraylevelcap != 0 && pkmn.exp > growth_rate.minimum_exp_for_level(getkuraylevelcap()+1)
-          if $PokemonSystem.levelcapbehavior == 2
-            pkmn.exp = growth_rate.minimum_exp_for_level(getkuraylevelcap())
-          end
-        end
         pkmn.calc_stats
         battler.pbUpdate(false) if battler
         @scene.pbRefreshOne(battler.index) if battler
@@ -268,33 +222,29 @@ class PokeBattle_Battle
       end
       # Levelled up
       pbCommonAnimation("LevelUp", battler) if battler
+      oldTotalHP = pkmn.totalhp
+      oldAttack = pkmn.attack
+      oldDefense = pkmn.defense
+      oldSpAtk = pkmn.spatk
+      oldSpDef = pkmn.spdef
+      oldSpeed = pkmn.speed
       if battler && battler.pokemon
         battler.pokemon.changeHappiness("levelup")
       end
-      if $PokemonSystem.levelcapbehavior == 2 && $PokemonSystem.kuraylevelcap != 0 && curLevel > getkuraylevelcap()
-        if $PokemonBag.pbCanStore?(:RARECANDY, 1)
-          $PokemonBag.pbStoreItem(:RARECANDY, 1)
-          pbDisplayPaused(_INTL("Obtained a Rare Candy!"))
-        end
-      else
-        oldTotalHP = pkmn.totalhp
-        oldAttack = pkmn.attack
-        oldDefense = pkmn.defense
-        oldSpAtk = pkmn.spatk
-        oldSpDef = pkmn.spdef
-        oldSpeed = pkmn.speed
-        pkmn.calc_stats
-        battler.pbUpdate(false) if battler
-        @scene.pbRefreshOne(battler.index) if battler
-        pbDisplayPaused(_INTL("{1} grew to Lv. {2}!", pkmn.name, curLevel))
-        if !$game_switches[SWITCH_NO_LEVELS_MODE]
-          @scene.pbLevelUp(pkmn, battler, oldTotalHP, oldAttack, oldDefense,
-                          oldSpAtk, oldSpDef, oldSpeed)
-        end
-        # Learn all moves learned at this level
-        moveList = pkmn.getMoveList
-        moveList.each { |m| pbLearnMove(idxParty, m[1]) if m[0] == curLevel }
+      pkmn.calc_stats
+      battler.pbUpdate(false) if battler
+      @scene.pbRefreshOne(battler.index) if battler
+      pbDisplayPaused(_INTL("{1} grew to Lv. {2}!", pkmn.name, curLevel))
+      if !$game_switches[SWITCH_NO_LEVELS_MODE]
+        @scene.pbLevelUp(pkmn, battler, oldTotalHP, oldAttack, oldDefense,
+                         oldSpAtk, oldSpDef, oldSpeed)
       end
+
+      echoln "256"
+
+      # Learn all moves learned at this level
+      moveList = pkmn.getMoveList
+      moveList.each { |m| pbLearnMove(idxParty, m[1]) if m[0] == curLevel }
     end
   end
 
@@ -311,7 +261,9 @@ class PokeBattle_Battle
     return if pkmn.moves.any? { |m| m && m.id == newMove }
     # Pokémon has space for the new move; just learn it
     if pkmn.moves.length < Pokemon::MAX_MOVES
-      pkmn.moves.push(Pokemon::Move.new(newMove))
+      move = Pokemon::Move.new(newMove)
+      pkmn.moves.push(move)
+      pkmn.add_learned_move(move)
       pbDisplay(_INTL("{1} learned {2}!", pkmnName, moveName)) { pbSEPlay("Pkmn move learnt") }
       if battler
         battler.moves.push(PokeBattle_Move.from_pokemon_move(self, pkmn.moves.last))
@@ -329,7 +281,9 @@ class PokeBattle_Battle
         if forgetMove >= 0
           oldMoveName = pkmn.moves[forgetMove].name
           pkmn.moves[forgetMove] = Pokemon::Move.new(newMove) # Replaces current/total PP
+          pkmn.add_learned_move(newMove)
           battler.moves[forgetMove] = PokeBattle_Move.from_pokemon_move(self, pkmn.moves[forgetMove]) if battler
+
           pbDisplayPaused(_INTL("1, 2, and... ... ... Ta-da!"))
           pbDisplayPaused(_INTL("{1} forgot how to use {2}. And...", pkmnName, oldMoveName))
           pbDisplay(_INTL("{1} learned {2}!", pkmnName, moveName)) { pbSEPlay("Pkmn move learnt") }

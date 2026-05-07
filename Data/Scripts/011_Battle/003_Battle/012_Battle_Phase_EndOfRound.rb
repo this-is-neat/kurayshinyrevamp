@@ -43,12 +43,7 @@ class PokeBattle_Battle
       when :Sun       then pbDisplay(_INTL("The sunlight faded."))
       when :Rain      then pbDisplay(_INTL("The rain stopped."))
       when :Sandstorm then pbDisplay(_INTL("The sandstorm subsided."))
-      when :Hail
-        if (!$PokemonSystem.modernhail || $PokemonSystem.modernhail != 2)
-          then pbDisplay(_INTL("The hail stopped."))
-        elsif ($PokemonSystem.modernhail && $PokemonSystem.modernhail == 2)
-          then pbDisplay(_INTL("The snow stopped."))
-        end
+      when :Hail      then pbDisplay(_INTL("The hail stopped."))
       when :ShadowSky then pbDisplay(_INTL("The shadow sky faded."))
       end
       @field.weather = :None
@@ -62,18 +57,13 @@ class PokeBattle_Battle
     weather_data = GameData::BattleWeather.try_get(@field.weather)
     pbCommonAnimation(weather_data.animation) if weather_data
     case @field.weather
-#    when :Sun         then pbDisplay(_INTL("The sunlight is strong."))
-#    when :Rain        then pbDisplay(_INTL("Rain continues to fall."))
+#    when :Sun         then pbDisplay("The sunlight is strong.")
+#    when :Rain        then pbDisplay("Rain continues to fall.")
     when :Sandstorm   then pbDisplay(_INTL("The sandstorm is raging."))
-    when :Hail
-      if (!$PokemonSystem.modernhail || $PokemonSystem.modernhail != 2)
-        then pbDisplay(_INTL("The hail is crashing down."))
-      elsif ($PokemonSystem.modernhail && $PokemonSystem.modernhail == 2)
-        then pbDisplay(_INTL("The snow is falling down."))
-      end
-#    when :HarshSun    then pbDisplay(_INTL("The sunlight is extremely harsh."))
-#    when :HeavyRain   then pbDisplay(_INTL("It is raining heavily."))
-#    when :StrongWinds then pbDisplay(_INTL("The wind is strong."))
+    when :Hail        then pbDisplay(_INTL("The hail is crashing down."))
+#    when :HarshSun    then pbDisplay("The sunlight is extremely harsh.")
+#    when :HeavyRain   then pbDisplay("It is raining heavily.")
+#    when :StrongWinds then pbDisplay("The wind is strong.")
     when :ShadowSky   then pbDisplay(_INTL("The shadow sky continues."))
     end
     # Effects due to weather
@@ -95,13 +85,12 @@ class PokeBattle_Battle
         b.pbItemHPHealCheck
         b.pbFaint if b.fainted?
       when :Hail
-        next if ($PokemonSystem.modernhail && $PokemonSystem.modernhail == 2)
         next if !b.takesHailDamage?
-          pbDisplay(_INTL("{1} is buffeted by the hail!",b.pbThis))
-          @scene.pbDamageAnimation(b)
-          b.pbReduceHP(b.totalhp/16,false)
-          b.pbItemHPHealCheck
-          b.pbFaint if b.fainted?
+        pbDisplay(_INTL("{1} is buffeted by the hail!",b.pbThis))
+        @scene.pbDamageAnimation(b)
+        b.pbReduceHP(b.totalhp/16,false)
+        b.pbItemHPHealCheck
+        b.pbFaint if b.fainted?
       when :ShadowSky
         next if !b.takesShadowSkyDamage?
         pbDisplay(_INTL("{1} is hurt by the shadow sky!",b.pbThis))
@@ -218,26 +207,6 @@ class PokeBattle_Battle
     priority = pbPriority(true)   # in order of fastest -> slowest speeds only
     # Weather
     pbEORWeather(priority)
-    # BerserkerIncrease
-    if $PokemonSystem.ch_berserker && $PokemonSystem.ch_berserker != 0
-      @positions.each_with_index do |pos,idxPos|
-        next if !pos || @battlers[idxPos].pbOwnedByPlayerSerious?
-        requiredturns = [1, 3, 2, 1, 1]
-        if requiredturns[$PokemonSystem.ch_berserker] > 1
-          next if @battlers[idxPos].turnCount % requiredturns[$PokemonSystem.ch_berserker] != 0
-        end
-        berserkup = [:ATTACK,1,:DEFENSE,1,:SPECIAL_ATTACK,1,:SPECIAL_DEFENSE,1,:SPEED,1]
-        next if !@battlers[idxPos].pbCanRaiseStatStage?(berserkup[0],@battlers[idxPos],self,true)
-        pbDisplay(_INTL("All stats from {1} increased! [BERSERKER MODE]",@battlers[idxPos].pbThis))
-        showAnim = true
-        for i in 0...berserkup.length/2
-          next if !@battlers[idxPos].pbCanRaiseStatStage?(berserkup[i*2],@battlers[idxPos],self)
-          if @battlers[idxPos].pbRaiseStatStage(berserkup[i*2],berserkup[i*2+1],@battlers[idxPos],showAnim)
-            showAnim = false
-          end
-        end
-      end
-    end
     # Future Sight/Doom Desire
     @positions.each_with_index do |pos,idxPos|
       next if !pos || pos.effects[PBEffects::FutureSightCounter]==0
@@ -401,16 +370,6 @@ class PokeBattle_Battle
       oldHP = b.hp
       dmg = (Settings::MECHANICS_GENERATION >= 7) ? b.totalhp/16 : b.totalhp/8
       dmg = (dmg/2.0).round if b.hasActiveAbility?(:HEATPROOF)
-      b.pbContinueStatus { b.pbReduceHP(dmg,false) }
-      b.pbItemHPHealCheck
-      b.pbAbilitiesOnDamageTaken(oldHP)
-      b.pbFaint if b.fainted?
-    end
-    # Damage from frostbite
-    priority.each do |b|
-      next if (b.status != :FROZEN || !b.takesIndirectDamage?) || (!$PokemonSystem.frostbite || $PokemonSystem.frostbite == 0)
-      oldHP = b.hp
-      dmg = (Settings::MECHANICS_GENERATION >= 7) ? b.totalhp/16 : b.totalhp/8
       b.pbContinueStatus { b.pbReduceHP(dmg,false) }
       b.pbItemHPHealCheck
       b.pbAbilitiesOnDamageTaken(oldHP)

@@ -11,7 +11,7 @@ class PokemonMartAdapter
   end
 
   def setMoney(value)
-    $Trainer.money=value
+    $Trainer.money = value
   end
 
   def getInventory
@@ -26,7 +26,7 @@ class PokemonMartAdapter
     item_name = getName(item)
     if GameData::Item.get(item).is_machine?
       machine = GameData::Item.get(item).move
-      item_name = _INTL("{1} {2}", item_name, GameData::Move.get(machine).name)
+      item_name = "#{item_name} #{GameData::Move.get(machine).name}"
     end
     return item_name
   end
@@ -56,8 +56,6 @@ class PokemonMartAdapter
     if $game_temp.mart_prices && $game_temp.mart_prices[item]
       if selling
         return $game_temp.mart_prices[item][1] if $game_temp.mart_prices[item][1] >= 0
-      elsif $game_temp.mart_prices[item][0] == -1
-        return 0
       else
         return $game_temp.mart_prices[item][0] if $game_temp.mart_prices[item][0] > 0
       end
@@ -99,7 +97,7 @@ class PokemonMartAdapter
     return nil
   end
 
-  def doSpecialItemAction(specialType)
+  def doSpecialItemAction(specialType,itemId=nil)
     return nil
   end
 
@@ -110,6 +108,7 @@ class PokemonMartAdapter
   def getSpecialItemShadowColor(specialType)
     return nil
   end
+
 
 end
 
@@ -178,6 +177,10 @@ class SellAdapter
     end
   end
 
+  def isSelling?
+    return true
+  end
+
   def getBaseColorOverride(item)
     return @adapter.getBaseColorOverride(item)
   end
@@ -186,9 +189,6 @@ class SellAdapter
     return @adapter.getShadowColorOverride(item)
   end
 
-  def isSelling?
-    return true
-  end
 end
 
 #===============================================================================
@@ -196,12 +196,12 @@ end
 #===============================================================================
 class Window_PokemonMart < Window_DrawableCommand
   def initialize(stock, adapter, x, y, width, height, viewport = nil)
-    @stock       = stock
-    @adapter     = adapter
+    @stock = stock
+    @adapter = adapter
     super(x, y, width, height, viewport)
-    @selarrow    = AnimatedBitmap.new("Graphics/Pictures/martSel")
-    @baseColor   = Color.new(88,88,80)
-    @shadowColor = Color.new(168,184,184)
+    @selarrow = AnimatedBitmap.new("Graphics/Pictures/martSel")
+    @baseColor = Color.new(88, 88, 80)
+    @shadowColor = Color.new(168, 184, 184)
     self.windowskin = nil
   end
 
@@ -217,7 +217,7 @@ class Window_PokemonMart < Window_DrawableCommand
     textpos = []
     rect = drawCursor(index, rect)
     ypos = rect.y
-    if index == count-1
+    if index == count - 1
       textpos.push([_INTL("CANCEL"), rect.x, ypos - 4, false, self.baseColor, self.shadowColor])
     else
       item = @stock[index]
@@ -228,7 +228,6 @@ class Window_PokemonMart < Window_DrawableCommand
         textpos.push([itemname, rect.x, ypos - 4, false, baseColor, shadowColor])
       else
         itemname = @adapter.getDisplayName(item)
-
         baseColorOverride = @adapter.getBaseColorOverride(item)
         shadowColorOverride = @adapter.getShadowColorOverride(item)
 
@@ -250,7 +249,7 @@ end
 #
 #===============================================================================
 class PokemonMart_Scene
-  def initialize(currency_name="Money")
+  def initialize(currency_name = "Money")
     @currency_name = currency_name
   end
 
@@ -266,10 +265,10 @@ class PokemonMart_Scene
       itemwindow = @sprites["itemwindow"]
       @sprites["icon"].item = itemwindow.item
       @sprites["itemtextwindow"].text =
-         (itemwindow.item) ? @adapter.getDescription(itemwindow.item) : _INTL("Quit shopping.")
+        (itemwindow.item) ? @adapter.getDescription(itemwindow.item) : _INTL("Quit shopping.")
       itemwindow.refresh
     end
-    @sprites["moneywindow"].text = _INTL("{2}:\r\n<r>{1}", @adapter.getMoneyString,@currency_name)
+    @sprites["moneywindow"].text = _INTL("{2}:\r\n<r>{1}", @adapter.getMoneyString, @currency_name)
   end
 
   def scroll_map()
@@ -280,33 +279,25 @@ class PokemonMart_Scene
     pbScrollMap(4, 5, 5)
   end
 
-  #KurayX Creating kuray shop
   def pbStartBuyOrSellScene(buying, stock, adapter)
     # Scroll right before showing screen
-    if !$game_temp.fromkurayshop
-      scroll_map()
-    end
-    # pbScrollMap(6, 5, 5)
+    scroll_map()
     @viewport = Viewport.new(0, 0, Graphics.width, Graphics.height)
     @viewport.z = 99999
     @stock = stock
     @adapter = adapter
     @sprites = {}
     @sprites["background"] = IconSprite.new(0, 0, @viewport)
-    if $game_temp.fromkurayshop
-      @sprites["background"].setBitmap("Graphics/Pictures/martScreenKuray")
-    else
-      @sprites["background"].setBitmap("Graphics/Pictures/martScreen")
-    end
+    @sprites["background"].setBitmap("Graphics/Pictures/martScreen")
     @sprites["icon"] = ItemIconSprite.new(36, Graphics.height - 50, nil, @viewport)
     winAdapter = buying ? BuyAdapter.new(adapter) : SellAdapter.new(adapter)
     @sprites["itemwindow"] = Window_PokemonMart.new(stock, winAdapter,
-       Graphics.width - 316 - 16, 12, 330 + 16, Graphics.height - 126)
+                                                    Graphics.width - 316 - 16, 12, 330 + 16, Graphics.height - 126)
     @sprites["itemwindow"].viewport = @viewport
     @sprites["itemwindow"].index = 0
     @sprites["itemwindow"].refresh
     @sprites["itemtextwindow"] = Window_UnformattedTextPokemon.newWithSize("",
-       64, Graphics.height - 96 - 16, Graphics.width - 64, 128, @viewport)
+                                                                           64, Graphics.height - 96 - 16, Graphics.width - 64, 128, @viewport)
     pbPrepareWindow(@sprites["itemtextwindow"])
     @sprites["itemtextwindow"].baseColor = Color.new(248, 248, 248)
     @sprites["itemtextwindow"].shadowColor = Color.new(0, 0, 0)
@@ -331,76 +322,6 @@ class PokemonMart_Scene
     @buying = buying
     pbRefresh
     Graphics.frame_reset
-    if $game_temp.fromkurayshop
-      pbUnlockEggs()
-    end
-  end
-
-  def pbUnlockEggs()
-    # pbDisplayPaused(_INTL("Test."))
-    # $PokemonSystem.gymrewardeggs
-    # $PokemonSystem.trainerprogress
-    can_get_egg = true
-    if !$PokemonSystem.gymrewardeggs
-      can_get_egg = false
-    end
-    if can_get_egg
-      if $PokemonSystem.gymrewardeggs < 1
-        can_get_egg = false
-      end
-    end
-    if !$PokemonSystem.trainerprogress.include?("0")
-      $PokemonSystem.trainerprogress.push("0")
-      pbDisplayPaused(_INTL("You unlocked Starter K-Eggs!"))
-      if can_get_egg
-        pbGiveEgg(2022)
-      end
-    end
-    for i in 1..8
-      smartUnlock(i)
-    end
-    if !$PokemonSystem.trainerprogress.include?("9") && $game_variables[VAR_STAT_NB_ELITE_FOUR] >= 1
-      $PokemonSystem.trainerprogress.push("9")
-      pbDisplayPaused(_INTL("You unlocked Elite 4 K-Eggs!"))
-      if can_get_egg
-        pbGiveEgg(2031)
-      end
-    end
-  end
-
-  def smartUnlock(id=1)
-    can_get_egg = true
-    if !$PokemonSystem.gymrewardeggs
-      can_get_egg = false
-    end
-    if can_get_egg
-      if $PokemonSystem.gymrewardeggs < 1
-        can_get_egg = false
-      end
-    end
-    all_ids = [$game_switches[SWITCH_GOT_BADGE_1], $game_switches[SWITCH_GOT_BADGE_2], $game_switches[SWITCH_GOT_BADGE_3], $game_switches[SWITCH_GOT_BADGE_4], $game_switches[SWITCH_GOT_BADGE_5], $game_switches[SWITCH_GOT_BADGE_6], $game_switches[SWITCH_GOT_BADGE_7], $game_switches[SWITCH_GOT_BADGE_8]]
-    
-    if all_ids[id-1] && !$PokemonSystem.trainerprogress.include?(id.to_s)
-      $PokemonSystem.trainerprogress.push(id.to_s)
-      if id == 1
-        pbDisplayPaused(_INTL("You unlocked 1 Badge K-Eggs!"))
-      else
-        pbDisplayPaused(_INTL("You unlocked {1} Badges K-Eggs!", id))
-      end
-      if can_get_egg
-        pbGiveEgg(2022+id)
-      end
-    end
-  end
-
-  def pbGiveEgg(item_id)
-    item = GameData::Item.get(item_id)
-    $PokemonBag.pbStoreItem(item_id, $PokemonSystem.gymrewardeggs)
-    if $PokemonSystem.gymrewardeggs > 1
-      pbDisplayPaused(_INTL("You received {2}x {1}s!", item.name, $PokemonSystem.gymrewardeggs))
-    else
-      pbDisplayPaused(_INTL("You received a {1}!", item.name))
-    end
   end
 
   def pbStartBuyScene(stock, adapter)
@@ -453,18 +374,14 @@ class PokemonMart_Scene
     pbRefresh
   end
 
-  #KurayX Creating kuray shop
   def pbEndBuyScene
     pbDisposeSpriteHash(@sprites)
     Kernel.pbClearText()
     @viewport.dispose
     # Scroll left after showing screen
-    if !$game_temp.fromkurayshop
-      scroll_back_map()
-    end
+    scroll_back_map()
   end
 
-  #KurayX Creating kuray shop
   def pbEndSellScene
     @subscene.pbEndScene if @subscene
     pbDisposeSpriteHash(@sprites)
@@ -480,7 +397,7 @@ class PokemonMart_Scene
       @viewport2.dispose
     end
     @viewport.dispose
-    pbScrollMap(4, 5, 5) if !@subscene && !$game_temp.fromkurayshop
+    pbScrollMap(4, 5, 5) if !@subscene
   end
 
   def pbPrepareWindow(window)
@@ -536,7 +453,7 @@ class PokemonMart_Scene
       wasbusy = cw.busy?
       self.update
       if !cw.busy? && !yielded
-        yield if block_given?   # For playing SE as soon as the message is all shown
+        yield if block_given? # For playing SE as soon as the message is all shown
         yielded = true
       end
       pbRefresh if !cw.busy? && wasbusy
@@ -579,72 +496,72 @@ class PokemonMart_Scene
     end
   end
 
-  def pbChooseNumber(helptext,item,maximum)
+  def pbChooseNumber(helptext, item, maximum)
     curnumber = 1
     ret = 0
     helpwindow = @sprites["helpwindow"]
     itemprice = @adapter.getPrice(item, !@buying)
     itemprice /= 2 if !@buying
     pbDisplay(helptext, true)
-    using(numwindow = Window_AdvancedTextPokemon.new("")) {   # Showing number of items
-      qty = @adapter.getQuantity(item)
-      using(inbagwindow = Window_AdvancedTextPokemon.new("")) {   # Showing quantity in bag
-        pbPrepareWindow(numwindow)
-        pbPrepareWindow(inbagwindow)
-        numwindow.viewport = @viewport
-        numwindow.width = 224
-        numwindow.height = 64
-        numwindow.baseColor = Color.new(88, 88, 80)
-        numwindow.shadowColor = Color.new(168, 184, 184)
-        inbagwindow.visible = @buying
-        inbagwindow.viewport = @viewport
-        inbagwindow.width = 190
-        inbagwindow.height = 64
-        inbagwindow.baseColor = Color.new(88, 88, 80)
-        inbagwindow.shadowColor = Color.new(168, 184, 184)
-        inbagwindow.text = _INTL("In Bag:<r>{1}  ", qty)
+    using(numwindow = Window_AdvancedTextPokemon.new("")) { # Showing number of items
+    qty = @adapter.getQuantity(item)
+    using(inbagwindow = Window_AdvancedTextPokemon.new("")) { # Showing quantity in bag
+    pbPrepareWindow(numwindow)
+    pbPrepareWindow(inbagwindow)
+    numwindow.viewport = @viewport
+    numwindow.width = 224
+    numwindow.height = 64
+    numwindow.baseColor = Color.new(88, 88, 80)
+    numwindow.shadowColor = Color.new(168, 184, 184)
+    inbagwindow.visible = @buying
+    inbagwindow.viewport = @viewport
+    inbagwindow.width = 190
+    inbagwindow.height = 64
+    inbagwindow.baseColor = Color.new(88, 88, 80)
+    inbagwindow.shadowColor = Color.new(168, 184, 184)
+    inbagwindow.text = _INTL("In Bag:<r>{1}  ", qty)
+    numwindow.text = _INTL("x{1}<r>$ {2}", curnumber, (curnumber * itemprice).to_s_formatted)
+    pbBottomRight(numwindow)
+    numwindow.y -= helpwindow.height
+    pbBottomLeft(inbagwindow)
+    inbagwindow.y -= helpwindow.height
+    loop do
+      Graphics.update
+      Input.update
+      numwindow.update
+      inbagwindow.update
+      self.update
+      if Input.repeat?(Input::LEFT)
+        pbPlayCursorSE
+        curnumber -= 10
+        curnumber = 1 if curnumber < 1
         numwindow.text = _INTL("x{1}<r>$ {2}", curnumber, (curnumber * itemprice).to_s_formatted)
-        pbBottomRight(numwindow)
-        numwindow.y -= helpwindow.height
-        pbBottomLeft(inbagwindow)
-        inbagwindow.y -= helpwindow.height
-        loop do
-          Graphics.update
-          Input.update
-          numwindow.update
-          inbagwindow.update
-          self.update
-          if Input.repeat?(Input::LEFT)
-            pbPlayCursorSE
-            curnumber -= 10
-            curnumber = 1 if curnumber < 1
-            numwindow.text = _INTL("x{1}<r>$ {2}", curnumber, (curnumber * itemprice).to_s_formatted)
-          elsif Input.repeat?(Input::RIGHT)
-            pbPlayCursorSE
-            curnumber += 10
-            curnumber = maximum if curnumber > maximum
-            numwindow.text = _INTL("x{1}<r>$ {2}", curnumber, (curnumber * itemprice).to_s_formatted)
-          elsif Input.repeat?(Input::UP)
-            pbPlayCursorSE
-            curnumber += 1
-            curnumber = 1 if curnumber > maximum
-            numwindow.text = _INTL("x{1}<r>$ {2}", curnumber, (curnumber * itemprice).to_s_formatted)
-          elsif Input.repeat?(Input::DOWN)
-            pbPlayCursorSE
-            curnumber -= 1
-            curnumber = maximum if curnumber < 1
-            numwindow.text = _INTL("x{1}<r>$ {2}", curnumber, (curnumber * itemprice).to_s_formatted)
-          elsif Input.trigger?(Input::USE)
-            pbPlayDecisionSE
-            ret = curnumber
-            break
-          elsif Input.trigger?(Input::BACK)
-            pbPlayCancelSE
-            ret = 0
-            break
-          end
-        end
-      }
+      elsif Input.repeat?(Input::RIGHT)
+        pbPlayCursorSE
+        curnumber += 10
+        curnumber = maximum if curnumber > maximum
+        numwindow.text = _INTL("x{1}<r>$ {2}", curnumber, (curnumber * itemprice).to_s_formatted)
+      elsif Input.repeat?(Input::UP)
+        pbPlayCursorSE
+        curnumber += 1
+        curnumber = 1 if curnumber > maximum
+        numwindow.text = _INTL("x{1}<r>$ {2}", curnumber, (curnumber * itemprice).to_s_formatted)
+      elsif Input.repeat?(Input::DOWN)
+        pbPlayCursorSE
+        curnumber -= 1
+        curnumber = maximum if curnumber < 1
+        numwindow.text = _INTL("x{1}<r>$ {2}", curnumber, (curnumber * itemprice).to_s_formatted)
+      elsif Input.trigger?(Input::USE)
+        pbPlayDecisionSE
+        ret = curnumber
+        break
+      elsif Input.trigger?(Input::BACK)
+        pbPlayCancelSE
+        ret = 0
+        break
+      end
+    end
+    }
     }
     helpwindow.visible = false
     return ret
@@ -663,7 +580,7 @@ class PokemonMart_Scene
         if itemwindow.item != olditem
           @sprites["icon"].item = itemwindow.item
           @sprites["itemtextwindow"].text =
-             (itemwindow.item) ? @adapter.getDescription(itemwindow.item) : _INTL("Quit shopping.")
+            (itemwindow.item) ? @adapter.getDescription(itemwindow.item) : _INTL("Quit shopping.")
         end
         if Input.trigger?(Input::BACK)
           pbPlayCloseMenuSE
@@ -693,10 +610,10 @@ end
 #
 #===============================================================================
 class PokemonMartScreen
-  def initialize(scene,stock,adapter=PokemonMartAdapter.new)
-    @scene=scene
-    @stock=stock
-    @adapter=adapter
+  def initialize(scene, stock, adapter = PokemonMartAdapter.new)
+    @scene = scene
+    @stock = stock
+    @adapter = adapter
   end
 
   def pbConfirm(msg)
@@ -707,52 +624,52 @@ class PokemonMartScreen
     return @scene.pbDisplay(msg)
   end
 
-  def pbDisplayPaused(msg,&block)
-    return @scene.pbDisplayPaused(msg,&block)
+  def pbDisplayPaused(msg, &block)
+    return @scene.pbDisplayPaused(msg, &block)
   end
 
   def pbBuyScreen
-    @scene.pbStartBuyScene(@stock,@adapter)
-    item=nil
+    @scene.pbStartBuyScene(@stock, @adapter)
+    item = nil
     loop do
       pbWait(4)
-      item=@scene.pbChooseBuyItem
+      item = @scene.pbChooseBuyItem
       break if !item
-      quantity=0
-      itemname=@adapter.getDisplayName(item)
-      price=@adapter.getPrice(item)
-      if @adapter.getMoney<price
+      quantity = 0
+      itemname = @adapter.getDisplayName(item)
+      price = @adapter.getPrice(item)
+      if @adapter.getMoney < price
         pbDisplayPaused(_INTL("You don't have enough money."))
         next
       end
       if GameData::Item.get(item).is_important?
         if !pbConfirm(_INTL("Certainly. You want {1}. That will be ${2}. OK?",
-           itemname,price.to_s_formatted))
+                            itemname, price.to_s_formatted))
           next
         end
-        quantity=1
+        quantity = 1
       else
         maxafford = (price <= 0) ? Settings::BAG_MAX_PER_SLOT : @adapter.getMoney / price
         maxafford = Settings::BAG_MAX_PER_SLOT if maxafford > Settings::BAG_MAX_PER_SLOT
-        quantity=@scene.pbChooseNumber(
-           _INTL("{1}? Certainly. How many would you like?",itemname),item,maxafford)
-        next if quantity==0
-        price*=quantity
+        quantity = @scene.pbChooseNumber(
+          _INTL("{1}? Certainly. How many would you like?", itemname), item, maxafford)
+        next if quantity == 0
+        price *= quantity
         if !pbConfirm(_INTL("{1}, and you want {2}. That will be ${3}. OK?",
-           itemname,quantity,price.to_s_formatted))
+                            itemname, quantity, price.to_s_formatted))
           next
         end
       end
-      if @adapter.getMoney<price
+      if @adapter.getMoney < price
         pbDisplayPaused(_INTL("You don't have enough money."))
         next
       end
-      added=0
+      added = 0
       quantity.times do
         break if !@adapter.addItem(item)
-        added+=1
+        added += 1
       end
-      if added!=quantity
+      if added != quantity
         added.times do
           if !@adapter.removeItem(item)
             raise _INTL("Failed to delete stored items")
@@ -760,16 +677,16 @@ class PokemonMartScreen
         end
         pbDisplayPaused(_INTL("You have no more room in the Bag."))
       else
-        @adapter.setMoney(@adapter.getMoney-price)
+        @adapter.setMoney(@adapter.getMoney - price)
         for i in 0...@stock.length
           if GameData::Item.get(@stock[i]).is_important? && $PokemonBag.pbHasItem?(@stock[i])
-            @stock[i]=nil
+            @stock[i] = nil
           end
         end
         @stock.compact!
         pbDisplayPaused(_INTL("Here you are! Thank you!")) { pbSEPlay("Mart buy item") }
         if $PokemonBag
-          if quantity>=10 && GameData::Item.get(item).is_poke_ball? && GameData::Item.exists?(:PREMIERBALL)
+          if quantity >= 10 && GameData::Item.get(item).is_poke_ball? && GameData::Item.exists?(:PREMIERBALL)
             if @adapter.addItem(GameData::Item.get(:PREMIERBALL))
               pbDisplayPaused(_INTL("I'll throw in a Premier Ball, too."))
             end
@@ -781,35 +698,35 @@ class PokemonMartScreen
   end
 
   def pbSellScreen
-    item=@scene.pbStartSellScene(@adapter.getInventory,@adapter)
+    item = @scene.pbStartSellScene(@adapter.getInventory, @adapter)
     loop do
-      item=@scene.pbChooseSellItem
+      item = @scene.pbChooseSellItem
       break if !item
-      itemname=@adapter.getDisplayName(item)
-      price=@adapter.getPrice(item,true)
+      itemname = @adapter.getDisplayName(item)
+      price = @adapter.getPrice(item, true)
       if !@adapter.canSell?(item)
-        pbDisplayPaused(_INTL("{1}? Oh, no. I can't buy that.",itemname))
+        pbDisplayPaused(_INTL("{1}? Oh, no. I can't buy that.", itemname))
         next
       end
-      qty=@adapter.getQuantity(item)
-      next if qty==0
+      qty = @adapter.getQuantity(item)
+      next if qty == 0
       @scene.pbShowMoney
-      if qty>1
-        qty=@scene.pbChooseNumber(
-           _INTL("{1}? How many would you like to sell?",itemname),item,qty)
+      if qty > 1
+        qty = @scene.pbChooseNumber(
+          _INTL("{1}? How many would you like to sell?", itemname), item, qty)
       end
-      if qty==0
+      if qty == 0
         @scene.pbHideMoney
         next
       end
-      price/=2
-      price*=qty
-      if pbConfirm(_INTL("I can pay ${1}. Would that be OK?",price.to_s_formatted))
-        @adapter.setMoney(@adapter.getMoney+price)
+      price /= 2
+      price *= qty
+      if pbConfirm(_INTL("I can pay ${1}. Would that be OK?", price.to_s_formatted))
+        @adapter.setMoney(@adapter.getMoney + price)
         qty.times do
           @adapter.removeItem(item)
         end
-        pbDisplayPaused(_INTL("Turned over the {1} and received ${2}.",itemname,price.to_s_formatted)) { pbSEPlay("Mart buy item") }
+        pbDisplayPaused(_INTL("Turned over the {1} and received ${2}.", itemname, price.to_s_formatted)) { pbSEPlay("Mart buy item") }
         @scene.pbRefresh
       end
       @scene.pbHideMoney
@@ -822,12 +739,12 @@ def replaceShopStockWithRandomized(stock)
   if $PokemonGlobal.randomItemsHash != nil
     newStock = []
     for item in stock
-      newItem =$PokemonGlobal.randomItemsHash[item]
-        if newItem != nil && GameData::Item.get(newItem).price >0 && !Settings::EXCLUDE_FROM_RANDOM_SHOPS.include?(newItem)
-          newStock << newItem
-        else
-          newStock << item
-        end
+      newItem = $PokemonGlobal.randomItemsHash[item]
+      if newItem != nil && GameData::Item.get(newItem).price > 0 && !Settings::EXCLUDE_FROM_RANDOM_SHOPS.include?(newItem)
+        newStock << newItem
+      else
+        newStock << item
+      end
     end
     return newStock
   end
@@ -837,7 +754,7 @@ end
 #===============================================================================
 #
 #===============================================================================
-def pbPokemonMart(stock,speech=nil,cantsell=false)
+def pbPokemonMart(stock, speech = nil, cantsell = false)
   if $game_switches[SWITCH_RANDOM_ITEMS_GENERAL] && $game_switches[SWITCH_RANDOM_SHOP_ITEMS]
     stock = replaceShopStockWithRandomized(stock)
   end
@@ -848,30 +765,30 @@ def pbPokemonMart(stock,speech=nil,cantsell=false)
   end
   stock.compact!
   commands = []
-  cmdBuy  = -1
+  cmdBuy = -1
   cmdSell = -1
   cmdQuit = -1
-  commands[cmdBuy = commands.length]  = _INTL("Buy")
+  commands[cmdBuy = commands.length] = _INTL("Buy")
   commands[cmdSell = commands.length] = _INTL("Sell") if !cantsell
   commands[cmdQuit = commands.length] = _INTL("Quit")
   cmd = pbMessage(
-     speech ? speech : _INTL("Welcome! How may I serve you?"),
-     commands,cmdQuit+1)
+    speech ? speech : _INTL("Welcome! How may I serve you?"),
+    commands, cmdQuit + 1)
   loop do
-    if cmdBuy>=0 && cmd==cmdBuy
+    if cmdBuy >= 0 && cmd == cmdBuy
       scene = PokemonMart_Scene.new
-      screen = PokemonMartScreen.new(scene,stock)
+      screen = PokemonMartScreen.new(scene, stock)
       screen.pbBuyScreen
-    elsif cmdSell>=0 && cmd==cmdSell
+    elsif cmdSell >= 0 && cmd == cmdSell
       scene = PokemonMart_Scene.new
-      screen = PokemonMartScreen.new(scene,stock)
+      screen = PokemonMartScreen.new(scene, stock)
       screen.pbSellScreen
     else
       pbMessage(_INTL("Please come again!"))
       break
     end
     cmd = pbMessage(_INTL("Is there anything else I can help you with?"),
-       commands,cmdQuit+1)
+                    commands, cmdQuit + 1)
   end
   $game_temp.clear_mart_prices
 end

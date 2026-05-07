@@ -11,7 +11,7 @@ class PokemonPokedexInfo_Scene
     @region = region
     @page = 1
     @entry_page = 0
-    @typebitmap = AnimatedBitmap.new(_INTL("Graphics/Pictures/Pokedex/icon_types"))
+    @typebitmap = AnimatedBitmap.new("Graphics/Pictures/Pokedex/icon_types")
     @sprites = {}
     @sprites["background"] = IconSprite.new(0, 0, @viewport)
     @sprites["infosprite"] = PokemonSprite.new(@viewport)
@@ -20,8 +20,8 @@ class PokemonPokedexInfo_Scene
     @sprites["infosprite"].y = 136
     @sprites["infosprite"].zoom_x = Settings::FRONTSPRITE_SCALE
     @sprites["infosprite"].zoom_y = Settings::FRONTSPRITE_SCALE
+    @spritesLoader = BattleSpriteLoader.new
     @randomEntryText = nil
-
     # @mapdata = pbLoadTownMapData
     # map_metadata = GameData::MapMetadata.try_get($game_map.map_id)
     # mappos = (map_metadata) ? map_metadata.town_map_position : nil
@@ -95,7 +95,7 @@ class PokemonPokedexInfo_Scene
     @sprites["downarrow"].visible = false
   end
 
-  def pbStartSpritesSelectSceneBrief(species,alts_list)
+  def pbStartSpritesSelectSceneBrief(species, alts_list)
     @available = alts_list
     @species = species
     @viewport = Viewport.new(0, 0, Graphics.width, Graphics.height)
@@ -107,7 +107,7 @@ class PokemonPokedexInfo_Scene
     @sprites["background"] = IconSprite.new(0, 0, @viewport)
     @sprites["overlay"] = BitmapSprite.new(Graphics.width, Graphics.height, @viewport)
     @sprites["infosprite"] = PokemonSprite.new(@viewport)
-
+    @spritesLoader = BattleSpriteLoader.new
     @page = 3
     initializeSpritesPageGraphics
     initializeSpritesPage(@available)
@@ -141,15 +141,13 @@ class PokemonPokedexInfo_Scene
     @index = 0
     @page = 1
     @brief = true
-    @typebitmap = AnimatedBitmap.new(_INTL("Graphics/Pictures/Pokedex/icon_types"))
+    @typebitmap = AnimatedBitmap.new("Graphics/Pictures/Pokedex/icon_types")
     @sprites = {}
     @sprites["background"] = IconSprite.new(0, 0, @viewport)
     @sprites["infosprite"] = PokemonSprite.new(@viewport)
     @sprites["infosprite"].setOffset(PictureOrigin::Center)
     @sprites["infosprite"].x = 104
     @sprites["infosprite"].y = 136
-    @sprites["infosprite"].zoom_x = Settings::FRONTSPRITE_SCALE
-    @sprites["infosprite"].zoom_y = Settings::FRONTSPRITE_SCALE
     @sprites["overlay"] = BitmapSprite.new(Graphics.width, Graphics.height, @viewport)
 
     pbSetSystemFont(@sprites["overlay"].bitmap)
@@ -192,9 +190,11 @@ class PokemonPokedexInfo_Scene
     if @sprites["previousSprite"]
       @sprites["previousSprite"].visible = false
     end
+
+
     # species_data = pbGetSpeciesData(@species)
     species_data = GameData::Species.get_species_form(@species, @form)
-    @sprites["infosprite"].setSpeciesBitmap(@species)#, @gender, @form)
+    @sprites["infosprite"].setSpeciesBitmap(@species) #, @gender, @form)
 
     # if @sprites["formfront"]
     #   @sprites["formfront"].setSpeciesBitmap(@species,@gender,@form)
@@ -239,10 +239,10 @@ class PokemonPokedexInfo_Scene
   #   # ret.each do |entry|
   #   #   if !entry[0] || entry[0].empty?   # Necessarily applies only to form 0
   #   #     case entry[1]
-  #   #     when 0 then entry[0] = _INTL("Male")
-  #   #     when 1 then entry[0] = _INTL("Female")
+  #   #     when 0 then entry[0] = "Male"
+  #   #     when 1 then entry[0] = "Female"
   #   #     else
-  #   #       entry[0] = (multiple_forms) ? _INTL("One Form") : _INTL("Genderless")
+  #   #       entry[0] = multiple_forms ? "One Form" : "Genderless"
   #   #     end
   #   #   end
   #   #   entry[1] = 0 if entry[1] == 2   # Genderless entries are treated as male
@@ -278,15 +278,15 @@ class PokemonPokedexInfo_Scene
     end
   end
 
-  def drawPageInfo
-    @sprites["background"].setBitmap(_INTL("Graphics/Pictures/Pokedex/bg_info"))
+  def drawPageInfo(reloading=false)
+    @sprites["background"].setBitmap("Graphics/Pictures/Pokedex/bg_info")
     overlay = @sprites["overlay"].bitmap
     base = Color.new(88, 88, 80)
     shadow = Color.new(168, 184, 184)
 
     imagepos = []
     if @brief
-      imagepos.push([_INTL("Graphics/Pictures/Pokedex/overlay_info"), 0, 0])
+      imagepos.push(["Graphics/Pictures/Pokedex/overlay_info", 0, 0])
     end
     species_data = GameData::Species.get_species_form(@species, @form)
     # Write various bits of text
@@ -298,7 +298,7 @@ class PokemonPokedexInfo_Scene
     indexText = sprintf("%03d", indexNumber)
     # end
     textpos = [
-      [_INTL("{1}{2} {3}", indexText, " ", species_data.name),
+      ["#{indexText}  #{species_data.name}",
        246, 36, 0, Color.new(248, 248, 248), Color.new(0, 0, 0)],
       [_INTL("Height"), 314, 152, 0, base, shadow],
       [_INTL("Weight"), 314, 184, 0, base, shadow]
@@ -306,25 +306,6 @@ class PokemonPokedexInfo_Scene
     if $Trainer.owned?(@species)
       # Write the category
       textpos.push([_INTL("{1} Pokémon", species_data.category), 246, 68, 0, base, shadow])
-      # Write the Evolutions
-      textpos.push([_INTL("Evolve"), 210, 112, 0, Color.new(248, 248, 248), Color.new(0, 0, 0)])
-      evolutions = species_data.get_evolutions
-      item_evo = evolutions.any? { |evo| evo[1] == :Item }
-      other_evo = evolutions.any? { |evo| evo[1] != :Item && evo[1] != :Level }
-      evolutions.select! { |evo| evo[1] == :Level }
-      y_evo_offset = 140;
-      for evo in evolutions
-        next if !evo
-        textpos.push([_INTL("Lv {1}", evo[2]), 208, y_evo_offset, 0, base, shadow])
-        y_evo_offset += 24
-      end
-      if item_evo
-        textpos.push([_INTL("Item"), 208, y_evo_offset, 0, base, shadow])
-        y_evo_offset += 24
-      end
-      if other_evo
-        textpos.push([_INTL("Other"), 208, y_evo_offset, 0, base, shadow])
-      end
       # Write the height and weight
       height = species_data.height
       weight = species_data.weight
@@ -343,7 +324,8 @@ class PokemonPokedexInfo_Scene
       #
       #
       #$PokemonSystem.use_generated_dex_entries=true if $PokemonSystem.use_generated_dex_entries ==nil
-      drawEntryText(overlay, species_data)
+      drawEntryText(overlay, species_data,reloading)
+
       # Draw the footprint
       footprintfile = GameData::Species.footprint_filename(@species, @form)
       if footprintfile
@@ -381,7 +363,7 @@ class PokemonPokedexInfo_Scene
   end
 
 
-  def   drawEntryText(overlay, species_data)
+  def   drawEntryText(overlay, species_data, reloading=false)
     baseColor = Color.new(88, 88, 80)
     shadow = Color.new(168, 184, 184)
     shadowCustom = Color.new(160, 200, 150)
@@ -394,11 +376,11 @@ class PokemonPokedexInfo_Scene
         shadowColor = shadowCustom
       else
         if $PokemonSystem.use_generated_dex_entries && species_data.is_a?(GameData::FusedSpecies)
-          @randomEntryText = species_data.get_random_dex_entry if !@randomEntryText
+          @randomEntryText = species_data.get_random_dex_entry if !reloading
           entryText = @randomEntryText
           shadowColor = shadow
         else
-          entryText = "No custom Pokédex entry available for this Pokémon. Please consider submitting an entry for this Pokémon on the game's Discord."
+          entryText = _INTL("No custom Pokédex entry available for this Pokémon. Please consider submitting an entry for this Pokémon on the game's Discord. Auto-generated Pokédex entries can be enabled in the options menu.")
           shadowColor = shadow
         end
       end
@@ -443,7 +425,7 @@ class PokemonPokedexInfo_Scene
   def reloadDexEntry()
     overlay = @sprites["overlay"].bitmap
     overlay.clear
-    drawPageInfo
+    drawPageInfo(true)
   end
 
   def changeEntryPage()
@@ -451,82 +433,84 @@ class PokemonPokedexInfo_Scene
     @entry_page = @entry_page == 1 ? 0 : 1
     reloadDexEntry
   end
-  
-    def isAutogenSprite(sprite_path)
-      return !sprite_path.include?(Settings::CUSTOM_BATTLERS_FOLDER)
-    end
-  
-    def getCustomEntryText(species_data)
-      sprite_bitmap= GameData::Species.sprite_bitmap(species_data.species)
-      return nil if isAutogenSprite(sprite_bitmap.path)
-      spritename = sprite_bitmap.filename
-      possibleCustomEntries = getCustomDexEntry(spritename)
-      if possibleCustomEntries && possibleCustomEntries.length > 0
-        customEntry = possibleCustomEntries.sample
-        customEntry = customEntry.gsub(Settings::CUSTOM_ENTRIES_NAME_PLACEHOLDER,species_data.name)
-      end
-      return customEntry
-    end
-  
-    def getCustomDexEntry(sprite)
-      json_data = File.read(Settings::CUSTOM_DEX_ENTRIES_PATH)
-      parsed_data = HTTPLite::JSON.parse(json_data)
-  
-      entries = parsed_data.select { |entry| entry["sprite"] == sprite }
-      if entries.any?
-        return entries.map { |entry| entry["entry"] }
-      else
-        echoln "No custom entry found for sprite " + sprite.to_s
-        return nil
-      end
-    end
 
-    def getAIDexEntry(pokemonID, name)
-      begin
-        head_number = get_head_number_from_symbol(pokemonID).to_s
-        body_number = get_body_number_from_symbol(pokemonID).to_s
-  
-        # Ensure the file exists, if not, create it
-        unless File.exist?(Settings::AI_DEX_ENTRIES_PATH)
-          File.write(Settings::AI_DEX_ENTRIES_PATH, '{}')
-        end
-  
-        json_data = File.read(Settings::AI_DEX_ENTRIES_PATH)
-        data = HTTPLite::JSON.parse(json_data)
-  
-        # Check if the entry exists
-        unless data[head_number] && data[head_number][body_number]
-          # If not, fetch it from the API
-          url = Settings::AI_ENTRIES_URL + "?head=#{head_number}&body=#{body_number}"
-          if !requestRateExceeded?(Settings::AI_ENTRIES_RATE_LOG_FILE, Settings::AI_ENTRIES_RATE_TIME_WINDOW, Settings::AI_ENTRIES_RATE_MAX_NB_REQUESTS)
-            fetched_entry = clean_json_string(pbDownloadToString(url))
-          else
-            echoln "API rate exceeded for AI entries"
-          end
-          return nil if !fetched_entry || fetched_entry.empty?
-          # If the fetched entry is valid, update the JSON and save it
-          unless fetched_entry.empty?
-            data[head_number] ||= {}
-            data[head_number][body_number] = fetched_entry
-            serialized_data = serialize_json(data)
-            File.write(Settings::AI_DEX_ENTRIES_PATH, serialized_data)
-          else
-            echoln "No AI entry found for Pokemon " + pokemonID.to_s
-            return nil
-          end
-        end
-  
-        entry = data[head_number][body_number]
-        entry = entry.gsub(Settings::CUSTOM_ENTRIES_NAME_PLACEHOLDER, name)
-        entry = entry.gsub("\n", "")
-  
-        # Unescape any escaped quotes before returning the entry
-        entry = entry.gsub('\\"', '"')
-        return clean_json_string(entry)
-      rescue MKXPError
-        return nil
-      end
+  def isAutogenSprite(sprite_path)
+    return !sprite_path.include?(Settings::CUSTOM_BATTLERS_FOLDER)
+  end
+
+  def getCustomEntryText(species_data)
+    spriteLoader = BattleSpriteLoader.new
+    pif_sprite=spriteLoader.get_pif_sprite_from_species(species_data)
+    return nil if pif_sprite.type != :CUSTOM
+    possibleCustomEntries = getCustomDexEntry(pif_sprite)
+    if possibleCustomEntries && possibleCustomEntries.length > 0
+      customEntry = possibleCustomEntries.sample
+      customEntry = customEntry.gsub(Settings::CUSTOM_ENTRIES_NAME_PLACEHOLDER, species_data.name)
     end
+    return customEntry
+  end
+
+  def getCustomDexEntry(pif_sprite)
+    sprite = pif_sprite.to_filename()
+    json_data = File.read(Settings::CUSTOM_DEX_ENTRIES_PATH)
+    parsed_data = HTTPLite::JSON.parse(json_data)
+
+    entries = parsed_data.select { |entry| entry["sprite"] == sprite }
+    if entries.any?
+      return entries.map { |entry| entry["entry"] }
+    else
+      echoln "No custom entry found for sprite " + sprite.to_s
+      return nil
+    end
+  end
+
+  #unused
+  def getAIDexEntry(pokemonID, name)
+    begin
+      head_number = get_head_number_from_symbol(pokemonID).to_s
+      body_number = get_body_number_from_symbol(pokemonID).to_s
+
+      # Ensure the file exists, if not, create it
+      unless File.exist?(Settings::AI_DEX_ENTRIES_PATH)
+        File.write(Settings::AI_DEX_ENTRIES_PATH, '{}')
+      end
+
+      json_data = File.read(Settings::AI_DEX_ENTRIES_PATH)
+      data = HTTPLite::JSON.parse(json_data)
+
+      # Check if the entry exists
+      unless data[head_number] && data[head_number][body_number]
+        # If not, fetch it from the API
+        url = Settings::AI_ENTRIES_URL + "?head=#{head_number}&body=#{body_number}"
+        if !requestRateExceeded?(Settings::AI_ENTRIES_RATE_LOG_FILE, Settings::AI_ENTRIES_RATE_TIME_WINDOW, Settings::AI_ENTRIES_RATE_MAX_NB_REQUESTS)
+          fetched_entry = clean_json_string(pbDownloadToString(url))
+        else
+          echoln "API rate exceeded for AI entries"
+        end
+        return nil if !fetched_entry || fetched_entry.empty?
+        # If the fetched entry is valid, update the JSON and save it
+        unless fetched_entry.empty?
+          data[head_number] ||= {}
+          data[head_number][body_number] = fetched_entry
+          serialized_data = serialize_json(data)
+          File.write(Settings::AI_DEX_ENTRIES_PATH, serialized_data)
+        else
+          echoln "No AI entry found for Pokemon " + pokemonID.to_s
+          return nil
+        end
+      end
+
+      entry = data[head_number][body_number]
+      entry = entry.gsub(Settings::CUSTOM_ENTRIES_NAME_PLACEHOLDER, name)
+      entry = entry.gsub("\n", "")
+
+      # Unescape any escaped quotes before returning the entry
+      entry = entry.gsub('\\"', '"')
+      return clean_json_string(entry)
+    rescue MKXPError
+      return nil
+    end
+  end
 
   def pbFindEncounter(enc_types, species)
     return false if !enc_types
@@ -538,7 +522,7 @@ class PokemonPokedexInfo_Scene
   end
 
   def drawPageArea
-    @sprites["background"].setBitmap(_INTL("Graphics/Pictures/Pokedex/bg_area"))
+    @sprites["background"].setBitmap("Graphics/Pictures/Pokedex/bg_area")
     overlay = @sprites["overlay"].bitmap
     base = Color.new(88, 88, 80)
     shadow = Color.new(168, 184, 184)
@@ -614,7 +598,7 @@ class PokemonPokedexInfo_Scene
   end
 
   def drawPageForms
-    @sprites["background"].setBitmap(_INTL("Graphics/Pictures/Pokedex/bg_forms"))
+    @sprites["background"].setBitmap("Graphics/Pictures/Pokedex/bg_forms")
     overlay = @sprites["overlay"].bitmap
     base = Color.new(88, 88, 80)
     shadow = Color.new(168, 184, 184)
@@ -657,7 +641,7 @@ class PokemonPokedexInfo_Scene
     end
   end
 
-  def pbChooseAlt(brief=false)
+  def pbChooseAlt(brief = false)
     index = 0
     for i in 0...@available.length
       if @available[i][1] == @gender && @available[i][2] == @form
@@ -704,7 +688,7 @@ class PokemonPokedexInfo_Scene
       pbUpdate
       dorefresh = false
       if Input.trigger?(Input::ACTION)
-        changeEntryPage()
+        #changeEntryPage()
       elsif Input.trigger?(Input::BACK)
         pbPlayCloseMenuSE
         break
@@ -722,7 +706,7 @@ class PokemonPokedexInfo_Scene
         oldindex = @index
         pbGoToPrevious
         if @index != oldindex
-          @selected_index=0
+          @selected_index = 0
           pbUpdateDummyPokemon
           @available = pbGetAvailableForms
           pbSEStop
@@ -733,7 +717,7 @@ class PokemonPokedexInfo_Scene
         oldindex = @index
         pbGoToNext
         if @index != oldindex
-          @selected_index=0
+          @selected_index = 0
           pbUpdateDummyPokemon
           @available = pbGetAvailableForms
           pbSEStop
@@ -789,18 +773,6 @@ class PokemonPokedexInfo_Scene
 
   def pbSelectSpritesSceneBrief
     pbChooseAlt(true)
-
-    # loop do
-    #   Graphics.update
-    #   Input.update
-    #   pbUpdate
-    #   if Input.trigger?(Input::ACTION)
-    #     pbPlayDecisionSE
-    #   elsif Input.trigger?(Input::BACK)
-    #     pbPlayCloseMenuSE
-    #     break
-    #   end
-    # end
   end
 
 end
@@ -841,8 +813,8 @@ class PokemonPokedexInfoScreen
     # For use when capturing a new species
     nb_sprites_for_alts_page = isSpeciesFusion(species) ? 2 : 1
     alts_list = @scene.pbGetAvailableForms(species)
-    if alts_list.length > nb_sprites_for_alts_page && ($PokemonSystem.dexspriteselect != nil && $PokemonSystem.dexspriteselect == 1)
-      @scene.pbStartSpritesSelectSceneBrief(species,alts_list)
+    if alts_list.length > nb_sprites_for_alts_page
+      @scene.pbStartSpritesSelectSceneBrief(species, alts_list)
       @scene.pbSelectSpritesSceneBrief
       @scene.pbEndScene
     end

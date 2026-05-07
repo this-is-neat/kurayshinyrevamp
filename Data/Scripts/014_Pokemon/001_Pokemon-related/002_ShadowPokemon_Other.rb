@@ -49,12 +49,10 @@ def pbPurify(pkmn, scene)
       pkmn.exp = newexp
     end
   end
-  if $PokemonSystem.skipcaughtnickname != 1
-    if scene.pbConfirm(_INTL("Would you like to give a nickname to {1}?", pkmn.speciesName))
-      newname = pbEnterPokemonName(_INTL("{1}'s nickname?", pkmn.speciesName),
-                                  0, Pokemon::MAX_NAME_SIZE, "", pkmn)
-      pkmn.name = newname
-    end
+  if scene.pbConfirm(_INTL("Would you like to give a nickname to {1}?", pkmn.speciesName))
+    newname = pbEnterPokemonName(_INTL("{1}'s nickname?", pkmn.speciesName),
+                                 0, Pokemon::MAX_NAME_SIZE, "", pkmn)
+    pkmn.name = newname
   end
 end
 
@@ -169,7 +167,7 @@ end
 # Shadow Pokémon in battle.
 #===============================================================================
 class PokeBattle_Battle
-  alias __shadow__pbCanUseItemOnPokemon? pbCanUseItemOnPokemon? unless method_defined?(:__shadow__pbCanUseItemOnPokemon?)
+  alias __shadow__pbCanUseItemOnPokemon? pbCanUseItemOnPokemon?
 
   def pbCanUseItemOnPokemon?(item,pkmn,battler,scene,showMessages=true)
     ret = __shadow__pbCanUseItemOnPokemon?(item,pkmn,battler,scene,showMessages)
@@ -184,7 +182,7 @@ end
 
 
 class PokeBattle_Battler
-  alias __shadow__pbInitPokemon pbInitPokemon unless method_defined?(:__shadow__pbInitPokemon)
+  alias __shadow__pbInitPokemon pbInitPokemon
 
   def pbInitPokemon(*arg)
     if self.pokemonIndex>0 && inHyperMode?

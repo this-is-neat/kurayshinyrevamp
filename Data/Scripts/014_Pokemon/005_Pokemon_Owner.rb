@@ -24,24 +24,6 @@ class Pokemon
       @language = language
     end
 
-    #KurayX
-    def as_json(options={})
-      {
-        "id" => @id,
-        "name" => @name,
-        "gender" => @gender,
-        "language" => @language
-      }
-    end
-
-    #KurayX
-    def load_json(jsonparse)
-      @id = jsonparse['id']
-      @name = jsonparse['name']
-      @gender = jsonparse['gender']
-      @language = jsonparse['language']
-    end
-
     # Returns a new Owner object populated with values taken from +trainer+.
     # @param trainer [Player, NPCTrainer] trainer object to read data from
     # @return [Owner] new Owner object

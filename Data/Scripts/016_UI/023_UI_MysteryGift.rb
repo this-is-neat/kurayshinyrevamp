@@ -136,22 +136,17 @@ def pbManageMysteryGifts
   # Download all gifts from online
   msgwindow=pbCreateMessageWindow
   pbMessageDisplay(msgwindow,_INTL("Searching for online gifts...\\wtnp[0]"))
-  newer_version = find_newer_available_version
-  if !newer_version
-    online = pbDownloadToString(Settings::MYSTERY_GIFT_KURAY_URL)
-    pbDisposeMessageWindow(msgwindow)
-    if nil_or_empty?(online)
-      pbMessage(_INTL("No online Mystery Gifts found.\\wtnp[20]"))
-      online=[]
-    else
-      pbMessage(_INTL("Online Mystery Gifts found.\\wtnp[20]"))
-      online=pbMysteryGiftDecrypt(online)
-      t=[]
-      online.each { |gift| t.push(gift[0]) }
-      online=t
-    end
+  online = pbDownloadToString(MysteryGift::URL)
+  pbDisposeMessageWindow(msgwindow)
+  if nil_or_empty?(online)
+    pbMessage(_INTL("No online Mystery Gifts found.\\wtnp[20]"))
+    online=[]
   else
-    pbMessageDisplay(sprites["msgwindow"],_INTL("Game not up-to-date, please update first."))
+    pbMessage(_INTL("Online Mystery Gifts found.\\wtnp[20]"))
+    online=pbMysteryGiftDecrypt(online)
+    t=[]
+    online.each { |gift| t.push(gift[0]) }
+    online=t
   end
   # Show list of all gifts.
   command=0
@@ -234,7 +229,7 @@ def pbRefreshMGCommands(master, online)
       itemname = GameData::Item.get(gift[2]).name + sprintf(" x%d", gift[1])
     end
     ontext = ["[  ]", "[X]"][(online.include?(gift[0])) ? 1 : 0]
-    commands.push(_INTL("{1} {2}: {3} ({4})", ontext, gift[0], gift[3], itemname))
+    commands.push("#{ontext} #{gift[0]}: #{gift[3]} (#{itemname})")
   end
   commands.push(_INTL("Export selected to file"))
   commands.push(_INTL("Cancel"))
@@ -253,85 +248,80 @@ def pbDownloadMysteryGift(trainer)
   pbFadeInAndShow(sprites)
   sprites["msgwindow"]=pbCreateMessageWindow
   pbMessageDisplay(sprites["msgwindow"],_INTL("Searching for a gift.\nPlease wait...\\wtnp[0]"))
-  newer_version = find_newer_available_version
-  if !newer_version
-    string = pbDownloadToString(Settings::MYSTERY_GIFT_KURAY_URL)
-    if nil_or_empty?(string)
+  string = pbDownloadToString(MysteryGift::URL)
+  if nil_or_empty?(string)
+    pbMessageDisplay(sprites["msgwindow"],_INTL("No new gifts are available."))
+  else
+    online=pbMysteryGiftDecrypt(string)
+    pending=[]
+    for gift in online
+      notgot=true
+      for j in trainer.mystery_gifts
+        notgot=false if j[0]==gift[0]
+      end
+      pending.push(gift) if notgot
+    end
+    if pending.length==0
       pbMessageDisplay(sprites["msgwindow"],_INTL("No new gifts are available."))
     else
-      online=pbMysteryGiftDecrypt(string)
-      pending=[]
-      for gift in online
-        notgot=true
-        for j in trainer.mystery_gifts
-          notgot=false if j[0]==gift[0]
-        end
-        pending.push(gift) if notgot
-      end
-      if pending.length==0
-        pbMessageDisplay(sprites["msgwindow"],_INTL("No new gifts are available."))
-      else
-        loop do
-          commands=[]
-          for gift in pending; commands.push(gift[3]); end
-          commands.push(_INTL("Cancel"))
-          pbMessageDisplay(sprites["msgwindow"],_INTL("Choose the gift you want to receive.\\wtnp[0]"))
-          command=pbShowCommands(sprites["msgwindow"],commands,-1)
-          if command==-1 || command==commands.length-1
-            break
+      loop do
+        commands=[]
+        for gift in pending; commands.push(gift[3]); end
+        commands.push(_INTL("Cancel"))
+        pbMessageDisplay(sprites["msgwindow"],_INTL("Choose the gift you want to receive.\\wtnp[0]"))
+        command=pbShowCommands(sprites["msgwindow"],commands,-1)
+        if command==-1 || command==commands.length-1
+          break
+        else
+          gift=pending[command]
+          sprites["msgwindow"].visible=false
+          if gift[1]==0
+            sprite=PokemonSprite.new(viewport)
+            sprite.setOffset(PictureOrigin::Center)
+            sprite.setPokemonBitmap(gift[2])
+            sprite.x=Graphics.width/2
+            sprite.y=-sprite.bitmap.height/2
           else
-            gift=pending[command]
-            sprites["msgwindow"].visible=false
-            if gift[1]==0
-              sprite=PokemonSprite.new(viewport)
-              sprite.setOffset(PictureOrigin::Center)
-              sprite.setPokemonBitmap(gift[2])
-              sprite.x=Graphics.width/2
-              sprite.y=-sprite.bitmap.height/2
-            else
-              sprite=ItemIconSprite.new(0,0,gift[2],viewport)
-              sprite.x=Graphics.width/2
-              sprite.y=-sprite.height/2
-            end
-            distanceDiff = 8*20/Graphics.frame_rate
-            loop do
-              Graphics.update
-              Input.update
-              sprite.update
-              sprite.y+=distanceDiff
-              break if sprite.y>=Graphics.height/2
-            end
-            pbMEPlay("Battle capture success")
-            (Graphics.frame_rate*3).times do
-              Graphics.update
-              Input.update
-              sprite.update
-              pbUpdateSceneMap
-            end
-            sprites["msgwindow"].visible=true
-            pbMessageDisplay(sprites["msgwindow"],_INTL("The gift has been received!")) { sprite.update }
-            pbMessageDisplay(sprites["msgwindow"],_INTL("Please pick up your gift from the deliveryman in any Poké Mart.")) { sprite.update }
-            trainer.mystery_gifts.push(gift)
-            pending[command]=nil; pending.compact!
-            opacityDiff = 16*20/Graphics.frame_rate
-            loop do
-              Graphics.update
-              Input.update
-              sprite.update
-              sprite.opacity-=opacityDiff
-              break if sprite.opacity<=0
-            end
-            sprite.dispose
+            sprite=ItemIconSprite.new(0,0,gift[2],viewport)
+            sprite.x=Graphics.width/2
+            sprite.y=-sprite.height/2
           end
-          if pending.length==0
-            pbMessageDisplay(sprites["msgwindow"],_INTL("No new gifts are available."))
-            break
+          distanceDiff = 8*20/Graphics.frame_rate
+          loop do
+            Graphics.update
+            Input.update
+            sprite.update
+            sprite.y+=distanceDiff
+            break if sprite.y>=Graphics.height/2
           end
+          pbMEPlay("Battle capture success")
+          (Graphics.frame_rate*3).times do
+            Graphics.update
+            Input.update
+            sprite.update
+            pbUpdateSceneMap
+          end
+          sprites["msgwindow"].visible=true
+          pbMessageDisplay(sprites["msgwindow"],_INTL("The gift has been received!")) { sprite.update }
+          pbMessageDisplay(sprites["msgwindow"],_INTL("Please pick up your gift from the deliveryman in any Poké Mart.")) { sprite.update }
+          trainer.mystery_gifts.push(gift)
+          pending[command]=nil; pending.compact!
+          opacityDiff = 16*20/Graphics.frame_rate
+          loop do
+            Graphics.update
+            Input.update
+            sprite.update
+            sprite.opacity-=opacityDiff
+            break if sprite.opacity<=0
+          end
+          sprite.dispose
+        end
+        if pending.length==0
+          pbMessageDisplay(sprites["msgwindow"],_INTL("No new gifts are available."))
+          break
         end
       end
     end
-  else
-    pbMessageDisplay(sprites["msgwindow"],_INTL("Game not up-to-date, please update first."))
   end
   pbFadeOutAndHide(sprites)
   pbDisposeMessageWindow(sprites["msgwindow"])
@@ -366,7 +356,6 @@ end
 # Collecting a Mystery Gift from the deliveryman.
 #===============================================================================
 def pbNextMysteryGiftID
-  $PokemonSystem.playerage_temp = $game_variables[99]
   for i in $Trainer.mystery_gifts
     return i[0] if i.length>1
   end
@@ -374,9 +363,6 @@ def pbNextMysteryGiftID
 end
 
 def pbReceiveMysteryGift(id)
-  if $PokemonSystem.playerage_temp
-    $game_variables[99] = $PokemonSystem.playerage_temp
-  end
   index=-1
   for i in 0...$Trainer.mystery_gifts.length
     if $Trainer.mystery_gifts[i][0]==id && $Trainer.mystery_gifts[i].length>1

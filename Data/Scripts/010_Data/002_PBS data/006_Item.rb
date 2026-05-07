@@ -173,11 +173,6 @@ module GameData
       }
       return combos[species] && combos[species].include?(@id)
     end
-
-    #Sylvi Items
-    def modded?
-      return @id_number >= 1000
-    end
   end
 end
 

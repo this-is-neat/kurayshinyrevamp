@@ -1,0 +1,12 @@
+{
+  "name": "Mouse UI",
+  "id": "mouse_ui",
+  "version": "1.0.0",
+  "author": "Probably",
+  "description": "Adds mouse-driven UI interaction, battle button clicks, and edge-walk map controls.",
+  "tags": ["UI", "QoL", "Controls"],
+  "dependencies": [],
+  "incompatible": [],
+  "settings": [],
+  "scripts": ["main.rb"]
+}

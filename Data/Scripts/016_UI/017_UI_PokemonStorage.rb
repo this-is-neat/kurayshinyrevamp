@@ -33,14 +33,14 @@ class PokemonBoxIcon < IconSprite
 
   #Sylvi Big Icons
   def x=(value)
-    @logical_x = value
-    super(@logical_x + @icon_offset_x)
+    @logical_x = value || 0
+    super(@logical_x + (@icon_offset_x || 0))
   end
 
   #Sylvi Big Icons
   def y=(value)
-    @logical_y = value
-    super(@logical_y + @icon_offset_y)
+    @logical_y = value || 0
+    super(@logical_y + (@icon_offset_y || 0))
   end
 
   #Sylvi Big Icons
@@ -3189,8 +3189,9 @@ class PokemonStorageScreen
   def initialize(scene, storage)
     @scene = scene
     @storage = storage
-    @pbHeldPokemon = nil
+    @heldpkmn = nil
     @multiheldpkmn = []
+    @multiSelectRange = nil
   end
 
   #KurayX - KURAYX_ABOUT_SHINIES
@@ -3622,11 +3623,12 @@ class PokemonStorageScreen
   end
 
   def pbMultiHeldPokemon
+    @multiheldpkmn ||= []
     return @multiheldpkmn
   end
 
   def pbHolding?
-    return @heldpkmn != nil || @multiheldpkmn.length > 0
+    return @heldpkmn != nil || pbMultiHeldPokemon.length > 0
   end
 
   def pbWithdraw(selected, heldpoke)

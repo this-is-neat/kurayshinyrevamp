@@ -1,0 +1,8 @@
+{
+  "version": "1.0.0",
+  "enabled": true,
+  "replace_default_starters": true,
+  "active_starter_set": "framework_default",
+  "deterministic_load": true,
+  "diagnostics": true
+}

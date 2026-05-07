@@ -43,7 +43,7 @@ class PokeBattle_Scene
       for i in 0...@battle.sideSizes[1]
         idxBattler = 2*i+1
 
-        #hidden ability animation
+          #hidden ability animation
         if @battle.battlers[idxBattler].hasHiddenAbility?
           pbCommonAnimation("StatUp",@battle.battlers[idxBattler])
           if @battle.is_a?(PokeBattle_Battle)
@@ -53,22 +53,7 @@ class PokeBattle_Scene
         end
 
         #shiny animation
-        if $PokemonSystem.kurayshinyanim == 2 && @battle.battlers[idxBattler]
-          pbCommonAnimation("Shiny",@battle.battlers[idxBattler])
-          next
-        end
-        next if !@battle.battlers[idxBattler] || (!@battle.battlers[idxBattler].shiny? && !@battle.battlers[idxBattler].fakeshiny?) || $PokemonSystem.kurayshinyanim != 0
-        pbCommonAnimation("Shiny",@battle.battlers[idxBattler])
-      end
-    elsif $PokemonSystem.kurayshinyanim == 0
-      for i in 0...@battle.sideSizes[1]
-        idxBattler = 2*i+1
-        #shiny animation
-        if $PokemonSystem.kurayshinyanim == 2 && @battle.battlers[idxBattler]
-          pbCommonAnimation("Shiny",@battle.battlers[idxBattler])
-          next
-        end
-        next if !@battle.battlers[idxBattler] || (!@battle.battlers[idxBattler].shiny? && !@battle.battlers[idxBattler].fakeshiny?) || $PokemonSystem.kurayshinyanim != 0
+        next if !@battle.battlers[idxBattler] || !@battle.battlers[idxBattler].shiny?
         pbCommonAnimation("Shiny",@battle.battlers[idxBattler])
       end
     end
@@ -155,12 +140,7 @@ class PokeBattle_Scene
     sendOutAnims.each { |a| a[0].dispose; a[1].dispose }
     # Play shininess animations for shiny Pokémon
     sendOuts.each do |b|
-      # next if !@battle.showAnims && $PokemonSystem.kurayshinyanim != 0 ||
-      if $PokemonSystem.kurayshinyanim == 2
-        pbCommonAnimation("Shiny",@battle.battlers[b[0]])
-        next
-      end
-      next if $PokemonSystem.kurayshinyanim != 0 ||
+      next if !@battle.showAnims ||
         if @battle.battlers[b[0]].shiny? || @battle.battlers[b[0]].glitter?
           pbCommonAnimation("Shiny",@battle.battlers[b[0]])
         end
@@ -206,6 +186,8 @@ class PokeBattle_Scene
   #   end
   #   abilitySplashAnim.dispose
   # end
+
+
 
   def pbHideAbilitySplash(battler)
     return if !PokeBattle_SceneConstants::USE_ABILITY_SPLASH

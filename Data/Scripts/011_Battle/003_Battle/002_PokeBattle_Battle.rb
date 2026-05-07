@@ -99,7 +99,10 @@ class PokeBattle_Battle
     end
     @scene             = scene
     @peer              = PokeBattle_BattlePeer.create
-    @battleAI          = PokeBattle_AI.new(self)
+    remote_battles_control = defined?(Settings::REMOTE_BATTLES_CONTROL) && Settings::REMOTE_BATTLES_CONTROL
+    @battleAI          = remote_battles_control ? RemotePokeBattle_AI.new(self) : PokeBattle_AI.new(self)
+    #TODO
+
     @field             = PokeBattle_ActiveField.new    # Whole field (gravity/rooms)
     @sides             = [PokeBattle_ActiveSide.new,   # Player's side
                           PokeBattle_ActiveSide.new]   # Foe's side
@@ -173,23 +176,25 @@ class PokeBattle_Battle
   def wildBattle?;    return @opponent.nil?;  end
   def trainerBattle?; return !@opponent.nil?; end
 
-  # def get_default_battle_format()
-  #   case $PokemonSystem.battle_type
-  #   when 0 then return [1, 1]
-  #   when 1 then return [2, 2]
-  #   when 2 then return [3, 3]
-  #   end
-  #   return [1,1]
-  # end
+  def self.resolve_configured_battle_size(setting)
+    case setting
+    when 1 then return 2
+    when 2 then return 3
+    when 3 then return 1 + rand(3)
+    else        return 1
+    end
+  end
+
+  def get_default_battle_format()
+    size = self.class.resolve_configured_battle_size($PokemonSystem.battle_type)
+    return [size, size]
+  end
 
   # Sets the number of battler slots on each side of the field independently.
   # For "1v2" names, the first number is for the player's side and the second
   # number is for the opposing side.
   def setBattleMode(mode)
-    # default = $game_variables[VAR_DEFAULT_BATTLE_TYPE].is_a?(Array) ? $game_variables[VAR_DEFAULT_BATTLE_TYPE] : [1, 1]
-    # default = get_default_battle_format()
-    #KurayX patching battles
-    default = $game_variables[VAR_DEFAULT_BATTLE_TYPE].is_a?(Array) ? $game_variables[VAR_DEFAULT_BATTLE_TYPE].clone : [1, 1]
+    default = get_default_battle_format()
     @sideSizes =
       case mode
       when "triple", "3v3" then [3, 3]
@@ -284,13 +289,6 @@ class PokeBattle_Battle
   end
 
   def pbOwnedByPlayer?(idxBattler)
-    return false if opposes?(idxBattler)
-    # Trapstarr's Auto-Battler (Ally controls player pokemon)
-    return false if $PokemonSystem.autobattler != nil && $PokemonSystem.autobattler == 1
-    return pbGetOwnerIndexFromBattlerIndex(idxBattler)==0
-  end
-
-  def pbOwnedByPlayerSerious?(idxBattler)
     return false if opposes?(idxBattler)
     return pbGetOwnerIndexFromBattlerIndex(idxBattler)==0
   end
@@ -684,12 +682,7 @@ class PokeBattle_Battle
     when :Sun         then pbDisplay(_INTL("The sunlight turned harsh!"))
     when :Rain        then pbDisplay(_INTL("It started to rain!"))
     when :Sandstorm   then pbDisplay(_INTL("A sandstorm brewed!"))
-    when :Hail
-      if (!$PokemonSystem.modernhail || $PokemonSystem.modernhail != 2)
-        then pbDisplay(_INTL("It started to hail!"))
-      elsif ($PokemonSystem.modernhail && $PokemonSystem.modernhail == 2)
-        then pbDisplay(_INTL("It started to snow!"))
-      end
+    when :Hail        then pbDisplay(_INTL("It started to hail!"))
     when :HarshSun    then pbDisplay(_INTL("The sunlight turned extremely harsh!"))
     when :HeavyRain   then pbDisplay(_INTL("A heavy rain began to fall!"))
     when :StrongWinds then pbDisplay(_INTL("Mysterious strong winds are protecting Flying-type Pokémon!"))
@@ -790,6 +783,8 @@ class PokeBattle_Battle
   def pbCommonAnimation(name,user=nil,targets=nil)
     @scene.pbCommonAnimation(name,user,targets) if @showAnims
   end
+
+
 
   def pbShowAbilitySplash(battler,delay=false,logTrigger=true,abilityName=nil)
     PBDebug.log("[Ability triggered] #{battler.pbThis}'s #{battler.abilityName}") if logTrigger

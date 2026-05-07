@@ -16,6 +16,34 @@ class Trainer
 	# end
 end
 
+class Player
+	def tutorlist
+		@tutorlist ||= []
+	end
+
+	def tutorlist=(value)
+		@tutorlist = value || []
+	end
+
+	def tutornet
+		@tutornet = false if @tutornet.nil?
+		return @tutornet
+	end
+
+	def tutornet=(value)
+		@tutornet = value
+	end
+
+	def tutornet_old_user
+		@tutornet_old_user = false if @tutornet_old_user.nil?
+		return @tutornet_old_user
+	end
+
+	def tutornet_old_user=(value)
+		@tutornet_old_user = value
+	end
+end
+
 class Bitmap
   attr_accessor :text_offset_y
 
@@ -1060,7 +1088,7 @@ class PokemonPokegearScreen
           screen = PokemonJukeboxScreen.new(scene)
           screen.pbStartScreen
         }
-      elsif cmdJukebox>=0 && cmd==cmdJukebox
+      elsif cmdTutornet>=0 && cmd==cmdTutornet
 			pbFadeOutIn {
 				scene = PokemonTutorNet_Scene.new
 				screen = PokemonTutorNetScreen.new(scene)

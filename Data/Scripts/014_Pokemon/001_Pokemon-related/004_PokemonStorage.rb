@@ -2,8 +2,6 @@ class PokemonBox
   attr_accessor   :pokemon
   attr_accessor :name
   attr_accessor :background
-  attr_accessor :sortlock
-  attr_accessor :exportlock
 
   BOX_WIDTH  = 6
   BOX_HEIGHT = 5
@@ -12,30 +10,12 @@ class PokemonBox
   def initialize(name, maxPokemon = BOX_SIZE)
     @pokemon = []
     @name = name
-    @sortlock = false
-    @exportlock = false
     @background = 0
     for i in 0...maxPokemon
       @pokemon[i] = nil
     end
   end
 
-  def sortlock?
-    return @sortlock
-  end
-  
-  def sortlock=(value)
-    @sortlock = value
-  end
-
-  def exportlock?
-    return @exportlock
-  end
-
-  def exportlock=(value)
-    @exportlock = value
-  end
-  
   def length
     return @pokemon.length
   end
@@ -69,25 +49,13 @@ class PokemonBox
   def clear
     @pokemon.clear
   end
-
-  #Sylvi Items
-  def clone
-    ret = super
-    ret.pokemon = @pokemon.clone
-    return ret
-  end
-
-  #Sylvi Items
-  def make_vanilla
-    @pokemon.map! { |pkmn| !pkmn.nil? ? pkmn.clone.make_vanilla : pkmn }
-    return self
-  end
 end
 
 
 
 class PokemonStorage
-  attr_reader   :boxes
+  attr_accessor   :boxes
+  attr_accessor   :transfer_box
   attr_accessor :currentBox
   attr_writer   :unlockedWallpapers
   BASICWALLPAPERQTY = 16
@@ -98,6 +66,7 @@ class PokemonStorage
       @boxes[i] = PokemonBox.new(_INTL("Box {1}",i+1),maxPokemon)
       @boxes[i].background = i % BASICWALLPAPERQTY
     end
+    @boxes
     @currentBox = 0
     @boxmode = -1
     @unlockedWallpapers = []
@@ -109,64 +78,36 @@ class PokemonStorage
     @fusionItem=nil
   end
 
-  #Kuray Allow to clean boxes
-  # def undefineboxes
-  #   numberboxes = @boxes.length+1
-  #   @boxes = []
-  #   for i in 0...numberboxes
-  #     @boxes[i] = PokemonBox.new(_INTL("Box {1}",i+1),PokemonBox::BOX_SIZE)
-  #     @boxes[i].background = i % BASICWALLPAPERQTY
-  #   end
-  # end
-
-  #Kuray Delete boxes
-  # def deleteboxes
-  #   while @boxes.length > 30
-  #     @boxes.pop()
-  #   end
-  # end
-
   def allWallpapers
     return [
        # Basic wallpapers
-       _INTL("Forest"),_INTL("City"),_INTL("Desert"),_INTL("Savanna"),
-       _INTL("Crag"),_INTL("Volcano"),_INTL("Snow"),_INTL("Cave"),
-       _INTL("Beach"),_INTL("Seafloor"),_INTL("River"),_INTL("Sky"),
-       _INTL("Poké Center"),_INTL("Machine"),_INTL("Checks"),_INTL("Simple"),
+       _INTL("Forest"),_INTL("City"),_INTL("Desert"),_INTL("Savanna"),  #0-3
+       _INTL("Crag"),_INTL("Volcano"),_INTL("Snow"),_INTL("Cave"),      #4-7
+       _INTL("Beach"),_INTL("Seafloor"),_INTL("River"),_INTL("Sky"),    #8-11
+       _INTL("Poké Center"),_INTL("Machine"),_INTL("Checks"),_INTL("Simple"), #12-15
        # Special wallpapers
-       _INTL("Space"),_INTL("Backyard"),_INTL("Nostalgic 1"),_INTL("Torchic"),
-       _INTL("Trio 1"),_INTL("PikaPika 1"),_INTL("Legend 1"),_INTL("Team Galactic 1"),
-       _INTL("Distortion"),_INTL("Contest"),_INTL("Nostalgic 2"),_INTL("Croagunk"),
-       _INTL("Trio 2"),_INTL("PikaPika 2"),_INTL("Legend 2"),_INTL("Team Galactic 2"),
-       _INTL("Heart"),_INTL("Soul"),_INTL("Big Brother"),_INTL("Pokéathlon"),
-       _INTL("Trio 3"),_INTL("Spiky Pika"),_INTL("Kimono Girl"),_INTL("Revival"),
-       #KurayX
-       _INTL("Fire Light"),_INTL("Fire Dark"),_INTL("Water Light"),_INTL("Water Dark"),_INTL("Grass Light"),_INTL("Grass Dark"),
-       _INTL("Electric Light"),_INTL("Electric Dark"),_INTL("Ground Light"),_INTL("Ground Dark"),_INTL("Flying Light"),_INTL("Flying Dark"),
-       _INTL("Psychic Light"),_INTL("Psychic Dark"),_INTL("Dark Light"),_INTL("Dark Dark"),_INTL("Fighting Light"),_INTL("Fighting Dark"),
-       _INTL("Rock Light"),_INTL("Rock Dark"),_INTL("Steel Light"),_INTL("Steel Dark"),_INTL("Ghost Light"),_INTL("Ghost Dark"),_INTL("Bug Light"),
-       _INTL("Bug Dark"),_INTL("Dragon Light"),_INTL("Dragon Dark"),_INTL("Fairy Light"),_INTL("Fairy Dark"),_INTL("Ice Light"),_INTL("Ice Dark"),
-       _INTL("Poison Light"),_INTL("Poison Dark"),_INTL("Normal Light"),_INTL("Normal Dark"),_INTL("PMD Sand"),_INTL("PMD Snow"),_INTL("PMD Altar"),
-       _INTL("PMD Trees"),_INTL("PMD Sharpedo Bluff"),_INTL("PMD Altar 2"),_INTL("PMD Time Stop"),_INTL("PMD Waterfall"),_INTL("PMD Time Tower"),
-       _INTL("PMD Time Tower 2"),_INTL("PMD Guild"),_INTL("PMD Time Stop 2"),_INTL("PMD Sky"),_INTL("PMD Friends Space"),_INTL("PMD Friends Space 2"),
-       _INTL("PMD Primal"),_INTL("PMD Tower"),_INTL("PMD Evolution"),_INTL("PMD Fire"),_INTL("PMD Mystery"),_INTL("PMD Night"),_INTL("PMD Cliff"),
-       _INTL("PMD Worldview"),_INTL("Snowy"),_INTL("Poison"),_INTL("Dark Rural"),_INTL("Marathon"),_INTL("Gothic"),_INTL("Black Gradient"),_INTL("Yveltal"),
-       _INTL("Plain Light"),_INTL("Plain Dark"),_INTL("Beach Sand"),_INTL("Blue Gradient"),_INTL("Night"),_INTL("Trade"),_INTL("Arid"),_INTL("City Path"),
-       _INTL("Book"),_INTL("Cobwebs"),_INTL("Mt. Coronet"),_INTL("Altar"),_INTL("Slowpoke Well"),_INTL("Tin Tower"),_INTL("Search Light"),_INTL("Search Dark"),
-       _INTL("Mewtwo Lab"),_INTL("Team Rocket 1"),_INTL("Team Rocket 2"),_INTL("Team Flare"),_INTL("Coral"),_INTL("Training"),_INTL("Dream Space"),_INTL("School"),
-       _INTL("Underwater"),_INTL("Underwater 2"),_INTL("Chess"),_INTL("Rainbow Plain"),_INTL("Mushrooms"),_INTL("Plain Pathway"),_INTL("Mountain"),_INTL("Shiny Blue"),
-       _INTL("Shiny Red"),_INTL("Shiny Green"),_INTL("Shiny Purple"),_INTL("Minecraft Rails"),_INTL("Minecraft Rails 2"),_INTL("Infernal"),_INTL("Insectoid"),
-       _INTL("Halloween"),_INTL("Neon"),_INTL("Obscuros"),_INTL("Japan"),_INTL("Norse"),_INTL("Oblivion"),_INTL("Rainbow"),_INTL("River"),_INTL("Sunset"),_INTL("Shadow"),
-       _INTL("Soulfire"),_INTL("Temple"),_INTL("Sweet Shop"),_INTL("Anubis"),_INTL("Dark"),_INTL("Demonic"),_INTL("Ethereal"),_INTL("Forest"),_INTL("Gembound"),
-       _INTL("Snow Game"),_INTL("Mega Evolution"),_INTL("Golden Night"),_INTL("Milotic Style"),_INTL("X & Y"),_INTL("Steampunk"),_INTL("Synthwave Neon"),
-       _INTL("Xerneas"),_INTL("Charged Steel"),_INTL("Reshiram & Zekrom"),_INTL("Kyurems"),_INTL("Beautiful Underwater"),
-       #KurayX2
-       _INTL("Synthwave Sunset"),_INTL("Team Magma"),_INTL("Team Aqua"),_INTL("Victini"),_INTL("Weezing/Kyogre"),_INTL("Star Snow"),_INTL("Dark Graphs"),
-       _INTL("Purple Geometry"),_INTL("RGBY Squares"),_INTL("RIP"),_INTL("RIP 2"),_INTL("Pizza"),_INTL("Fusing Chart"),_INTL("Roaring Reshigon"),
-       _INTL("Arcade Academy"),_INTL("Windows XP"),_INTL("Doggy XP"),_INTL("Mewtwo Strikes"),_INTL("Pikachu Sad"),_INTL("Ash Ded"),_INTL("Shadow Lugia"),
-       _INTL("Primal Dialga"),_INTL("Bluescreen"),_INTL("Bluescreen 2")
+       _INTL("Space"),_INTL("Backyard"),_INTL("Nostalgic 1"),_INTL("Torchic"),    #16-19
+       _INTL("Trio 1"),_INTL("PikaPika 1"),_INTL("Legend 1"),_INTL("Team Galactic 1"),  #20-23
+       _INTL("Distortion"),_INTL("Contest"),_INTL("Nostalgic 2"),_INTL("Croagunk"), #24-27
+       _INTL("Trio 2"),_INTL("PikaPika 2"),_INTL("Legend 2"),_INTL("Team Galactic 2"),  #28-31
+       _INTL("Heart"),_INTL("Soul"),_INTL("Big Brother"),_INTL("Pokéathlon"), #32-35
+       _INTL("Trio 3"),_INTL("Spiky Pika"),_INTL("Kimono Girl"),_INTL("Rocket"), #36-39
+
+
+       _INTL("Noctowl"),_INTL("Pink Moon"),_INTL("Entree Forest"),_INTL("Poké Ball Mayhem"), #40-43
+       _INTL("Discord"),_INTL("HELLO"),_INTL("Sky 2"),_INTL("Ice Fishing"),  #44-47
+       _INTL("Rafflesia"),_INTL("Dancing Frog"),_INTL("Crab"),_INTL("Flannery"),  #48-51
+       _INTL("Norman"),_INTL("Roxanne"),_INTL("Tate & Liza"),_INTL("Wallace"),    #52-55
+       _INTL("Rotom Dex 1"),_INTL("Rotom Dex 2"),_INTL("Happy Hypno"),_INTL("Fossil Shark"),  #56-59
+       _INTL("Camping"),_INTL("Swimming"),_INTL("Nostalgic 3"),_INTL("Graffiti"), #60-63
+       _INTL("Ruins"),_INTL("Digital"),_INTL("Galactic"),_INTL("Sinnoh"), #64-67
+       _INTL("PC"),_INTL("Ancient Sea"),_INTL("Cat Playroom"),_INTL("Softboiled"), #68-71
+       _INTL("Electric Mouse"),_INTL("Sailing"),_INTL("Forest 2"),_INTL("Graveyard"), #72-75
+       _INTL("Eon"),_INTL("Quest"),_INTL("Pink Stars"),_INTL("Party Hard"), #76-79
+       _INTL("Espurr"),_INTL("Nostalgic 4"),_INTL("Dark Forest"), #80-82
     ]
   end
+
 
   def unlockedWallpapers
     @unlockedWallpapers = [] if !@unlockedWallpapers
@@ -176,7 +117,6 @@ class PokemonStorage
   def isAvailableWallpaper?(i)
     @unlockedWallpapers = [] if !@unlockedWallpapers
     return true if i<BASICWALLPAPERQTY
-    return true if i>39
     return true if @unlockedWallpapers[i]
     return false
   end
@@ -209,7 +149,7 @@ class PokemonStorage
   end
 
   def maxPokemon(box)
-    return 0 if box >= self.maxBoxes
+    return 0 if box >= self.maxBoxes && !self[box].is_a?(StorageTransferBox)
     return (box < 0) ? Settings::MAX_PARTY_SIZE : self[box].length
   end
 
@@ -250,36 +190,6 @@ class PokemonStorage
     end
   end
 
-  #Kuray
-  def pbImportKuray(boxDst,indexDst,importpoke)
-    if indexDst<0 && boxDst<self.maxBoxes
-      found = false
-      for i in 0...maxPokemon(boxDst)
-        next if self[boxDst,i]
-        found = true
-        indexDst = i
-        break
-      end
-      return false if !found
-    end
-    importpoke.calc_stats
-    if boxDst==-1   # Copying into party
-      return false if party_full?
-      self.party[self.party.length] = importpoke.clone
-      # self.party[self.party.length] = importpoke
-      self.party.compact!
-    else   # Copying into box
-      pkmn = importpoke.clone
-      # pkmn = importpoke
-      raise "Trying to copy nil to storage" if !pkmn
-      pkmn.time_form_set = nil
-      pkmn.form          = 0 if pkmn.isSpecies?(:SHAYMIN)
-      pkmn.heal
-      self[boxDst,indexDst] = pkmn
-    end
-    return true
-  end
-
   def pbCopy(boxDst,indexDst,boxSrc,indexSrc)
     if indexDst<0 && boxDst<self.maxBoxes
       found = false
@@ -300,7 +210,7 @@ class PokemonStorage
       raise "Trying to copy nil to storage" if !pkmn
       pkmn.time_form_set = nil
       pkmn.form          = 0 if pkmn.isSpecies?(:SHAYMIN)
-      pkmn.heal
+           #pkmn.heal
       self[boxDst,indexDst] = pkmn
     end
     return true
@@ -323,7 +233,7 @@ class PokemonStorage
         if box>=0
           pkmn.time_form_set = nil if pkmn.time_form_set
           pkmn.form          = 0 if pkmn.isSpecies?(:SHAYMIN)
-          pkmn.heal
+          #pkmn.heal
         end
         self[box,i] = pkmn
         return true
@@ -333,10 +243,15 @@ class PokemonStorage
   end
 
   def pbStoreCaught(pkmn)
+
+    if self[@currentBox].is_a?(StorageTransferBox)
+      @currentBox = 0
+    end
+
     if @currentBox>=0
       pkmn.time_form_set = nil
-      # pkmn.form          = 0 if pkmn.isSpecies?(:SHAYMIN)
-      pkmn.heal
+      #pkmn.form          = 0 if pkmn.isSpecies?(:SHAYMIN)
+      #pkmn.heal
     end
     for i in 0...maxPokemon(@currentBox)
       if self[@currentBox,i]==nil
@@ -363,41 +278,10 @@ class PokemonStorage
     end
   end
 
-  #By Sylvi (multi)
-  def pbDeleteMulti(box,indexes)
-    for index in indexes
-      self[box,index] = nil
-    end
-    self.party.compact! if box==-1
-  end
-
   def clear
     for i in 0...self.maxBoxes
       @boxes[i].clear
     end
-  end
-
-  #Sylvi Items
-  def cloneBoxes(boxes)
-    @boxes = []
-    for i in 0...boxes.length
-      @boxes[i] = boxes[i].clone
-    end
-  end
-
-  #Sylvi Items
-  def clone
-    ret = super
-    ret.cloneBoxes(@boxes)
-    return ret
-  end
-
-  #Sylvi Items
-  def make_vanilla
-    for i in 0...self.maxBoxes
-      @boxes[i].make_vanilla
-    end
-    return self
   end
 end
 

@@ -739,9 +739,6 @@ module Compiler
 
 
   def main
-    #skipping return will force the game to recompile from PBS folder each time it launches, so return had to be turned back on
-    # import_new_maps
-    return
     return if !$DEBUG
     begin
       dataFiles = [
@@ -795,9 +792,10 @@ module Compiler
       mustCompile |= import_new_maps
       # If no PBS file, create one and fill it, then recompile
       if !safeIsDirectory?("PBS")
-        Dir.mkdir("PBS") rescue nil
-        write_all
-        mustCompile = true
+        return
+        # Dir.mkdir("PBS") rescue nil
+        # write_all
+        # mustCompile = true
       end
       # Check data files and PBS files, and recompile if any PBS file was edited
       # more recently than the data files were last created

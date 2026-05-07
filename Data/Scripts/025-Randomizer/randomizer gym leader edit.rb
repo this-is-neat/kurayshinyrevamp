@@ -41,6 +41,51 @@ def Kernel.initRandomTypeArray()
   $game_variables[VAR_GYM_TYPES_ARRAY] = $game_switches[SWITCH_RANDOMIZED_GYM_TYPES] ? typesArray : GYM_TYPES_ARRAY
 end
 
+
+def legendary_mode_candidates_for_types(target_types = nil)
+  candidates = []
+  LEGENDARIES_LIST.each do |legendary_id|
+    species = GameData::Species.get(legendary_id) rescue next
+    if target_types && !target_types.empty?
+      next if !target_types.include?(species.type1) && !target_types.include?(species.type2)
+    end
+    candidates << species.id
+  end
+  candidates = LEGENDARIES_LIST.clone if candidates.empty?
+  return candidates
+end
+
+def convert_species_to_legendary(oldSpecies)
+  original_species = getSpecies(oldSpecies)
+  return LEGENDARIES_LIST.sample if !original_species
+
+  gym_type = nil
+  if $game_variables && $game_variables[VAR_CURRENT_GYM_TYPE] && $game_variables[VAR_CURRENT_GYM_TYPE] != -1
+    gym_type = getLeaderType()
+  end
+
+  target_types = []
+  target_types << gym_type if gym_type
+  if target_types.empty?
+    target_types << original_species.type1 if original_species.respond_to?(:type1)
+    target_types << original_species.type2 if original_species.respond_to?(:type2)
+  end
+  target_types.compact!
+  target_types.uniq!
+
+  if isFusion(dexNum(oldSpecies))
+    body_species = get_body_species_from_symbol(original_species.id)
+    head_species = get_head_species_from_symbol(original_species.id)
+    body_types = target_types.empty? ? [body_species.type1, body_species.type2].compact.uniq : target_types
+    head_types = target_types.empty? ? [head_species.type1, head_species.type2].compact.uniq : target_types
+    body_legendary = legendary_mode_candidates_for_types(body_types).sample
+    head_legendary = legendary_mode_candidates_for_types(head_types).sample
+    return getFusionSpecies(body_legendary, head_legendary).id
+  end
+
+  return legendary_mode_candidates_for_types(target_types).sample
+end
+
 # def setRivalStarter(starter1, starter2, starter3, choice)
 #   starters = [starter1, starter2, starter3]
 #   starters.delete_at(choice)
@@ -69,7 +114,6 @@ class PokeBattle_Battle
       end
       pokemon.species = newspecies
       pokemon.name = PBSpecies.getName(newspecies)
-      pokemon.kuraycustomfile = nil
       pokemon.resetMoves
       pokemon.calcStats
     end
@@ -97,7 +141,6 @@ class PokeBattle_Battle
       end
       m.species = newspecies
       m.name = PBSpecies.getName(newspecies)
-      m.kuraycustomfile = nil
       m.resetMoves
       m.calcStats
     end
@@ -152,10 +195,10 @@ end
 
 def getLeaderType()
   currentGym = $game_variables[VAR_CURRENT_GYM_TYPE]
-  if currentGym > $game_variables[151].length
+  if currentGym > $game_variables[VAR_GYM_TYPES_ARRAY].length
     return nil
   else
-    typeIndex = $game_variables[151][currentGym]
+    typeIndex = $game_variables[VAR_GYM_TYPES_ARRAY][currentGym]
     type = PBTypes.getName(typeIndex)
   end
   return typeIndex
@@ -230,7 +273,6 @@ def Kernel.sumGameStats()
   stringStats << "\nBeat the Elite Four " << $game_variables[VAR_STAT_NB_ELITE_FOUR].to_s << " times"
   stringStats << "\nFused " << $game_variables[VAR_STAT_NB_FUSIONS].to_s << " Pokémon"
 
-
   stringStats << "\nRematched " << $game_variables[VAR_STAT_LEADER_REMATCH].to_s << " Gym Leaders"
   stringStats << "\nTook " << $PokemonGlobal.stepcount.to_s << " steps"
   stringStats << "\nVisited " << countVisitedMaps.to_s << " different areas"
@@ -269,16 +311,24 @@ def Kernel.pbRandomizeTM()
   for item in $itemData
     #machine=$ItemData[item][ITEMMACHINE]
     #movename=PBMoves.getName(machine)
-    #Kernel.pbMessage(_INTL("It contained {1}.\1",item))
+    #Kernel.pbMessage("It contained {1}.\1",item)
 
     tmList << item if pbIsHiddenMachine?(item)
   end
 end
 
 def getNewSpecies(oldSpecies, bst_range = 50, ignoreRivalPlaceholder = false, maxDexNumber = PBSpecies.maxValue, includeLegendaries=true)
+
   oldSpecies_dex = dexNum(oldSpecies)
   return oldSpecies_dex if (oldSpecies_dex == Settings::RIVAL_STARTER_PLACEHOLDER_SPECIES && !ignoreRivalPlaceholder)
   return oldSpecies_dex if oldSpecies_dex >= Settings::ZAPMOLCUNO_NB
+
+  if $game_switches[SWITCH_LEGENDARY_MODE]
+    new_species= convert_species_to_legendary(oldSpecies)
+    newspecies_dex = dexNum(new_species)
+    return newspecies_dex
+  end
+
   newspecies_dex = rand(maxDexNumber - 1) + 1
   i = 0
   while bstNotOk(newspecies_dex, oldSpecies_dex, bst_range) || !(legendaryOk(oldSpecies_dex,newspecies_dex,includeLegendaries))
@@ -292,6 +342,15 @@ def getNewSpecies(oldSpecies, bst_range = 50, ignoreRivalPlaceholder = false, ma
 end
 
 def getNewCustomSpecies(oldSpecies, customSpeciesList, bst_range = 50, ignoreRivalPlaceholder = false,includeLegendaries=true)
+  if $game_switches[SWITCH_LEGENDARY_MODE]
+    new_species= convert_species_to_legendary(oldSpecies)
+
+    echoln "CHOSEN  #{get_readable_fusion_name(oldSpecies)} -> #{get_readable_fusion_name(new_species)}"
+
+    newspecies_dex = dexNum(new_species)
+    return newspecies_dex
+  end
+
   oldSpecies_dex = dexNum(oldSpecies)
   return oldSpecies_dex if (oldSpecies_dex == Settings::RIVAL_STARTER_PLACEHOLDER_SPECIES && !ignoreRivalPlaceholder)
   return oldSpecies_dex if oldSpecies_dex >= Settings::ZAPMOLCUNO_NB
@@ -316,6 +375,16 @@ def playShuffleSE(i)
   end
 end
 
+def getTrainersDataMode
+  mode = GameData::Trainer
+  if $game_switches && $game_switches[SWITCH_MODERN_MODE]
+    mode = GameData::TrainerModern
+  elsif $game_switches && $game_switches[SWITCH_EXPERT_MODE]
+    mode = GameData::TrainerExpert
+  end
+  return mode
+end
+
 def Kernel.pbShuffleTrainers(bst_range = 50, customsOnly = false, customsList = nil)
   bst_range = pbGet(VAR_RANDOMIZER_TRAINER_BST)
 
@@ -323,9 +392,13 @@ def Kernel.pbShuffleTrainers(bst_range = 50, customsOnly = false, customsList = 
     customsOnly = false
   end
   randomTrainersHash = Hash.new
-  trainers_data = GameData::Trainer.list_all
+
+
+  trainers_data = getTrainersDataMode.list_all
   trainers_data.each do |key, value|
     trainer = trainers_data[key]
+    echoln "------"
+    echoln "Processing [#{trainer.id}#] {trainer.trainer_type} ##{trainer.real_name}"
     i = 0
     new_party = []
     for poke in trainer.pokemon
@@ -358,9 +431,9 @@ end
 #     i += 1
 #     if i % 2 == 0
 #       n = (i.to_f/trainers.length)*100
-#       Kernel.pbMessageNoSound(_INTL("\\ts[]Shuffling trainers...\\n {1}%\\^",sprintf('%.2f', n),PBSpecies.maxValue))
+#       Kernel.pbMessageNoSound("\\ts[]Shuffling trainers...\\n {1}%\\^",sprintf('%.2f', n),PBSpecies.maxValue)
 #     end
-#     #Kernel.pbMessage(_INTL("pushing trainer {1}: {2} ",i,trainer))
+#     #Kernel.pbMessage("pushing trainer {1}: {2} ",i,trainer)
 #   end
 #   $PokemonGlobal.randomTrainersHash = randomTrainersHash
 # end
@@ -369,12 +442,12 @@ def Kernel.pbShuffleTrainersCustom(bst_range = 50)
   randomTrainersHash = Hash.new
   bst_range = pbGet(VAR_RANDOMIZER_TRAINER_BST)
 
-  Kernel.pbMessage(_INTL("Parsing custom sprites folder"))
-  customsList = getCustomSpeciesList(true,true)
-  Kernel.pbMessage(_INTL("{1} sprites found", customsList.length.to_s))
+  Kernel.pbMessage(_INTL("Parsing custom sprites folder..."))
+  customsList = getCustomSpeciesList(true, true)
+  Kernel.pbMessage(_INTL("{1} sprites found. Shuffling...", customsList.length.to_s))
 
   if customsList.length == 0
-    Kernel.pbMessage(_INTL("To use custom sprites, please place correctly named sprites in the /CustomBattlers folder. See readMe.txt for more information"))
+    Kernel.pbMessage(_INTL("To use custom sprites, please place correctly named sprites in the /CustomBattlers folder. See readMe.txt for more information."))
     Kernel.pbMessage(_INTL("Trainer Pokémon will include auto-generated sprites."))
     return Kernel.pbShuffleTrainers(bst_range)
   elsif customsList.length < 200
@@ -403,9 +476,9 @@ end
 #   i += 1
 #   if i % 2 == 0
 #     n = (i.to_f/trainers.length)*100
-#     Kernel.pbMessageNoSound(_INTL("\\ts[]Shuffling trainers (custom sprites only)...\\n {1}%\\^",sprintf('%.2f', n),PBSpecies.maxValue))
+#     Kernel.pbMessageNoSound("\\ts[]Shuffling trainers (custom sprites only)...\\n {1}%\\^",sprintf('%.2f', n),PBSpecies.maxValue)
 #   end
-#   #Kernel.pbMessage(_INTL("pushing trainer {1}: {2} ",i,trainer))
+#   #Kernel.pbMessage("pushing trainer {1}: {2} ",i,trainer)
 # end
 # $PokemonGlobal.randomTrainersHash = randomTrainersHash
 
@@ -420,7 +493,7 @@ end
 #    return (body*NB_POKEMON)+head
 #end
 
-def getCustomSpeciesList(allowOnline = true, redownload_file=false)
+def getCustomSpeciesList(allowOnline = true, redownload_file = false)
   speciesList = []
 
   for num in 1..NB_POKEMON
@@ -439,10 +512,10 @@ def getCustomSpeciesList(allowOnline = true, redownload_file=false)
     end
   end
 
-  if speciesList.length <= 20000 && allowOnline
-    if redownload_file && Kernel.pbConfirmMessage(_INTL("Not enough local sprites found.  Attempt to fetch list from the internet?"))
-      updateOnlineCustomSpritesFile
-    end
+  # if speciesList.length <= 20000 && allowOnline
+  #   if redownload_file && Kernel.pbConfirmMessage("Not enough local sprites found.  Attempt to fetch list from the internet?")
+  #     updateOnlineCustomSpritesFile
+  #   end
     #try to get list from github
     online_list = list_online_custom_sprites(true)
     return speciesList if !online_list
@@ -452,9 +525,11 @@ def getCustomSpeciesList(allowOnline = true, redownload_file=false)
       species_id_list << dexnum if dexnum && dexnum <= maxDexNumber && dexnum > 0
     end
     return species_id_list
-  end
+    #end
   return speciesList
 end
+
+
 
 def is_file_alt(file)
   filename = file.split(".")[0]
@@ -475,7 +550,6 @@ def getDexNumFromFilename(filename)
   end
 
 end
-
 
 # def getCustomSpeciesList()
 #   filesList = Dir["./Graphics/CustomBattlers/*"]
@@ -510,39 +584,34 @@ def Kernel.getBaseStats(species)
 end
 
 def Kernel.gymLeaderRematchHint()
-  hints = [
-    "I heard that Brock has a huge interest in Pokémon fossils. He donated a lot of fossils he excavated to the Pewter City Museum.",
-    "Misty is a pro at swimming. I heard she trains every single morning.",
-    "Did you know that Lt. Surge used the magnetic fields generated by his Pokémon to navigate his plane back when he was in the army. He still loves a good magnetic field.",
-    "Erika is a lover of nature. She loves going to parks to relax during the day.",
-    "Koga has been seen leaving Fuschia city in the evenings. The rumors say he's preparing for a new job somewhere else...",
-    "People say that Sabrina never sleeps. I wonder where she goes when she leaves her gym at night.",
-    "The hot-headed Blaine is a man of extremes. He likes to explore around his hometown during the day.",
-    "Giovanni is a mysterious man. I wonder where he goes in the evening. Probably somewhere as remote as possible to meditate in peace...",
-    "I heard that Whitney went to school in one of the towns near Goldenrod before becoming a Gym Leader. She kept in touch with her old teacher and she goes to visit sometimes in the evening.",
-    "Kurt is always on the lookout for Bug-type Pokémon. He goes hunting early in the morning.",
-    "Falkner rises up early in the morning. You can usually find him in high places.",
-    "Clair is a member of a famous clan of dragon masters. She goes to a special place to pray at night.",
-    "Chuck is a martial arts pro. I've seen him train with Saffron City's dojo master back in the days.",
-    "Morty is a mysterious man. He's been known to be one of the few people who dare enter Pokémon Tower at night.",
-    "Pryce is an ice-type expert who has been around for a long time. He used to train in the Ice Tunnel between Mahogany Town and Blackthorn City before it froze over.",
-    "Jasmine is on vacation in the Sevii Islands. She likes to rise up early to explore around the islands when no one's around."
-  ]
-  arr = []
-  n = 0
-  for i in 426..437
-    if !$game_switches[i]
-      arr.push(n)
-    end
-    n += 1
+  hints = {
+    426 =>_INTL("I heard that Brock has a huge interest in Pokémon fossils. He donated a lot of fossils he excavated to the Pewter City Museum."),
+    427 =>_INTL("Misty is a pro at swimming. I heard she trains every single morning."),
+    428 =>_INTL("Did you know that Lt. Surge used the magnetic fields generated by his Pokémon to navigate his plane back when he was in the army? He still loves a good magnetic field."),
+    429 =>_INTL("Erika is a lover of nature. She loves going to parks to relax during the day."),
+    430 =>_INTL("Koga has been seen leaving Fuschia city in the evenings. The rumors say he's preparing for a new job somewhere else..."),
+    431 =>_INTL("People say that Sabrina never sleeps. I wonder where she goes when she leaves her gym at night."),
+    432 =>_INTL("The hot-headed Blaine is a man of extremes. He likes to explore around his hometown during the day."),
+    433 =>_INTL("Giovanni is a mysterious man. I wonder where he goes in the evening. Probably somewhere as remote as possible to meditate in peace..."),
+    434 =>_INTL("I heard that Whitney went to school in one of the towns near Goldenrod before becoming a Gym Leader. She kept in touch with her old teacher and she goes to visit sometimes in the evening."),
+    435 =>_INTL("Kurt is always on the lookout for Bug-type Pokémon. He goes hunting early in the morning."),
+    436 =>_INTL("Falkner rises up early in the morning. You can usually find him in high places."),
+    437 =>_INTL("Clair is a member of a famous clan of dragon masters. She goes to a special place to pray at night."),
+    510 =>_INTL("Chuck is a martial arts pro. I've seen him train with Saffron City's dojo master back in the days."),
+    508 =>_INTL("Morty is a mysterious man. He's been known to be one of the few people who dare enter Pokémon Tower at night."),
+    509 =>_INTL("Pryce is an ice-type expert who has been around for a long time. He used to train in the Ice Tunnel between Mahogany Town and Blackthorn City before it froze over."),
+    511 =>_INTL("Jasmine is on vacation in the Sevii Islands. She likes to rise up early to explore around the islands when no one's around.")
+  }
+  remaining_leaders = []
+  for switch_nb in hints.keys
+    remaining_leaders << switch_nb unless $game_switches[switch_nb]
   end
-  arr.push(508); arr.push(509); arr.push(510); arr.push(511);
-  n += 4
-
-  if arr.length > 0
-    return hints[arr[rand(arr.length)]]
+  if remaining_leaders.empty?
+    return "You got every Gym Leader to come here. This place is more popular than ever!\nNow go and battle them!"
+  else
+    key = remaining_leaders.sample
+    return hints[key]
   end
-  return "You got every Gym Leader to come here. This place is more popular than ever!\nNow go and battle them!"
 end
 
 def getTrainerParty(trainer)
@@ -598,7 +667,7 @@ end
 #  def pbLoadTrainer(trainerid,trainername,partyid=0)
 #   if trainerid.is_a?(String) || trainerid.is_a?(Symbol)
 #     if !hasConst?(PBTrainers,trainerid)
-#       raise _INTL("Trainer type does not exist ({1}, {2}, ID {3})",trainerid,trainername,partyid)
+#       raise "Trainer type does not exist ({1}, {2}, ID {3})",trainerid,trainername,partyid
 #     end
 #     trainerid=getID(PBTrainers,trainerid)
 #   end
@@ -635,7 +704,7 @@ end
 #     #use le random Array si randomized starters (et pas 1ere rival battle)
 #     isPlayingRandomized =  $game_switches[987] && !$game_switches[46]
 #     if isPlayingRandomized && $PokemonGlobal.randomTrainersHash[trainerIndex] == nil
-#       Kernel.pbMessage(_INTL("The trainers need to be re-shuffled."))
+#       Kernel.pbMessage("The trainers need to be re-shuffled.")
 #       Kernel.pbShuffleTrainers()
 #     end
 #     trainerParty = isPlayingRandomized ? $PokemonGlobal.randomTrainersHash[trainerIndex][3] : getTrainerParty(trainer)

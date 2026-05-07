@@ -275,7 +275,7 @@ def pbHiddenPower(pkmn,forcedType=nil)
   if Settings::MECHANICS_GENERATION <= 5
     powerMin = 30
     powerMax = 70
-    power |= (iv[:HP]&2)>>1
+    power = (iv[:HP]&2)>>1
     power |= (iv[:ATTACK]&2)
     power |= (iv[:DEFENSE]&2)<<1
     power |= (iv[:SPEED]&2)<<2
@@ -744,43 +744,24 @@ class PokeBattle_Move_09F < PokeBattle_Move
       }
     elsif @id == :MULTIATTACK
       @itemTypes = {
-         :FISTPLATE   => :FIGHTING,
-         :SKYPLATE    => :FLYING,
-         :TOXICPLATE  => :POISON,
-         :EARTHPLATE  => :GROUND,
-         :STONEPLATE  => :ROCK,
-         :INSECTPLATE => :BUG,
-         :SPOOKYPLATE => :GHOST,
-         :IRONPLATE   => :STEEL,
-         :FLAMEPLATE  => :FIRE,
-         :SPLASHPLATE => :WATER,
-         :MEADOWPLATE => :GRASS,
-         :ZAPPLATE    => :ELECTRIC,
-         :MINDPLATE   => :PSYCHIC,
-         :ICICLEPLATE => :ICE,
-         :DRACOPLATE  => :DRAGON,
-         :DREADPLATE  => :DARK,
-         :PIXIEPLATE  => :FAIRY
+         :FIGHTINGMEMORY => :FIGHTING,
+         :FLYINGMEMORY   => :FLYING,
+         :POISONMEMORY   => :POISON,
+         :GROUNDMEMORY   => :GROUND,
+         :ROCKMEMORY     => :ROCK,
+         :BUGMEMORY      => :BUG,
+         :GHOSTMEMORY    => :GHOST,
+         :STEELMEMORY    => :STEEL,
+         :FIREMEMORY     => :FIRE,
+         :WATERMEMORY    => :WATER,
+         :GRASSMEMORY    => :GRASS,
+         :ELECTRICMEMORY => :ELECTRIC,
+         :PSYCHICMEMORY  => :PSYCHIC,
+         :ICEMEMORY      => :ICE,
+         :DRAGONMEMORY   => :DRAGON,
+         :DARKMEMORY     => :DARK,
+         :FAIRYMEMORY    => :FAIRY
       }
-      # @itemTypes = {
-      #    :FIGHTINGMEMORY => :FIGHTING,
-      #    :FLYINGMEMORY   => :FLYING,
-      #    :POISONMEMORY   => :POISON,
-      #    :GROUNDMEMORY   => :GROUND,
-      #    :ROCKMEMORY     => :ROCK,
-      #    :BUGMEMORY      => :BUG,
-      #    :GHOSTMEMORY    => :GHOST,
-      #    :STEELMEMORY    => :STEEL,
-      #    :FIREMEMORY     => :FIRE,
-      #    :WATERMEMORY    => :WATER,
-      #    :GRASSMEMORY    => :GRASS,
-      #    :ELECTRICMEMORY => :ELECTRIC,
-      #    :PSYCHICMEMORY  => :PSYCHIC,
-      #    :ICEMEMORY      => :ICE,
-      #    :DRAGONMEMORY   => :DRAGON,
-      #    :DARKMEMORY     => :DARK,
-      #    :FAIRYMEMORY    => :FAIRY
-      # }
     end
   end
 
@@ -3014,7 +2995,7 @@ class PokeBattle_Move_0EB < PokeBattle_Move
       return true
     end
     # if @battle.wildBattle? && target.level>user.level
-    #   @battle.pbDisplay(_INTL("But it failed!"))
+    #   @battle.pbDisplay("But it failed!")
     #   return true
     # end
     if @battle.trainerBattle?
@@ -3245,10 +3226,8 @@ class PokeBattle_Move_0F1 < PokeBattle_Move
     # removed target.item == target.initialItem, this may cause bugs.
     if @battle.wildBattle? && target.opposes? && !user.initialItem
       user.setInitialItem(target.item)
-      target.pbRemoveItem
-    else
-      target.pbRemoveItem(false)
     end
+    target.pbRemoveItem(false)
     @battle.pbDisplay(_INTL("{1} stole {2}'s {3}!",user.pbThis,target.pbThis(true),itemName))
     user.pbHeldItemTriggerCheck
   end

@@ -69,7 +69,8 @@ class HairstyleSelectionMenuPresenter
   end
 
   def getDefaultName()
-    return DEFAULT_NAMES[@gender]
+    gender = $Trainer ? $Trainer.gender : nil
+    return getPlayerDefaultName(gender)
   end
 
 

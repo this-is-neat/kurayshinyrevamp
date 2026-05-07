@@ -138,8 +138,7 @@ end
 #===============================================================================
 class PokeBattle_Move_109 < PokeBattle_Move
   def pbEffectGeneral(user)
-    # if user.pbOwnedByPlayer?
-    if user.pbOwnedByPlayerSerious?
+    if user.pbOwnedByPlayer?
       @battle.field.effects[PBEffects::PayDay] += 5 * user.level
     end
     @battle.pbDisplay(_INTL("Coins were scattered everywhere!"))
@@ -2087,7 +2086,7 @@ end
 Events.onEndBattle += proc { |_sender,_e|
   $Trainer.party.each_with_index do |value, i|
     pokemon = $Trainer.party[i]
-    pokemon.changeFormSpecies(:U_NECROZMA,:NECROZMA) if pokemon.isFusionOf(:U_NECROZMA)
+      pokemon.changeFormSpecies(:U_NECROZMA,:NECROZMA) if pokemon.isFusionOf(:U_NECROZMA)
   end
 }
 

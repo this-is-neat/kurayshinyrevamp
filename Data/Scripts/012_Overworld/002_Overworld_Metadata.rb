@@ -37,6 +37,7 @@ class PokemonGlobalMetadata
   # Affecting the map
   attr_accessor :bridge
   attr_accessor :repel
+  attr_accessor :tempRepel
   attr_accessor :flashUsed
   attr_accessor :encounter_version
   # Map transfers
@@ -96,6 +97,7 @@ class PokemonGlobalMetadata
     # Affecting the map
     @bridge               = 0
     @repel                = 0
+    @tempRepel            = false
     @flashused            = false
     @encounter_version    = 0
     # Map transfers
@@ -194,24 +196,6 @@ class PokemonGlobalMetadata
     else
       $Trainer.seen_storage_creator = value
     end
-  end
-
-  #Sylvi Items
-  alias _overworld_clone clone unless method_defined?(:_overworld_clone)
-  def clone
-    ret = _overworld_clone
-    ret.pcItemStorage = @pcItemStorage.clone
-    ret.partner = [@partner[0], @partner[1], @partner[2], @partner[3].clone] if @partner
-    ret.mailbox = @mailbox.clone
-    return ret
-  end
-
-  #Sylvi Items
-  def make_vanilla
-    @pcItemStorage.make_vanilla if @pcItemStorage
-    @partner[3].map! { |pkmn| pkmn.clone.make_vanilla } if @partner
-    @mailbox.delete_if { |mail| item = GameData::Item.try_get(mail.item); item && item.modded? } if @mailbox
-    return self
   end
 end
 

@@ -116,7 +116,7 @@ class PokemonSummary_Scene
     @pokemon = @party[@partyindex]
     @inbattle = inbattle
     @page = 1
-    @typebitmap = AnimatedBitmap.new(_INTL("Graphics/Pictures/types"))
+    @typebitmap = AnimatedBitmap.new("Graphics/Pictures/types")
     @markingbitmap = AnimatedBitmap.new("Graphics/Pictures/Summary/markings")
     @sprites = {}
     @sprites["background"] = IconSprite.new(0, 0, @viewport)
@@ -133,9 +133,6 @@ class PokemonSummary_Scene
       @sprites["pokemon"].zoom_y = Settings::FRONTSPRITE_SCALE
     end
     @sprites["pokeicon"] = PokemonIconSprite.new(@pokemon, @viewport)
-    #Sylvi Big Icons
-    @sprites["pokeicon"].icon_offset_x = 0
-    @sprites["pokeicon"].icon_offset_y = 0
     @sprites["pokeicon"].setOffset(PictureOrigin::Center)
     @sprites["pokeicon"].x = 46
     @sprites["pokeicon"].y = 92
@@ -190,15 +187,12 @@ class PokemonSummary_Scene
     @partyindex = partyindex
     @pokemon = @party[@partyindex]
     @page = 4
-    @typebitmap = AnimatedBitmap.new(_INTL("Graphics/Pictures/types"))
+    @typebitmap = AnimatedBitmap.new("Graphics/Pictures/types")
     @sprites = {}
     @sprites["background"] = IconSprite.new(0, 0, @viewport)
     @sprites["overlay"] = BitmapSprite.new(Graphics.width, Graphics.height, @viewport)
     pbSetSystemFont(@sprites["overlay"].bitmap)
     @sprites["pokeicon"] = PokemonIconSprite.new(@pokemon, @viewport)
-    #Sylvi Big Icons
-    @sprites["pokeicon"].icon_offset_x = 0
-    @sprites["pokeicon"].icon_offset_y = 0
     @sprites["pokeicon"].setOffset(PictureOrigin::Center)
     @sprites["pokeicon"].x = 46
     @sprites["pokeicon"].y = 92
@@ -341,13 +335,12 @@ class PokemonSummary_Scene
       imagepos.push([sprintf("Graphics/Pictures/Summary/icon_pokerus"), 176, 100])
     end
     # Show shininess star
-    if @pokemon.shiny? || @pokemon.fakeshiny?
-      #KurayX new ShinyStars
-      addShinyStarsToGraphicsArray(imagepos,2,134,@pokemon.bodyShiny?,@pokemon.headShiny?,@pokemon.debugShiny?,nil,nil,nil,nil,true,false,@pokemon.fakeshiny?,[@pokemon.shinyR?,@pokemon.shinyG?,@pokemon.shinyB?,@pokemon.shinyKRS?])
+    if @pokemon.shiny?
+      addShinyStarsToGraphicsArray(imagepos, 2, 134, @pokemon.bodyShiny?, @pokemon.headShiny?, @pokemon.debugShiny?, nil, nil, nil, nil, true)
       #imagepos.push([sprintf("Graphics/Pictures/shiny"), 2, 134])
     end
     # Draw all images
-    # pbDrawImagePositions(overlay, imagepos)
+    pbDrawImagePositions(overlay, imagepos)
     # Write various bits of text
     pagename = [_INTL("INFO"),
                 _INTL("TRAINER MEMO"),
@@ -367,33 +360,13 @@ class PokemonSummary_Scene
       textpos.push([_INTL("None"), 16, 346, 0, Color.new(192, 200, 208), Color.new(208, 216, 224)])
     end
     # Write the gender symbol
-    #KurayNewSymbolGender
-    kuraygender1t = "♂"
-    kuraygender2t = "♀"
-    # kuraygender3t = "♃"
-    # kuraygender4t = "♄"
-    kuraygender1r = [55, 148, 229]
-    kuraygender1s = [68, 98, 125]
-    kuraygender2r = [229, 55, 203]
-    kuraygender2s = [137, 73, 127]
-    # kuraygender3r = [55, 229, 81]
-    # kuraygender3s = [68, 127, 76]
-    # kuraygender4r = [229, 127, 55]
-    # kuraygender4s = [135, 95, 69]
-    if @pokemon.pizza?
-      imagepos.push(["Graphics/Pictures/Storage/gender4", 160, 61])
-      # textpos.push([_INTL(kuraygender4t), 178, 56, 0, Color.new(kuraygender4r[0], kuraygender4r[1], kuraygender4r[2]), Color.new(kuraygender4s[0], kuraygender4s[1], kuraygender4s[2])])
-    elsif @pokemon.male?
-      textpos.push([_INTL(kuraygender1t), 178, 56, 0, Color.new(kuraygender1r[0], kuraygender1r[1], kuraygender1r[2]), Color.new(kuraygender1s[0], kuraygender1s[1], kuraygender1s[2])])
+    if @pokemon.male?
+      textpos.push(["♂", 178, 56, 0, Color.new(24, 112, 216), Color.new(136, 168, 208)])
     elsif @pokemon.female?
-      textpos.push([_INTL(kuraygender2t), 178, 56, 0, Color.new(kuraygender2r[0], kuraygender2r[1], kuraygender2r[2]), Color.new(kuraygender2s[0], kuraygender2s[1], kuraygender2s[2])])
-    elsif @pokemon.genderless?
-      imagepos.push(["Graphics/Pictures/Storage/gender3", 164, 69])
-      # textpos.push([_INTL(kuraygender3t), 178, 56, 0, Color.new(kuraygender3r[0], kuraygender3r[1], kuraygender3r[2]), Color.new(kuraygender3s[0], kuraygender3s[1], kuraygender3s[2])])
+      textpos.push(["♀", 178, 56, 0, Color.new(248, 56, 32), Color.new(224, 152, 144)])
     end
     # Draw all text
     pbDrawTextPositions(overlay, textpos)
-    pbDrawImagePositions(overlay, imagepos)
     # Draw the Pokémon's markings
     drawMarkings(overlay, 84, 292)
     # Draw page-specific information
@@ -445,12 +418,12 @@ class PokemonSummary_Scene
     end
     # Write various bits of text
     textpos = [
-      #[_INTL("Dex No."), 238, dex_no_y, 0, base, shadow],
+      #["Dex No.", 238, dex_no_y, 0, base, shadow],
       [_INTL("Species"), 238, species_y, 0, base, shadow],
       [@pokemon.speciesName, 435, species_y, 2, Color.new(64, 64, 64), Color.new(176, 176, 176)],
       [_INTL("Type"), 238, type_y, 0, base, shadow],
       [_INTL("OT"), 238, ot_y, 0, base, shadow],
-      # [_INTL("ID No."), 238, id_no_y, 0, base, shadow],
+      # ["ID No.", 238, id_no_y, 0, base, shadow],
     ]
     if @pokemon.isFusion?
       headName = getPokemon(@pokemon.species_data.get_head_species).name
@@ -493,7 +466,7 @@ class PokemonSummary_Scene
     # Write Original Trainer's name and ID number
     if @pokemon.owner.name.empty?
       textpos.push([_INTL("RENTAL"), 435, ot_y, 2, Color.new(64, 64, 64), Color.new(176, 176, 176)])
-      # textpos.push(["?????", 435, 202, 2, Color.new(64, 64, 64), Color.new(176, 176, 176)])
+      #textpos.push(["?????", 435, 202, 2, Color.new(64, 64, 64), Color.new(176, 176, 176)])
     else
       ownerbase = Color.new(64, 64, 64)
       ownershadow = Color.new(176, 176, 176)
@@ -506,17 +479,17 @@ class PokemonSummary_Scene
         ownershadow = Color.new(224, 152, 144)
       end
       textpos.push([@pokemon.owner.name, 435, ot_y, 2, ownerbase, ownershadow])
-      # textpos.push([sprintf("%05d", @pokemon.owner.public_id), 435, 202, 2, Color.new(64, 64, 64), Color.new(176, 176, 176)])
+      #textpos.push([sprintf("%05d", @pokemon.owner.public_id), 435, 202, 2, Color.new(64, 64, 64), Color.new(176, 176, 176)])
     end
     # Write Exp text OR heart gauge message (if a Shadow Pokémon)
     # if @pokemon.shadowPokemon?
-    #   textpos.push([_INTL("Heart Gauge"), 238, 234, 0, base, shadow])
-    #   heartmessage = [_INTL("The door to its heart is open! Undo the final lock!"),
-    #                   _INTL("The door to its heart is almost fully open."),
-    #                   _INTL("The door to its heart is nearly open."),
-    #                   _INTL("The door to its heart is opening wider."),
-    #                   _INTL("The door to its heart is opening up."),
-    #                   _INTL("The door to its heart is tightly shut.")][@pokemon.heartStage]
+    #   textpos.push(["Heart Gauge", 238, 234, 0, base, shadow])
+    #   heartmessage = ["The door to its heart is open! Undo the final lock!",
+    #                   "The door to its heart is almost fully open.",
+    #                   "The door to its heart is nearly open.",
+    #                   "The door to its heart is opening wider.",
+    #                   "The door to its heart is opening up.",
+    #                   "The door to its heart is tightly shut."][@pokemon.heartStage]
     #   memo = sprintf("<c3=404040,B0B0B0>%s\n", heartmessage)
     #   drawFormattedTextEx(overlay, 234, 304, 264, memo)
     # else
@@ -525,7 +498,7 @@ class PokemonSummary_Scene
     textpos.push([@pokemon.exp.to_s_formatted, 488, 266, 1, Color.new(64, 64, 64), Color.new(176, 176, 176)])
     textpos.push([_INTL("To Next Lv."), 238, 298, 0, base, shadow])
     textpos.push([(endexp - @pokemon.exp).to_s_formatted, 488, 330, 1, Color.new(64, 64, 64), Color.new(176, 176, 176)])
-    # end
+    #end
     # Draw all text
     pbDrawTextPositions(overlay, textpos)
     # Draw Pokémon type(s)
@@ -533,7 +506,7 @@ class PokemonSummary_Scene
     type2_number = GameData::Type.get(@pokemon.type2).id_number
     type1rect = Rect.new(0, type1_number * 28, 64, 28)
     type2rect = Rect.new(0, type2_number * 28, 64, 28)
-    
+
     type_graphics_y = type_y + type_y_offset
     if @pokemon.type1 == @pokemon.type2
       overlay.blt(402, type_graphics_y, @typebitmap.bitmap, type1rect)
@@ -721,79 +694,25 @@ class PokemonSummary_Scene
       end
     end
     # Write various bits of text
-    # textpos = [
-    #   [_INTL("HP"), 248, 70, 0, base, statshadows[:HP]],
-    #   [sprintf("%d", @pokemon.hp), 346, 70, 1, base, shadow],
-    #   [sprintf("%d", @pokemon.totalhp), 400, 70, 1, Color.new(64, 64, 64), Color.new(176, 176, 176)],
-	  # #[_INTL("IV"), 360, 70, 0, Color.new(64, 64, 64), Color.new(176, 176, 176)],
-    #   [sprintf("%d", @pokemon.iv[:HP]), 440, 70, 1, Color.new(84, 64, 44), Color.new(248, 148, 0)],
-	  # #[_INTL("EV"), 442, 70, 1, Color.new(64, 64, 64), Color.new(176, 176, 176)],
-    #   [sprintf("%d", @pokemon.ev[:HP]), 480, 70, 1, Color.new(54, 84, 54), Color.new(24, 192, 32)],
-    #   [_INTL("Attack"), 248, 114, 0, base, statshadows[:ATTACK]],
-    #   [sprintf("%d", @pokemon.attack), 400, 114, 1, Color.new(64, 64, 64), Color.new(176, 176, 176)],
-    #   [sprintf("%d", @pokemon.iv[:ATTACK]), 440, 114, 1, Color.new(84, 64, 44), Color.new(248, 148, 0)],
-    #   [sprintf("%d", @pokemon.ev[:ATTACK]), 480, 114, 1, Color.new(54, 84, 54), Color.new(24, 192, 32)],
-    #   [_INTL("Defense"), 248, 146, 0, base, statshadows[:DEFENSE]],
-    #   [sprintf("%d", @pokemon.defense), 400, 146, 1, Color.new(64, 64, 64), Color.new(176, 176, 176)],
-    #   [sprintf("%d", @pokemon.iv[:DEFENSE]), 440, 146, 1, Color.new(84, 64, 44), Color.new(248, 148, 0)],
-    #   [sprintf("%d", @pokemon.ev[:DEFENSE]), 480, 146, 1, Color.new(54, 84, 54), Color.new(24, 192, 32)],
-    #   [_INTL("Sp. Atk"), 248, 178, 0, base, statshadows[:SPECIAL_ATTACK]],
-    #   [sprintf("%d", @pokemon.spatk), 400, 178, 1, Color.new(64, 64, 64), Color.new(176, 176, 176)],
-    #   [sprintf("%d", @pokemon.iv[:SPECIAL_ATTACK]), 440, 178, 1, Color.new(84, 64, 44), Color.new(248, 148, 0)],
-    #   [sprintf("%d", @pokemon.ev[:SPECIAL_ATTACK]), 480, 178, 1, Color.new(54, 84, 54), Color.new(24, 192, 32)],
-    #   [_INTL("Sp. Def"), 248, 210, 0, base, statshadows[:SPECIAL_DEFENSE]],
-    #   [sprintf("%d", @pokemon.spdef), 400, 210, 1, Color.new(64, 64, 64), Color.new(176, 176, 176)],
-    #   [sprintf("%d", @pokemon.iv[:SPECIAL_DEFENSE]), 440, 210, 1, Color.new(84, 64, 44), Color.new(248, 148, 0)],
-    #   [sprintf("%d", @pokemon.ev[:SPECIAL_DEFENSE]), 480, 210, 1, Color.new(54, 84, 54), Color.new(24, 192, 32)],
-    #   [_INTL("Speed"), 248, 242, 0, base, statshadows[:SPEED]],
-    #   [sprintf("%d", @pokemon.speed), 400, 242, 1, Color.new(64, 64, 64), Color.new(176, 176, 176)],
-    #   [sprintf("%d", @pokemon.iv[:SPEED]), 440, 242, 1, Color.new(84, 64, 44), Color.new(248, 148, 0)],
-    #   [sprintf("%d", @pokemon.ev[:SPEED]), 480, 242, 1, Color.new(54, 84, 54), Color.new(24, 192, 32)],
-    #   [_INTL("Ability"), 224, 278, 0, base, shadow]
-    # ]
-    stats = [:HP, :ATTACK, :DEFENSE, :SPECIAL_ATTACK, :SPECIAL_DEFENSE, :SPEED]
-    stats_value = [:totalhp, :attack, :defense, :spatk, :spdef, :speed]
-    stats_displayname = [_INTL("HP"), _INTL("Attack"), _INTL("Defense"), _INTL("Sp. Atk"), _INTL("Sp. Def"), _INTL("Speed")]
-    textpos = []
-    
-    stats.length.times do |i|
-      # y = 70 + i * 36
-      case i
-      when 0
-        y = 70
-      when 1
-        y = 114
-      when 2
-        y = 146
-      when 3
-        y = 178
-      when 4
-        y = 210
-      when 5
-        y = 242
-      end
-      base_stat = @pokemon.baseStats[stats[i]]
-      ev_stat = ($PokemonSystem.noevsmode && $PokemonSystem.noevsmode > 0) ? 0 : @pokemon.ev[stats[i]]
-      iv_stat = ($PokemonSystem.maxivsmode && $PokemonSystem.maxivsmode > 0) ? Pokemon::IV_STAT_LIMIT : @pokemon.iv[stats[i]]
-      textpos += [
-        [stats_displayname[i], 236, y, 0, base, statshadows[stats[i]]],
-        [sprintf("%d", @pokemon.send(stats_value[i].downcase)), 380, y, 1, Color.new(64, 64, 64), Color.new(176, 176, 176)],
-        [sprintf("%d", iv_stat), 420, y, 1, Color.new(84, 64, 44), Color.new(248, 148, 0)],
-        [sprintf("%d", ev_stat), 460, y, 1, Color.new(54, 84, 54), Color.new(24, 192, 32)],
-        [sprintf("%d", base_stat), 500, y, 1, Color.new(36, 60, 80), Color.new(88, 152, 248)]
-      ]
-      if i == 0 # If the stat is HP
-        textpos << [sprintf("%d", @pokemon.hp), 326, y, 1, base, shadow]
-        textpos << ["IVs", 420, y-23, 1, Color.new(64, 44, 24), Color.new(228, 128, 0)]
-        textpos << ["EVs", 460, y-23, 1, Color.new(34, 64, 34), Color.new(4, 172, 12)]
-        textpos << ["BST", 500, y-23, 1, Color.new(36, 60, 80), Color.new(88, 152, 248)]
-      end
-    end
-    
-    textpos << [_INTL("Ability"), 224, 278, 0, base, shadow]
+    textpos = [
+      [_INTL("HP"), 292, 70, 2, base, statshadows[:HP]],
+      [sprintf("%d/%d", @pokemon.hp, @pokemon.totalhp), 462, 70, 1, Color.new(64, 64, 64), Color.new(176, 176, 176)],
+      [_INTL("Attack"), 248, 114, 0, base, statshadows[:ATTACK]],
+      [sprintf("%d", @pokemon.attack), 456, 114, 1, Color.new(64, 64, 64), Color.new(176, 176, 176)],
+      [_INTL("Defense"), 248, 146, 0, base, statshadows[:DEFENSE]],
+      [sprintf("%d", @pokemon.defense), 456, 146, 1, Color.new(64, 64, 64), Color.new(176, 176, 176)],
+      [_INTL("Sp. Atk"), 248, 178, 0, base, statshadows[:SPECIAL_ATTACK]],
+      [sprintf("%d", @pokemon.spatk), 456, 178, 1, Color.new(64, 64, 64), Color.new(176, 176, 176)],
+      [_INTL("Sp. Def"), 248, 210, 0, base, statshadows[:SPECIAL_DEFENSE]],
+      [sprintf("%d", @pokemon.spdef), 456, 210, 1, Color.new(64, 64, 64), Color.new(176, 176, 176)],
+      [_INTL("Speed"), 248, 242, 0, base, statshadows[:SPEED]],
+      [sprintf("%d", @pokemon.speed), 456, 242, 1, Color.new(64, 64, 64), Color.new(176, 176, 176)],
+      [_INTL("Ability"), 224, 278, 0, base, shadow]
+    ]
     # Draw ability name and description
     ability = @pokemon.ability
     ability2 = @pokemon.ability2
+
     if ability
       textpos.push([ability.name, 362, 278, 0, Color.new(64, 64, 64), Color.new(176, 176, 176)])
       drawTextEx(overlay, 224, 320, 282, 2, ability.description, Color.new(64, 64, 64), Color.new(176, 176, 176))
@@ -1003,7 +922,7 @@ class PokemonSummary_Scene
   #   @sprites["downarrow"].visible = false
   #   # Write various bits of text
   #   textpos = [
-  #     [_INTL("No. of Ribbons:"), 234, 326, 0, Color.new(64, 64, 64), Color.new(176, 176, 176)],
+  #     ["No. of Ribbons:", 234, 326, 0, Color.new(64, 64, 64), Color.new(176, 176, 176)],
   #     [@pokemon.numRibbons.to_s, 450, 326, 1, Color.new(64, 64, 64), Color.new(176, 176, 176)],
   #   ]
   #   # Draw all text
@@ -1358,6 +1277,7 @@ class PokemonSummary_Scene
     cmdPokedex = -1
     cmdMark = -1
     cmdHat = -1
+
     if !@pokemon.egg?
       if pbBattleChallenge.currentChallenge == -1
         commands[cmdGiveItem = commands.length] = _INTL("Give item")
@@ -1438,7 +1358,7 @@ class PokemonSummary_Scene
       pbChangePokemon()
     end
   end
-  
+
   def pbChooseMoveToForget(move_to_learn)
     new_move = (move_to_learn) ? Pokemon::Move.new(move_to_learn) : nil
     selmove = 0
@@ -1576,7 +1496,7 @@ class PokemonSummaryScreen
       ret = @scene.pbChooseMoveToForget(move_to_learn)
       break if ret < 0 || !move_to_learn
       break if party[partyindex].moves[ret]
-      #pbMessage(_INTL("HM moves can't be forgotten now.")) { @scene.pbUpdate }
+      #pbMessage("HM moves can't be forgotten now.") { @scene.pbUpdate }
     end
     @scene.pbEndScene
     return ret

@@ -6,8 +6,8 @@ class Player < Trainer
   attr_accessor :seen_purify_chamber
 
   alias __shadowPkmn__initialize initialize unless method_defined?(:__shadowPkmn__initialize)
-  def initialize(name, trainer_type)
-    __shadowPkmn__initialize(name, trainer_type)
+  def initialize(*args)
+    __shadowPkmn__initialize(*args)
     @has_snag_machine    = false
     @seen_purify_chamber = false
   end

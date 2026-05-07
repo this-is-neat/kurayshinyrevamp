@@ -265,7 +265,6 @@ def pbWildBattleCore(*args)
     pbMEStop
     return 1   # Treat it as a win
   end
-  $PokemonSystem.is_in_battle = true
   # Record information about party Pokémon to be used at the end of battle (e.g.
   # comparing levels for an evolution check)
   Events.onStartBattle.trigger(nil)
@@ -337,9 +336,6 @@ def pbWildBattleCore(*args)
   return decision
 end
 
-#
-#
-# ??? PIF added those functions, but they are not being used (WIP maybe)
 def pbWildDoubleBattleSpecific(pokemon1,pokemon2, outcomeVar=1, canRun=true, canLose=false)
   # Set some battle rules
   setBattleRule("outcomeVar",outcomeVar) if outcomeVar!=1
@@ -363,38 +359,25 @@ def pbWildBattleSpecific(pokemon, outcomeVar=1, canRun=true, canLose=false)
   # Return false if the player lost or drew the battle, and true if any other result
   return (decision!=2 && decision!=5)
 end
-# ??? PIF added those functions, but they are not being used (WIP maybe)
-#
-#
 
 #===============================================================================
 # Standard methods that start a wild battle of various sizes
 #===============================================================================
 # Used when walking in tall grass, hence the additional code.
-
-def pbKurayRandomize(species)
+def pbWildBattle(species, level, outcomeVar=1, canRun=true, canLose=false)
   if !species
     displayRandomizerErrorMessage()
-    return nil
+    return
   end
   species = GameData::Species.get(species).id
   dexnum = getDexNumberForSpecies(species)
-  # if dexnum <= NB_POKEMON
-  if $game_switches[SWITCH_RANDOM_STATIC_ENCOUNTERS] && dexnum <= NB_POKEMON && $PokemonTemp.pokeradar.nil?
+  if $game_switches[SWITCH_RANDOM_STATIC_ENCOUNTERS] && dexnum <= NB_POKEMON
     newSpecies = $PokemonGlobal.psuedoBSTHash[dexnum]
     if !newSpecies
       displayRandomizerErrorMessage()
     else
       species = getSpecies(newSpecies)
     end
-  end
-  return species
-end
-
-def pbWildBattle(species, level, outcomeVar=1, canRun=true, canLose=false)
-  species = pbKurayRandomize(species)
-  if !species
-    return
   end
 
   # Potentially call a different pbWildBattle-type method instead (for roaming
@@ -416,14 +399,6 @@ end
 
 def pbDoubleWildBattle(species1, level1, species2, level2,
                        outcomeVar=1, canRun=true, canLose=false)
-  species1 = pbKurayRandomize(species1)
-  if !species1
-    return
-  end
-  species2 = pbKurayRandomize(species2)
-  if !species2
-    return
-  end
   # Set some battle rules
   setBattleRule("outcomeVar",outcomeVar) if outcomeVar!=1
   setBattleRule("cannotRun") if !canRun
@@ -435,20 +410,35 @@ def pbDoubleWildBattle(species1, level1, species2, level2,
   return (decision!=2 && decision!=5)
 end
 
+def pbConfiguredWildBattle(encounterType, encounter1)
+  encounters = [encounter1]
+  target_size = 1
+  if $PokemonEncounters && $PokemonEncounters.respond_to?(:configured_wild_battle_size)
+    target_size = $PokemonEncounters.configured_wild_battle_size
+  elsif $PokemonEncounters && $PokemonEncounters.have_double_wild_battle?
+    target_size = 2
+  end
+  while encounters.length < target_size
+    next_encounter = $PokemonEncounters.choose_wild_pokemon(encounterType)
+    next_encounter = EncounterModifier.trigger(next_encounter)
+    break if !next_encounter
+    encounters << next_encounter
+  end
+  case encounters.length
+  when 3
+    return pbTripleWildBattle(encounters[0][0], encounters[0][1],
+                              encounters[1][0], encounters[1][1],
+                              encounters[2][0], encounters[2][1])
+  when 2
+    return pbDoubleWildBattle(encounters[0][0], encounters[0][1],
+                              encounters[1][0], encounters[1][1])
+  else
+    return pbWildBattle(encounters[0][0], encounters[0][1])
+  end
+end
+
 def pbTripleWildBattle(species1, level1, species2, level2, species3, level3,
                        outcomeVar=1, canRun=true, canLose=false)
-  species1 = pbKurayRandomize(species1)
-  if !species1
-    return
-  end
-  species2 = pbKurayRandomize(species2)
-  if !species2
-    return
-  end
-  species3 = pbKurayRandomize(species3)
-  if !species3
-    return
-  end
   # Set some battle rules
   setBattleRule("outcomeVar",outcomeVar) if outcomeVar!=1
   setBattleRule("cannotRun") if !canRun
@@ -493,7 +483,6 @@ def pbTrainerBattleCore(*args)
     pbMEStop
     return ($Trainer.able_pokemon_count == 0) ? 0 : 1   # Treat it as undecided/a win
   end
-  $PokemonSystem.is_in_battle = true
   # Record information about party Pokémon to be used at the end of battle (e.g.
   # comparing levels for an evolution check)
   Events.onStartBattle.trigger(nil)
@@ -600,10 +589,12 @@ def convert_pokemon_to_pokemon_hash(pokemon)
   return pokemon_hash
 end
 
+
+
 #party: array of pokemon team
 # [[:SPECIES,level], ... ]
 #
-def customTrainerBattle(trainerName, trainerType, party_array, default_level=50, endSpeech="", sprite_override=nil)
+def customTrainerBattle(trainerName, trainerType, party_array, default_level=50, endSpeech="", sprite_override=nil,custom_appearance=nil, items = [])
 
 
   # trainerID= "customTrainer"
@@ -618,8 +609,9 @@ def customTrainerBattle(trainerName, trainerType, party_array, default_level=50,
   # trainer_info_hash[:pokemon] = party
 
   #trainer = GameData::Trainer.new(trainer_info_hash)
-  trainer = NPCTrainer.new(trainerName,trainerType,sprite_override)
+  trainer = NPCTrainer.new(trainerName,trainerType,sprite_override,custom_appearance)
   trainer.lose_text=endSpeech
+  trainer.items = items
   party = []
   party_array.each { |pokemon|
     if pokemon.is_a?(Pokemon)
@@ -766,6 +758,35 @@ def pbAfterBattle(decision,canLose)
       (Graphics.frame_rate/4).times { Graphics.update }
     end
   end
+  if decision == 4
+    begin
+      CaptureCompletionFallback.flush(true) if defined?(CaptureCompletionFallback)
+    rescue
+    end
+    begin
+      EBDXOverlayCleanup.cleanup if defined?(EBDXOverlayCleanup)
+      EBDXOverlayCleanup.cleanup_strays(true) if defined?(EBDXOverlayCleanup)
+    rescue
+    end
+    begin
+      if $scene.is_a?(Scene_Map)
+        if $scene.respond_to?(:disposeSpritesets) && $scene.respond_to?(:createSpritesets)
+          $scene.disposeSpritesets
+          $scene.createSpritesets
+        end
+        $scene.updateSpritesets(true) if $scene.respond_to?(:updateSpritesets)
+      end
+    rescue
+    end
+    begin
+      Graphics.frame_reset
+    rescue
+    end
+    begin
+      DeferredCaughtPokemonProcessing.flush(true) if defined?(DeferredCaughtPokemonProcessing)
+    rescue
+    end
+  end
   Events.onEndBattle.trigger(nil,decision,canLose)
   $game_player.straighten
 end
@@ -786,6 +807,7 @@ Events.onEndBattle += proc { |_sender,e|
       pbHoneyGather(pkmn)
     end
     pickUpTypeItemSetBonus()
+    qmarkMaskCheck()
   when 2, 5   # Lose, draw
     if !canLose
       $game_system.bgm_unpause
@@ -795,13 +817,11 @@ Events.onEndBattle += proc { |_sender,e|
   end
 }
 
-#EVOLUTION_PREVENT_KURAY
 def pbEvolutionCheck(currentLevels,scene=nil)
   for i in 0...currentLevels.length
     pkmn = $Trainer.party[i]
     next if !pkmn || (pkmn.hp==0 && !Settings::CHECK_EVOLUTION_FOR_FAINTED_POKEMON)
     next if currentLevels[i] && pkmn.level==currentLevels[i]
-    next if pkmn.kuray_no_evo? == 1 && $PokemonSystem.kuray_no_evo == 1
     newSpecies = pkmn.check_evolution_on_level_up()
     next if !newSpecies
     evo = PokemonEvolutionScene.new
@@ -817,6 +837,12 @@ def pbDynamicItemList(*args)
     ret.push(args[i]) if GameData::Item.exists?(args[i])
   end
   return ret
+end
+
+# Older outfit/visual addons called this after winning battles, but some mod
+# combinations no longer provide an implementation. Keep the hook alive as a
+# harmless no-op so post-battle cleanup doesn't crash.
+def qmarkMaskCheck
 end
 
 # Try to gain an item after a battle if a Pokemon has the ability Pickup.

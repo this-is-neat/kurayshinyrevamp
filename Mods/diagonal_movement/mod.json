@@ -1,0 +1,12 @@
+{
+  "name": "Diagonal Movement",
+  "id": "diagonal_movement",
+  "version": "1.0.0",
+  "author": "Probably",
+  "description": "Enables 8-direction movement and a diagonal movement option.",
+  "tags": ["Movement", "QoL"],
+  "dependencies": [],
+  "incompatible": [],
+  "settings": [],
+  "scripts": ["main.rb"]
+}

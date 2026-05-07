@@ -181,7 +181,7 @@ class PokemonTrade_Scene
     pbDisposeSpriteHash(@sprites)
     @viewport.dispose
     newspecies = @pokemon2.check_evolution_on_trade(@pokemon)
-    if newspecies && (@pokemon2.kuray_no_evo? == 0 || $PokemonSystem.kuray_no_evo == 0)
+    if newspecies
       evo = PokemonEvolutionScene.new
       evo.pbStartScreen(@pokemon2,newspecies)
       evo.pbEvolution(false)
@@ -249,4 +249,7 @@ def pbStartTrade(pokemonIndex,newpoke,nickname,trainerName,trainerGender=0,saveg
     evo.pbEndScreen
   }
   $Trainer.party[pokemonIndex] = yourPokemon
+
+  setDialogIconOff(@event_id) if @event_id
+  return yourPokemon
 end

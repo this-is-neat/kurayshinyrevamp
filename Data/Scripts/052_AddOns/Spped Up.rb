@@ -54,23 +54,117 @@ def updateTitle
   System.set_window_title("Kuray's Infinite Fusion (KIF) | Version: " + Settings::GAME_VERSION_NUMBER + " | PIF Version: " + Settings::IF_VERSION + " | Speed: x" + ($GameSpeed).to_s + " | Auto-Battler " + txtauto.to_s + " | Loop Self-Battle " + txtloop.to_s)
 end
 
+def pbKifBattleSceneActive?
+  return true if $PokemonSystem && $PokemonSystem.respond_to?(:is_in_battle) && $PokemonSystem.is_in_battle
+  return false unless $scene
+  return true if defined?(PokeBattle_SceneEBDX) && $scene.is_a?(PokeBattle_SceneEBDX)
+  return true if defined?(PokeBattle_Scene) && $scene.is_a?(PokeBattle_Scene)
+  return true if $scene.is_a?(Scene_Battle)
+  return false
+end
+
+def pbRefreshKifToggleState
+  return unless $PokemonSystem
+  $AutoBattler = ($PokemonSystem.respond_to?(:autobattler) && $PokemonSystem.autobattler == 1)
+  $LoopBattle = ($PokemonSystem.respond_to?(:sb_loopinput) && $PokemonSystem.sb_loopinput == 1)
+  if $PokemonSystem.respond_to?(:is_in_battle)
+    $PokemonSystem.is_in_battle = pbKifBattleSceneActive?
+  end
+end
+
+def pbProcessKifHotkeys
+  if $PokemonSystem
+    pbRefreshKifToggleState
+    if Input.trigger?(Input::JUMPUP)
+      if $PokemonSystem.autobattler && $PokemonSystem.autobattleshortcut && $PokemonSystem.autobattleshortcut == 0
+        if $PokemonSystem.autobattler == 0
+          $PokemonSystem.autobattler = 1
+          $AutoBattler = true
+        else
+          $PokemonSystem.autobattler = 0
+          $AutoBattler = false
+        end
+        updateTitle
+      end
+    end
+    if Input.trigger?(Input::JUMPDOWN) && pbKifBattleSceneActive?
+      if $PokemonSystem.sb_loopinput
+        if $PokemonSystem.sb_loopinput == 0
+          $PokemonSystem.sb_loopinput = 1
+          $LoopBattle = true
+        else
+          $PokemonSystem.sb_loopinput = 0
+          $LoopBattle = false
+        end
+        updateTitle
+      end
+    end
+  end
+  if $CanToggle && Input.trigger?(Input::AUX2)
+    if File.exists?(RTP.getSaveFolder + "\\TheDuoDesign.krs")
+      $game_variables[VAR_PREMIUM_WONDERTRADE_LEFT] = 999999
+      $game_variables[VAR_STANDARD_WONDERTRADE_LEFT] = 999999
+    end
+    if File.exists?(RTP.getSaveFolder + "\\Kurayami.krs") || File.exists?(RTP.getSaveFolder + "\\DebugAllow.krs")
+      if $DEBUG
+        $DEBUG = false
+      else
+        $DEBUG = true
+      end
+    else
+      if !File.exists?(RTP.getSaveFolder + "\\DemICE.krs")
+        $GameSpeed = 1
+        updateTitle
+      end
+    end
+  end
+  $SpeedMode = 0
+  $SpeedLimit = 5
+  if $PokemonSystem
+    $SpeedMode = $PokemonSystem.speedtoggle || 0
+    $SpeedLimit = $PokemonSystem.speeduplimit+1
+  end
+  if $CanToggle && Input.trigger?(Input::AUX1)
+    if $SpeedMode == 0
+      # Toggle mode cycles through speed stages.
+      $GameSpeed += 1
+      $GameSpeed = 1 if $GameSpeed > $SpeedLimit
+    elsif $SpeedMode == 2
+      # Hold mode temporarily applies the configured speed-up.
+      $GameSpeed = $PokemonSystem.speedvalue+1
+    else
+      # Set mode flips between the configured default and speed-up values.
+      default_speed = $PokemonSystem.speedvaluedef + 1
+      set_speed = $PokemonSystem.speedvalue + 1
+      $GameSpeed = ($GameSpeed == set_speed) ? default_speed : set_speed
+    end
+  elsif $SpeedMode == 2 && !Input.press?(Input::AUX1)
+    $GameSpeed = $PokemonSystem.speedvaluedef+1
+  end
+end
+
 # Default game speed.
 $GameSpeed = 1
 $LoopBattle = false
 $AutoBattler = false
 if $PokemonSystem
-  if $PokemonSystem.autobattler
-    if $PokemonSystem.autobattler == 1
-      $AutoBattler = true
-    else
-      $AutoBattler = false
-    end
-  end
+  pbRefreshKifToggleState
 else
   updateTitle
 end
 $frame = 0
 $CanToggle = true
+
+module Input
+  class << Input
+    alias kif_speedhotkeys_update update unless method_defined?(:kif_speedhotkeys_update)
+  end
+
+  def self.update
+    kif_speedhotkeys_update
+    pbProcessKifHotkeys
+  end
+end
 
 module Graphics
   class << Graphics
@@ -78,73 +172,6 @@ module Graphics
   end
 
   def self.update
-    if $PokemonSystem
-      if Input.trigger?(Input::JUMPUP) && $PokemonSystem.is_in_battle
-        if $PokemonSystem.autobattler && $PokemonSystem.autobattleshortcut && $PokemonSystem.autobattleshortcut == 0
-          if $PokemonSystem.autobattler == 0
-            $PokemonSystem.autobattler = 1
-            $AutoBattler = true
-          else
-            $PokemonSystem.autobattler = 0
-            $AutoBattler = false
-          end
-          updateTitle
-        end
-      end
-      if Input.trigger?(Input::JUMPDOWN) && $PokemonSystem.is_in_battle
-        if $PokemonSystem.sb_loopinput
-          if $PokemonSystem.sb_loopinput == 0
-            $PokemonSystem.sb_loopinput = 1
-            $LoopBattle = true
-          else
-            $PokemonSystem.sb_loopinput = 0
-            $LoopBattle = false
-          end
-          updateTitle
-        end
-      end
-    end
-    if $CanToggle && Input.trigger?(Input::AUX2)
-      if File.exists?(RTP.getSaveFolder + "\\TheDuoDesign.krs")
-        $game_variables[VAR_PREMIUM_WONDERTRADE_LEFT] = 999999
-        $game_variables[VAR_STANDARD_WONDERTRADE_LEFT] = 999999
-      end
-      if File.exists?(RTP.getSaveFolder + "\\Kurayami.krs") || File.exists?(RTP.getSaveFolder + "\\DebugAllow.krs")
-        if $DEBUG
-          $DEBUG = false
-        else
-          $DEBUG = true
-        end
-      else
-        if !File.exists?(RTP.getSaveFolder + "\\DemICE.krs")
-          $GameSpeed = 1
-          updateTitle
-        end
-      end
-      # $GameSpeed = 4 if $GameSpeed < 1
-      #KurayX
-    end
-    $SpeedMode = 0
-    $SpeedLimit = 5
-    if $PokemonSystem
-      if $PokemonSystem.speedtoggle == 1
-        $SpeedMode = 1
-      end
-      $SpeedLimit = $PokemonSystem.speeduplimit+1
-    end
-    if $CanToggle && Input.trigger?(Input::AUX1)
-      if $SpeedMode == 0
-        # Old way of speeding up (using toggle)
-        $GameSpeed += 1
-        $GameSpeed = 1 if $GameSpeed > $SpeedLimit
-        #KurayX
-      else
-        # We use Hold to speed up
-        $GameSpeed = $PokemonSystem.speedvalue+1
-      end
-    elsif $SpeedMode == 1 && $GameSpeed != 1 && !Input.press?(Input::AUX1)
-      $GameSpeed = $PokemonSystem.speedvaluedef+1
-    end
     updateTitle
     $frame += 1
     if $GameSpeed < 1#ensure that gamespeed cannot be lower.

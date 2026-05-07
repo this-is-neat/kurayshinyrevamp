@@ -510,15 +510,7 @@ class PokemonEvolutionScene
     rsprite1.y = (Graphics.height-64)/2
     rsprite2 = PokemonSprite.new(@viewport)
     rsprite2.setOffset(PictureOrigin::Center)
-    # Ignore custom file KurayX
-    # ignoredBack = @pokemon.clone
-    # ignoredBack.kuraycustomfile = nil
-    # rsprite2.setPokemonBitmapSpecies(ignoredBack,@newspecies,false)
-    @pokemon.oldkuraycustomfile = @pokemon.kuraycustomfile?
-    @pokemon.kuraycustomfile = nil
-    @pokemon.kuraycustomfile = kurayGetCustomSprite(GameData::Species.get(@newspecies).id_number)
     rsprite2.setPokemonBitmapSpecies(@pokemon,@newspecies,false)
-    # Ignore custom file KurayX
     rsprite2.x       = rsprite1.x
     rsprite2.y       = rsprite1.y
     rsprite2.opacity = 0
@@ -580,8 +572,6 @@ class PokemonEvolutionScene
     if canceled
       pbMessageDisplay(@sprites["msgwindow"],
          _INTL("Huh? {1} stopped evolving!",@pokemon.name)) { pbUpdate }
-      @pokemon.kuraycustomfile = @pokemon.oldkuraycustomfile?
-      @pokemon.oldkuraycustomfile = nil
     else
       pbEvolutionSuccess(reversing)
     end
@@ -599,7 +589,8 @@ class PokemonEvolutionScene
     # Success jingle/message
     pbMEPlay("Evolution success")
     sprite_bitmap=@sprites["rsprite2"].getBitmap
-    # drawSpriteCredits(sprite_bitmap.filename,sprite_bitmap.path, @viewport)
+
+    #drawSpriteCredits(sprite_bitmap.filename,sprite_bitmap.path, @viewport)
 
     newspeciesname = GameData::Species.get(@newspecies).name
     if !reversing
@@ -612,29 +603,24 @@ class PokemonEvolutionScene
                              @pokemon.name,newspeciesname)) { pbUpdate }
     end
 
+
     @sprites["msgwindow"].text = ""
     # Check for consumed item and check if Pokémon should be duplicated
     pbEvolutionMethodAfterEvolution if !reversing
 
-    # @pokemon
-    # @pokemon.ability
-
-    # oldAbility = @pokemon.ability.id
 
     #oldAbility = @pokemon.ability.id if @pokemon.ability
     newSpecies = GameData::Species.get(@newspecies)
 
-    # allNewPossibleAbilities = newSpecies.abilities + newSpecies.hidden_abilities
+    #allNewPossibleAbilities = newSpecies.abilities + newSpecies.hidden_abilities
 
     # Modify Pokémon to make it evolved
-    if @pokemon.oldkuraycustomfile == @pokemon.kuraycustomfile
-      @pokemon.kuraycustomfile = nil
-    end
     @pokemon.species = @newspecies
     @pokemon.form    = 0 if @pokemon.isSpecies?(:MOTHIM)
     @pokemon.calc_stats
-    @pokemon.oldkuraycustomfile = nil
     # See and own evolved species
+    #
+
     if !$Trainer.pokedex.owned?(@newspecies)
       $Trainer.pokedex.register(@pokemon)
       $Trainer.pokedex.set_owned(@newspecies)
@@ -643,16 +629,13 @@ class PokemonEvolutionScene
       @scene.pbShowPokedex(@newspecies)
     end
 
-    $Trainer.pokedex.register_unfused_pkmn(@pokemon).each do |unfused|
-      Kernel.pbMessageDisplay(@sprites["msgwindow"], 
-        _INTL("{1}'s data was added to the Pokédex", GameData::Species.get(unfused).name))
-    end
-    
+
+
     # if allNewPossibleAbilities.include?(oldAbility)
     #   @pokemon.ability=oldAbility
     # end
+
     # Learn moves upon evolution for evolved species
-    Kernel.pbMessageDisplay(@sprites["msgwindow"], "\\wtnp[0]", false, nil, false) # clear text before learning moves
     movelist = @pokemon.getMoveList
     for i in movelist
       next if i[0]!=0 && i[0]!=@pokemon.level   # 0 is "learn upon evolution"

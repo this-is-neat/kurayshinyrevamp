@@ -238,59 +238,69 @@ ItemHandlers::UseOnPokemon.add(:TRANSGENDERSTONE, proc { |item, pokemon, scene|
   end
 })
 
-#NOT FULLY IMPLEMENTED
-ItemHandlers::UseOnPokemon.add(:SECRETCAPSULE, proc { |item, poke, scene|
-  abilityList = poke.getAbilityList
-  numAbilities = abilityList[0].length
-
-  if numAbilities <= 2
-    scene.pbDisplay(_INTL("It won't have any effect."))
-    next false
-  elsif abilityList[0].length <= 3
-    if changeHiddenAbility1(abilityList, scene, poke)
-      next true
-    end
-    next false
-  else
-    if changeHiddenAbility2(abilityList, scene, poke)
-      next true
-    end
-    next false
+def pbAbilityCapsuleChoices(pokemon, use_hidden_abilities = false)
+  choices = []
+  seen_abilities = {}
+  current_ability_id = pokemon.ability_id
+  pokemon.getAbilityList.each do |ability_id, ability_index|
+    next if use_hidden_abilities ? ability_index < 2 : ability_index >= 2
+    next if !ability_id || seen_abilities[ability_id]
+    seen_abilities[ability_id] = true
+    next if ability_id == current_ability_id
+    choices << [ability_id, ability_index]
   end
-})
-
-def changeHiddenAbility1(abilityList, scene, poke)
-  abID1 = abilityList[0][2]
-  msg = _INTL("Change {1}'s ability to {2}?", poke.name, PBAbilities.getName(abID1))
-  if Kernel.pbConfirmMessage(_INTL(msg))
-    poke.setAbility(2)
-    abilName1 = PBAbilities.getName(abID1)
-    scene.pbDisplay(_INTL("{1}'s ability was changed to {2}!", poke.name, PBAbilities.getName(abID1)))
-    return true
-  else
-    return false
-  end
+  return choices
 end
 
-def changeHiddenAbility2(abilityList, scene, poke)
-  return false if !Kernel.pbConfirmMessage(_INTL("Change {1}'s ability?", poke.name))
-
-  abID1 = abilityList[0][2]
-  abID2 = abilityList[0][3]
-
-  abilName2 = PBAbilities.getName(abID1)
-  abilName3 = PBAbilities.getName(abID2)
-
-  if (Kernel.pbMessage("Choose an ability.", [_INTL("{1}", abilName2), _INTL("{1}", abilName3)], 2)) == 0
-    poke.setAbility(2)
-    scene.pbDisplay(_INTL("{1}'s ability was changed to {2}!", poke.name, abilName2))
-  else
-    return false
+def pbChooseAbilityCapsuleTarget(pokemon, scene, choices)
+  return nil if choices.empty?
+  chosen_ability = choices[0]
+  if choices.length > 1
+    commands = choices.map { |ability_id, _ability_index| GameData::Ability.get(ability_id).name }
+    chosen_index = scene.pbShowCommands(_INTL("Choose an ability."), commands, 0)
+    return nil if chosen_index < 0
+    chosen_ability = choices[chosen_index]
   end
-  poke.setAbility(3)
-  scene.pbDisplay(_INTL("{1}'s ability was changed to {2}!", poke.name, abilName3))
+  ability_name = GameData::Ability.get(chosen_ability[0]).name
+  return nil if !scene.pbConfirm(_INTL("Would you like to change {1}'s Ability to {2}?",
+                                       pokemon.name, ability_name))
+  return chosen_ability
+end
+
+def pbApplyAbilityCapsuleChoice(pokemon, scene, chosen_ability)
+  return false if !chosen_ability
+  ability_id, ability_index = chosen_ability
+  ability_name = GameData::Ability.get(ability_id).name
+  pokemon.ability_index = ability_index
+  pokemon.ability = ability_id
+  scene.pbHardRefresh
+  scene.pbDisplay(_INTL("{1}'s Ability changed to {2}!", pokemon.name, ability_name))
   return true
 end
+
+ItemHandlers::UseOnPokemon.add(:ABILITYCAPSULE, proc { |item, poke, scene|
+  if poke.hasHiddenAbility? || poke.isSpecies?(:ZYGARDE)
+    scene.pbDisplay(_INTL("It won't have any effect."))
+    next false
+  end
+  choices = pbAbilityCapsuleChoices(poke, false)
+  if choices.empty?
+    scene.pbDisplay(_INTL("It won't have any effect."))
+    next false
+  end
+  chosen_ability = pbChooseAbilityCapsuleTarget(poke, scene, choices)
+  next pbApplyAbilityCapsuleChoice(poke, scene, chosen_ability)
+})
+
+ItemHandlers::UseOnPokemon.add(:SECRETCAPSULE, proc { |item, poke, scene|
+  choices = pbAbilityCapsuleChoices(poke, true)
+  if choices.empty?
+    scene.pbDisplay(_INTL("It won't have any effect."))
+    next false
+  end
+  chosen_ability = pbChooseAbilityCapsuleTarget(poke, scene, choices)
+  next pbApplyAbilityCapsuleChoice(poke, scene, chosen_ability)
+})
 
 ItemHandlers::UseOnPokemon.add(:ROCKETMEAL, proc { |item, pokemon, scene|
   next pbHPItem(pokemon, 100, scene)
@@ -1193,59 +1203,30 @@ ItemHandlers::UseOnPokemon.add(:TRANSGENDERSTONE, proc { |item, pokemon, scene|
 #
 # })
 
-#NOT FULLY IMPLEMENTED
-ItemHandlers::UseOnPokemon.add(:SECRETCAPSULE, proc { |item, poke, scene|
-  abilityList = poke.getAbilityList
-  numAbilities = abilityList[0].length
-
-  if numAbilities <= 2
+# Override the older capsule registrations above with the modern ability-list logic.
+ItemHandlers::UseOnPokemon.add(:ABILITYCAPSULE, proc { |item, poke, scene|
+  if poke.hasHiddenAbility? || poke.isSpecies?(:ZYGARDE)
     scene.pbDisplay(_INTL("It won't have any effect."))
     next false
-  elsif abilityList[0].length <= 3
-    if changeHiddenAbility1(abilityList, scene, poke)
-      next true
-    end
-    next false
-  else
-    if changeHiddenAbility2(abilityList, scene, poke)
-      next true
-    end
+  end
+  choices = pbAbilityCapsuleChoices(poke, false)
+  if choices.empty?
+    scene.pbDisplay(_INTL("It won't have any effect."))
     next false
   end
+  chosen_ability = pbChooseAbilityCapsuleTarget(poke, scene, choices)
+  next pbApplyAbilityCapsuleChoice(poke, scene, chosen_ability)
 })
 
-def changeHiddenAbility1(abilityList, scene, poke)
-  abID1 = abilityList[0][2]
-  msg = _INTL("Change {1}'s ability to {2}?", poke.name, PBAbilities.getName(abID1))
-  if Kernel.pbConfirmMessage(_INTL(msg))
-    poke.setAbility(2)
-    abilName1 = PBAbilities.getName(abID1)
-    scene.pbDisplay(_INTL("{1}'s ability was changed to {2}!", poke.name, PBAbilities.getName(abID1)))
-    return true
-  else
-    return false
+ItemHandlers::UseOnPokemon.add(:SECRETCAPSULE, proc { |item, poke, scene|
+  choices = pbAbilityCapsuleChoices(poke, true)
+  if choices.empty?
+    scene.pbDisplay(_INTL("It won't have any effect."))
+    next false
   end
-end
-
-def changeHiddenAbility2(abilityList, scene, poke)
-  return false if !Kernel.pbConfirmMessage(_INTL("Change {1}'s ability?", poke.name))
-
-  abID1 = abilityList[0][2]
-  abID2 = abilityList[0][3]
-
-  abilName2 = PBAbilities.getName(abID1)
-  abilName3 = PBAbilities.getName(abID2)
-
-  if (Kernel.pbMessage("Choose an ability.", [_INTL("{1}", abilName2), _INTL("{1}", abilName3)], 2)) == 0
-    poke.setAbility(2)
-    scene.pbDisplay(_INTL("{1}'s ability was changed to {2}!", poke.name, abilName2))
-  else
-    return false
-  end
-  poke.setAbility(3)
-  scene.pbDisplay(_INTL("{1}'s ability was changed to {2}!", poke.name, abilName3))
-  return true
-end
+  chosen_ability = pbChooseAbilityCapsuleTarget(poke, scene, choices)
+  next pbApplyAbilityCapsuleChoice(poke, scene, chosen_ability)
+})
 
 ItemHandlers::UseOnPokemon.add(:ROCKETMEAL, proc { |item, pokemon, scene|
   next pbHPItem(pokemon, 100, scene)

@@ -12,7 +12,6 @@ class PokeRadar_UI
 
   GRAPHICS_Z = 99998
 
-
   def initialize(seenPokemon = [], unseenPokemon = [], rarePokemon = [])
     @seen_pokemon = seenPokemon
     @unseen_pokemon = unseenPokemon
@@ -63,6 +62,7 @@ class PokeRadar_UI
 
   def addPokemonIcon(species, blackened = false, rare=false)
     pokemonId=dexNum(species)
+    return if !pokemonId
     iconId = _INTL("{1}", species)
 
     pokemonBitmap = pbCheckPokemonIconFiles(species)
@@ -103,69 +103,6 @@ class PokeRadar_UI
   end
 
 
-
-  #KurayX Custom icons
-  def customIcons(dex_number)
-    return nil if dex_number == nil
-    if dex_number <= Settings::NB_POKEMON
-      return get_notfusedicon_sprite_path(dex_number)
-    else
-      if dex_number >= Settings::ZAPMOLCUNO_NB
-        specialPath = getSpecialIconName(dex_number)
-        if !pbResolveBitmap(specialPath)
-          specialPath = sprintf("Graphics/Battlers/special/000")
-        end
-        return pbResolveBitmap(specialPath)
-        head_id=nil
-      else
-        body_id = getBodyID(dex_number)
-        head_id = getHeadID(dex_number, body_id)
-        return get_customicons_sprite_path(head_id,body_id)
-        # folder = head_id.to_s
-        # filename = sprintf("%s.%s.png", head_id, body_id)
-      end
-    end
-  end
-
-  #KurayX Custom icons
-  def getSpecialIconName(dexNum)
-    return kuray_global_triples(dexNum)
-  end
-
-  #Just in case (KurayX) KurayX Custom icons
-  def get_notfusedicon_sprite_path(dex_number)
-    folder = dex_number.to_s
-    filename = sprintf("%s_i.png", dex_number)
-  
-    if alt_sprites_substitutions_available && $PokemonGlobal.alt_sprite_substitutions.keys.include?(dex_number)
-      return $PokemonGlobal.alt_sprite_substitutions[dex_number]
-    end
-  
-    normal_path = Settings::BATTLERS_FOLDER + folder + "/" + filename
-    lightmode_path = Settings::BATTLERS_FOLDER + filename
-    return normal_path if pbResolveBitmap(normal_path)
-    return lightmode_path
-  end
-
-  #Just in case (KurayX) KurayX Custom icons
-  def get_customicons_sprite_path(head_id,body_id)
-    #Swap path if alt is selected for this pokemon
-    dex_num = getSpeciesIdForFusion(head_id,body_id)
-    if alt_sprites_substitutions_available && $PokemonGlobal.alt_sprite_substitutions.keys.include?(dex_num)
-      heredoing = $PokemonGlobal.alt_sprite_substitutions[dex_num]
-      heredoing = heredoing[0..-5] + "_i.png"
-      return heredoing if pbResolveBitmap(heredoing)
-      return false
-    end
-  
-    #Try local custom sprite
-    filename = sprintf("%s.%s_i.png", head_id, body_id)
-    local_custom_path = Settings::CUSTOM_BATTLERS_FOLDER_INDEXED + head_id.to_s + "/" +filename
-    return local_custom_path if pbResolveBitmap(local_custom_path)
-    return false
-  end
-
-  #KurayX - KURAYX_ABOUT_SHINIES
   def createFusionIcon(pokemonId,x,y)
     bodyPoke_number = getBodyID(pokemonId)
     headPoke_number = getHeadID(pokemonId, bodyPoke_number)
@@ -176,31 +113,18 @@ class PokeRadar_UI
 
     bitmap1 = AnimatedBitmap.new(GameData::Species.icon_filename(headPoke))
     bitmap2 = AnimatedBitmap.new(GameData::Species.icon_filename(bodyPoke))
+    dexNum = getDexNumberForSpecies(pokemonId)
+    ensureFusionIconExists()
+    bitmapFileName = sprintf("Graphics/Pokemon/FusionIcons/icon%03d", dexNum)
+    headPokeFileName = GameData::Species.icon_filename(headPoke)
+    bitmapPath = sprintf("%s.png", bitmapFileName)
+    generated_new_icon = generateFusionIcon(headPokeFileName,bitmapPath)
+    result_bitmap = generated_new_icon ? AnimatedBitmap.new(bitmapPath) : bitmap1
 
-    #KurayX Github
-    directory_name = "Graphics/Pokemon/FusionIcons"
-    checkDirectory(directory_name)
-    # bitmapFileName = sprintf("Graphics/Pokemon/FusionIcons/icon%03d", pokemonId)
-    dexNum = pokemonId
-    #KurayX Custom icons
-    if dexNum.is_a?(Symbol)
-      dexNum = GameData::Species.get(dexNum).id_number
-    end
-    customiconname = customIcons(dexNum)
-    if customiconname
-      result_bitmap = AnimatedBitmap.new(customiconname)
-    else
-      bitmapFileName = sprintf("Graphics/Pokemon/FusionIcons/icon%03d", dexNum)
-      headPokeFileName = GameData::Species.icon_filename(headPoke)
-      bitmapPath = sprintf("%s.png", bitmapFileName)
-      IO.copy_stream(headPokeFileName, bitmapPath)
-      result_bitmap = AnimatedBitmap.new(bitmapPath)
-
-      for i in 0..bitmap1.width-1
-        for j in ((bitmap1.height / 2) + Settings::FUSION_ICON_SPRITE_OFFSET)..bitmap1.height-1
-          temp = bitmap2.bitmap.get_pixel(i, j)
-          result_bitmap.bitmap.set_pixel(i, j, temp)
-        end
+    for i in 0..bitmap1.width-1
+      for j in ((bitmap1.height / 2) + Settings::FUSION_ICON_SPRITE_OFFSET)..bitmap1.height-1
+        temp = bitmap2.bitmap.get_pixel(i, j)
+        result_bitmap.bitmap.set_pixel(i, j, temp)
       end
     end
     icon = IconSprite.new(x, y)

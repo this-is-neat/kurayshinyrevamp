@@ -46,6 +46,7 @@
 def onLoadExistingGame()
   migrateOldSavesToCharacterCustomization()
 
+  repairLegacyPinkanQuestProgress() rescue nil
 
 end
 
@@ -92,6 +93,9 @@ module SaveData
 
   # For compatibility with games saved without this plugin
   OLD_SAVE_SLOT = 'Game'
+  LEGACY_SAVE_DIR_NAMES = [
+    'kurayinfinitefusion'
+  ]
 
   SAVE_DIR = if File.directory?(System.data_directory)
                System.data_directory
@@ -103,8 +107,74 @@ module SaveData
     (AUTO_SLOTS + MANUAL_SLOTS).each { |f| yield f }
   end
 
+  def self.display_slots
+    slots = AUTO_SLOTS + MANUAL_SLOTS
+    slots << OLD_SAVE_SLOT if legacy_save_exists?
+    return slots
+  end
+
+  def self.legacy_save_exists?
+    return File.file?(self.get_full_path(OLD_SAVE_SLOT))
+  end
+
+  def self.legacy_slot?(slot)
+    return slot == OLD_SAVE_SLOT
+  end
+
   def self.get_full_path(file)
     return "#{SAVE_DIR}/#{file}.rxdata"
+  end
+
+  def self.standard_slots
+    return AUTO_SLOTS + MANUAL_SLOTS + [OLD_SAVE_SLOT]
+  end
+
+  def self.legacy_save_directories
+    dirs = []
+    roots = [
+      ENV['APPDATA'],
+      ENV['LOCALAPPDATA'],
+      (ENV['USERPROFILE'] ? File.join(ENV['USERPROFILE'], 'Saved Games') : nil),
+      (ENV['USERPROFILE'] ? File.join(ENV['USERPROFILE'], 'Documents') : nil)
+    ].compact
+    LEGACY_SAVE_DIR_NAMES.each do |dir_name|
+      roots.each do |root|
+        next if !root || !File.directory?(root)
+        path = File.join(root, dir_name)
+        dirs << path if File.directory?(path)
+      end
+    end
+    return dirs.uniq
+  end
+
+  def self.import_legacy_standard_saves
+    imported_slots = []
+    legacy_save_directories.each do |source_dir|
+      standard_slots.each do |slot|
+        source_path = File.join(source_dir, "#{slot}.rxdata")
+        next if !File.file?(source_path)
+        target_path = get_full_path(slot)
+        next if File.file?(target_path)
+        file_copy(source_path, target_path)
+        imported_slots << slot
+      end
+    end
+    return imported_slots
+  end
+
+  def self.first_available_manual_slot
+    MANUAL_SLOTS.each do |slot|
+      return slot if !File.file?(self.get_full_path(slot))
+    end
+    return nil
+  end
+
+  def self.peek_from_file(file_path)
+    validate file_path => String
+    save_data = get_data_from_file(file_path)
+    save_data = to_hash_format(save_data) if save_data.is_a?(Array)
+    resolve_modded_data(save_data)
+    return save_data
   end
 
   def self.get_backup_file_path
@@ -142,7 +212,7 @@ module SaveData
       full_path = self.get_full_path(file_slot)
       next if !File.file?(full_path)
       begin
-        temp_save_data = self.read_from_file(full_path)
+        temp_save_data = self.peek_from_file(full_path)
       rescue
         next
       end
@@ -153,16 +223,24 @@ module SaveData
         newest_slot = file_slot
       end
     end
-    # Port old save
-    if newest_slot.nil? && File.file?(self.get_full_path(OLD_SAVE_SLOT))
-      file_copy(self.get_full_path(OLD_SAVE_SLOT), self.get_full_path(MANUAL_SLOTS[0]))
-      return MANUAL_SLOTS[0]
+    if legacy_save_exists?
+      legacy_path = self.get_full_path(OLD_SAVE_SLOT)
+      begin
+        legacy_save_data = self.peek_from_file(legacy_path)
+        save_time = legacy_save_data[:player].last_time_saved || Time.at(1)
+      rescue
+        save_time = Time.at(1)
+      end
+      if newest_slot.nil? || save_time > newest_time
+        newest_slot = OLD_SAVE_SLOT
+      end
     end
     return newest_slot
   end
 
   # @return [Boolean] whether any save file exists
   def self.exists?
+    return true if legacy_save_exists?
     self.each_slot do |slot|
       full_path = SaveData.get_full_path(slot)
       return true if File.file?(full_path)
@@ -181,6 +259,8 @@ module SaveData
         full_path = self.get_full_path(slot)
         File.delete(full_path) if File.file?(full_path)
       end
+      legacy_path = self.get_full_path(OLD_SAVE_SLOT)
+      File.delete(legacy_path) if File.file?(legacy_path)
     end
   end
 
@@ -188,6 +268,7 @@ module SaveData
   # location specified by {MANUAL_SLOTS[0]}. Does nothing if a save file
   # already exists in {MANUAL_SLOTS[0]}.
   def self.move_old_windows_save
+    import_legacy_standard_saves
     return if self.exists?
     game_title = System.game_title.gsub(/[^\w ]/, '_')
     home = ENV['HOME'] || ENV['HOMEPATH']
@@ -196,7 +277,18 @@ module SaveData
     return unless File.directory?(old_location)
     old_file = File.join(old_location, 'Game.rxdata')
     return unless File.file?(old_file)
-    File.move(old_file, MANUAL_SLOTS[0])
+    File.move(old_file, self.get_full_path(OLD_SAVE_SLOT))
+  end
+
+  def self.promote_legacy_save_slot
+    legacy_path = self.get_full_path(OLD_SAVE_SLOT)
+    return nil if !File.file?(legacy_path)
+    target_slot = first_available_manual_slot
+    return OLD_SAVE_SLOT if target_slot.nil?
+    target_path = self.get_full_path(target_slot)
+    file_copy(legacy_path, target_path)
+    File.delete(legacy_path) if File.file?(legacy_path)
+    return target_slot
   end
 
   # Runs all possible conversions on the given save data.
@@ -226,25 +318,44 @@ end
 #
 #===============================================================================
 class PokemonLoad_Scene
+  def pbSlotArrowClicked?(sprite_key)
+    return false unless (Input.trigger?(Input::MOUSELEFT) rescue false)
+    mx = (Input.mouse_x rescue nil)
+    my = (Input.mouse_y rescue nil)
+    return false if mx.nil? || my.nil?
+    sprite = @sprites[sprite_key]
+    return false unless sprite && !pbDisposed?(sprite)
+    width = sprite.framewidth rescue sprite.width
+    height = sprite.frameheight rescue sprite.height
+    return mx >= sprite.x && mx < sprite.x + width &&
+           my >= sprite.y && my < sprite.y + height
+  end
+
   def pbChoose(commands, continue_idx)
     @sprites["cmdwindow"].commands = commands
+    if continue_idx && continue_idx >= 0 && continue_idx < commands.length
+      @sprites["cmdwindow"].index = continue_idx
+    end
     loop do
       Graphics.update
       Input.update
       pbUpdate
-      if Input.trigger?(Input::USE)
-        return @sprites["cmdwindow"].index
-      elsif @sprites["cmdwindow"].index == continue_idx
+      if @sprites["cmdwindow"].index == continue_idx
         @sprites["leftarrow"].visible = true
         @sprites["rightarrow"].visible = true
-        if Input.trigger?(Input::LEFT)
+        if pbSlotArrowClicked?("leftarrow") || Input.repeat?(Input::LEFT)
           return -3
-        elsif Input.trigger?(Input::RIGHT)
+        elsif pbSlotArrowClicked?("rightarrow") || Input.repeat?(Input::RIGHT)
           return -2
+        elsif Input.trigger?(Input::USE)
+          return @sprites["cmdwindow"].index
         end
       else
         @sprites["leftarrow"].visible = false
         @sprites["rightarrow"].visible = false
+        if Input.trigger?(Input::USE)
+          return @sprites["cmdwindow"].index
+        end
       end
     end
   end
@@ -296,16 +407,77 @@ class PokemonLoadScreen
 
   # @param file_path [String] file to load save data from
   # @return [Hash] save data
-  def load_save_file(file_path)
+  def load_save_file(file_path, preview = false)
+    warn_about_legacy_save(file_path) if preview
     begin
-      save_data = SaveData.read_from_file(file_path)
+      save_data = preview ? SaveData.peek_from_file(file_path) : SaveData.read_from_file(file_path)
     rescue
+      return {} if preview
       save_data = try_load_backup(file_path)
     end
     unless SaveData.valid?(save_data)
+      return {} if preview
       save_data = try_load_backup(file_path)
     end
     return save_data
+  end
+
+  def warn_about_legacy_save(file_path)
+    legacy_version = legacy_save_version(file_path)
+    return if legacy_version.nil?
+    @legacy_save_versions ||= {}
+    return if @legacy_save_versions[file_path] == legacy_version
+    pbMessage(_INTL("This save was created in {1}. Loading it in version {2} will update the file for compatibility.\nA backup will be created automatically before required conversions are applied.", legacy_save_version_text(legacy_version), Settings::GAME_VERSION))
+    @legacy_save_versions[file_path] = legacy_version
+  end
+
+  def confirm_selected_save_load
+    return true if !@selected_file
+    return true if !@legacy_save_versions
+    file_path = SaveData.get_full_path(@selected_file)
+    legacy_version = @legacy_save_versions[file_path]
+    return true if legacy_version.nil?
+    @confirmed_legacy_saves ||= {}
+    return true if @confirmed_legacy_saves[file_path]
+    confirmed = pbConfirmMessageSerious(_INTL("This save started in {1} and is being loaded in version {2}.\nContinue?", legacy_save_version_text(legacy_version), Settings::GAME_VERSION))
+    if confirmed
+      @confirmed_legacy_saves[file_path] = true
+      @save_data = load_selected_save_data
+      return !@save_data.empty?
+    end
+    return confirmed
+  end
+
+  def load_selected_save_data
+    return {} if !@selected_file
+    file_slot = @selected_file
+    if SaveData.legacy_slot?(file_slot)
+      promoted_slot = SaveData.promote_legacy_save_slot
+      file_slot = promoted_slot if promoted_slot
+      @selected_file = file_slot
+    end
+    save_data = load_save_file(SaveData.get_full_path(file_slot), false)
+    if save_data[:player] && save_data[:player].respond_to?(:save_slot=)
+      save_data[:player].save_slot = file_slot
+    end
+    return save_data
+  end
+
+  def legacy_save_version(file_path)
+    return nil if !file_path || !File.file?(file_path)
+    save_data = SaveData.peek_from_file(file_path)
+    return nil if !save_data.is_a?(Hash) || save_data.empty?
+    raw_version = save_data[:game_version].to_s.strip
+    return :unknown if raw_version.empty?
+    return raw_version if PluginManager.compare_versions(raw_version, Settings::GAME_VERSION) < 0
+    return nil
+  rescue
+    return nil
+  end
+
+  def legacy_save_version_text(legacy_version)
+    return _INTL("an older unknown version") if legacy_version == :unknown
+    return _INTL("version {1}", legacy_version)
   end
 
   def try_load_backup(file_path)
@@ -426,12 +598,13 @@ class PokemonLoadScreen
     # puts RUBY_VERSION.to_s + " is the ruby version"
     # End of WIP Kuray Eggs
 
-    save_file_list = SaveData::AUTO_SLOTS + SaveData::MANUAL_SLOTS
+    save_file_list = SaveData.display_slots
     first_time = true
     loop do
       # Outer loop is used for switching save files
+      save_file_list = SaveData.display_slots
       if @selected_file
-        @save_data = load_save_file(SaveData.get_full_path(@selected_file))
+        @save_data = load_save_file(SaveData.get_full_path(@selected_file), true)
       else
         @save_data = {}
       end
@@ -493,6 +666,7 @@ class PokemonLoadScreen
 
         case command
         when cmd_continue
+          next unless confirm_selected_save_load
           @scene.pbEndScene
           Game.load(@save_data)
           $game_switches[SWITCH_V5_1] = true
@@ -767,7 +941,11 @@ module Game
     SaveData.move_old_windows_save if System.platform[/Windows/]
     save_slot = SaveData.get_newest_save_slot
     if save_slot
-      save_data = SaveData.read_from_file(SaveData.get_full_path(save_slot))
+      begin
+        save_data = SaveData.peek_from_file(SaveData.get_full_path(save_slot))
+      rescue
+        save_data = {}
+      end
     else
       save_data = {}
     end
