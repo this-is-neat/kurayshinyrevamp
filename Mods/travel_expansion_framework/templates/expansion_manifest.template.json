@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "id": "your_expansion_id",
+  "name": "Your Expansion Name",
+  "namespace": "your_expansion_namespace",
+  "version": "0.1.0",
+  "author": "Author Name",
+  "asset_roots": ["assets"],
+  "map_block": {
+    "start": 21000,
+    "size": 1000
+  },
+  "maps": {
+    "files": [
+      {
+        "id": "entry_map",
+        "local_id": 1,
+        "path": "maps/Map001.rxdata",
+        "name": "Entry Map"
+      }
+    ]
+  },
+  "travel_nodes": [
+    {
+      "id": "entry",
+      "name": "Entry Point",
+      "description": "Travel into the expansion pack.",
+      "local_map_id": 1,
+      "position_mode": "fixed",
+      "x": 0,
+      "y": 0,
+      "direction": 2,
+      "mode_options": ["shared", "isolated"]
+    }
+  ],
+  "badges": {
+    "pages": [
+      {
+        "id": "region_badges",
+        "name": "Region Badges",
+        "slot_count": 8
+      }
+    ]
+  },
+  "dex": {
+    "pages": [
+      {
+        "id": "region_dex",
+        "name": "Region Dex",
+        "species": []
+      }
+    ]
+  },
+  "quests": {
+    "definitions": []
+  },
+  "variants": {
+    "aliases": [],
+    "transfer_rules": []
+  },
+  "migrations": []
+}

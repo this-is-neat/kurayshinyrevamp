@@ -1,0 +1,105 @@
+{
+  "schema_version": 1,
+  "version": "2026.05-rc1",
+  "worlds": {
+    "reborn": {
+      "status": "release_candidate",
+      "required_categories": ["startup", "story_transfer", "trainer_battle", "town_map", "menu_settings", "save_load_recovery"],
+      "known_risks": ["story flags after scripted crashes", "map transfer interpreter staleness"]
+    },
+    "xenoverse": {
+      "status": "release_candidate",
+      "required_categories": ["startup", "story_transfer", "trainer_battle", "item_handlers", "save_load_recovery"]
+    },
+    "insurgence": {
+      "status": "release_candidate",
+      "required_categories": ["startup", "story_transfer", "trainer_battle", "follower_system", "menu_settings", "save_load_recovery"]
+    },
+    "pokemon_uranium": {
+      "status": "release_candidate",
+      "required_categories": ["startup", "story_transfer", "trainer_battle", "encounters", "save_load_recovery"]
+    },
+    "opalo": {
+      "status": "release_candidate",
+      "required_categories": ["startup", "story_transfer", "trainer_battle", "encounters", "save_load_recovery"]
+    },
+    "empyrean": {
+      "status": "release_candidate",
+      "required_categories": ["startup", "story_transfer", "trainer_battle", "bridge_passability", "encounters", "save_load_recovery"],
+      "known_risks": ["bridge passability and over/under bridge state"]
+    },
+    "realidea": {
+      "status": "release_candidate",
+      "required_categories": ["startup", "story_transfer", "trainer_battle", "menu_settings", "save_load_recovery"]
+    },
+    "soulstones": {
+      "status": "release_candidate",
+      "required_categories": ["startup", "story_transfer", "trainer_battle", "item_handlers", "encounters", "save_load_recovery"],
+      "known_risks": ["helper methods and edge map connections"]
+    },
+    "soulstones2": {
+      "status": "release_candidate",
+      "required_categories": ["startup", "story_transfer", "trainer_battle", "item_handlers", "encounters", "save_load_recovery"],
+      "known_risks": ["helper methods and starter setup"]
+    },
+    "anil": {
+      "status": "release_candidate",
+      "required_categories": ["startup", "story_transfer", "trainer_battle", "item_handlers", "town_map", "follower_system", "dex", "menu_settings", "save_load_recovery"],
+      "known_risks": ["native menus", "town map language", "follower/photo helpers", "transfer release"]
+    },
+    "bushido": {
+      "status": "release_candidate",
+      "required_categories": ["startup", "story_transfer", "trainer_battle", "menu_settings", "save_load_recovery"],
+      "known_risks": ["battle scripting setup and party ownership reset"]
+    },
+    "darkhorizon": {
+      "status": "release_candidate",
+      "required_categories": ["startup", "story_transfer", "trainer_battle", "item_handlers", "menu_settings", "save_load_recovery"],
+      "known_risks": ["EliteBattle setup and trainer wrappers"]
+    },
+    "infinity": {
+      "status": "release_candidate",
+      "required_categories": ["startup", "story_transfer", "trainer_battle", "follower_system", "menu_settings", "save_load_recovery"],
+      "known_risks": ["day-night helper methods and roaming checks"]
+    },
+    "solar_eclipse": {
+      "status": "release_candidate",
+      "required_categories": ["startup", "story_transfer", "trainer_battle", "follower_system", "menu_settings", "save_load_recovery"],
+      "known_risks": ["intro setting menus and trainer-card setup"]
+    },
+    "vanguard": {
+      "status": "release_candidate",
+      "required_categories": ["startup", "story_transfer", "trainer_battle", "save_load_recovery"]
+    },
+    "pokemon_z": {
+      "status": "release_candidate",
+      "required_categories": ["startup", "story_transfer", "trainer_battle", "menu_settings", "save_load_recovery"]
+    },
+    "chaos_in_vesita": {
+      "status": "release_candidate",
+      "required_categories": ["startup", "story_transfer", "trainer_battle", "save_load_recovery"]
+    },
+    "deserted": {
+      "status": "release_candidate",
+      "required_categories": ["startup", "story_transfer", "trainer_battle", "save_load_recovery"]
+    },
+    "gadir_deluxe": {
+      "status": "release_candidate",
+      "required_categories": ["startup", "story_transfer", "trainer_battle", "menu_settings", "save_load_recovery"]
+    },
+    "hollow_woods": {
+      "status": "release_candidate",
+      "required_categories": ["startup", "story_transfer", "trainer_battle", "item_handlers", "menu_settings", "save_load_recovery"],
+      "known_risks": ["game-mode screens", "starter selection", "quest helpers"]
+    },
+    "keishou": {
+      "status": "release_candidate",
+      "required_categories": ["startup", "story_transfer", "trainer_battle", "item_handlers", "town_map", "bridge_passability", "encounters", "menu_settings", "save_load_recovery"],
+      "known_risks": ["native item handlers", "charm/crafting/storage", "town map routing", "bridge and encounter tags"]
+    },
+    "unbreakable_ties": {
+      "status": "release_candidate",
+      "required_categories": ["startup", "story_transfer", "trainer_battle", "menu_settings", "save_load_recovery"]
+    }
+  }
+}

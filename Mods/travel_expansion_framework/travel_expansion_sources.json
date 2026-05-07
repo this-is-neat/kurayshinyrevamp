@@ -1,0 +1,259 @@
+{
+  "search_roots": [
+    "./ExpansionLibrary"
+  ],
+  "ignore_directories": [
+    "PIF",
+    "ExpansionLibrary",
+    "ExpansionLinks"
+  ],
+  "auto_link_readable_projects": false,
+  "allow_direct_mount_without_link_file": false,
+  "projects": {
+    "reborn": {
+      "root": "../Reborn",
+      "display_name": "Pokemon Reborn",
+      "enabled": true,
+      "direct_mount": true,
+      "map_block_start": 26000,
+      "entry_anchor": { "map_id": 51, "x": 10, "y": 10, "direction": 2 },
+      "story_anchor": { "map_id": 51, "x": 10, "y": 10, "direction": 2 },
+      "exploration_anchor": { "map_id": 37, "x": 23, "y": 68, "direction": 6 },
+      "position_mode": "fixed",
+      "mode_options": ["shared"]
+    },
+    "xenoverse": {
+      "root": "../Xenoverse",
+      "display_name": "Pokemon Xenoverse",
+      "enabled": true,
+      "direct_mount": true,
+      "map_block_start": 27000,
+      "position_mode": "fixed",
+      "mode_options": ["shared"]
+    },
+    "insurgence": {
+      "root": "../Insurgence",
+      "display_name": "Pokemon Insurgence",
+      "enabled": true,
+      "direct_mount": true,
+      "prepared_data_root": "C:/Games/PIF/ExpansionLibrary/ExtractedArchives/insurgence/Data",
+      "prepared_project_root": "C:/Games/PIF/ExpansionLibrary/ExtractedArchives/insurgence",
+      "map_block_start": 24000,
+      "position_mode": "fixed",
+      "mode_options": ["shared"]
+    },
+    "pokemon_uranium": {
+      "root": "../Uranium",
+      "root_aliases": ["../Pokemon Uranium"],
+      "display_name": "Pokemon Uranium",
+      "enabled": true,
+      "direct_mount": true,
+      "prepared_data_root": "C:/Games/PIF/ExpansionLibrary/ExtractedArchives/pokemon_uranium/Data",
+      "prepared_project_root": "C:/Games/PIF/ExpansionLibrary/ExtractedArchives/pokemon_uranium",
+      "map_block_start": 25000,
+      "position_mode": "fixed",
+      "mode_options": ["shared"]
+    },
+    "opalo": {
+      "root": "../Opalo",
+      "root_aliases": ["../Pokemon Opalo"],
+      "display_name": "Pokemon Opalo",
+      "enabled": true,
+      "direct_mount": true,
+      "map_block_start": 28000,
+      "position_mode": "fixed",
+      "mode_options": ["shared"],
+      "preferred_language": "en"
+    },
+    "empyrean": {
+      "root": "../Empyrean",
+      "root_aliases": ["../PokemonEmpyrean", "../Pokemon Empyrean"],
+      "display_name": "Pokemon Empyrean",
+      "enabled": true,
+      "direct_mount": true,
+      "map_block_start": 29000,
+      "position_mode": "fixed",
+      "mode_options": ["shared"]
+    },
+    "realidea": {
+      "root": "../Realidea",
+      "root_aliases": ["../Pokemon Realidea", "../Pokemon Realidea System"],
+      "display_name": "Pokemon Realidea",
+      "enabled": true,
+      "direct_mount": true,
+      "map_block_start": 30000,
+      "position_mode": "fixed",
+      "mode_options": ["shared"]
+    },
+    "soulstones": {
+      "root": "../Soulstones",
+      "root_aliases": ["../Pokemon Soulstones"],
+      "display_name": "Pokemon Soulstones",
+      "enabled": true,
+      "direct_mount": true,
+      "map_block_start": 31000,
+      "position_mode": "fixed",
+      "mode_options": ["shared"]
+    },
+    "soulstones2": {
+      "root": "../Soulstones2",
+      "root_aliases": ["../Pokemon Soulstones 2", "../Pokemon Soulstones II"],
+      "display_name": "Pokemon Soulstones 2",
+      "enabled": true,
+      "direct_mount": true,
+      "map_block_start": 32000,
+      "position_mode": "fixed",
+      "mode_options": ["shared"]
+    },
+    "anil": {
+      "root": "../Anil",
+      "root_aliases": ["../Pokemon Anil", "../Pokemon Indigo"],
+      "display_name": "Pokemon Anil / Indigo",
+      "enabled": true,
+      "direct_mount": true,
+      "map_block_start": 33000,
+      "entry_anchor": { "map_id": 1, "x": 0, "y": 0, "direction": 2 },
+      "story_anchor": { "map_id": 1, "x": 0, "y": 0, "direction": 2 },
+      "exploration_anchor": { "map_id": 2, "x": 22, "y": 39, "direction": 2 },
+      "position_mode": "fixed",
+      "mode_options": ["shared"],
+      "preferred_language": "en"
+    },
+    "bushido": {
+      "root": "../Bushido",
+      "root_aliases": ["../Pokemon Bushido"],
+      "display_name": "Pokemon Bushido",
+      "enabled": true,
+      "direct_mount": true,
+      "map_block_start": 34000,
+      "position_mode": "fixed",
+      "mode_options": ["shared"],
+      "preferred_language": "en"
+    },
+    "darkhorizon": {
+      "root": "../DarkHorizon",
+      "root_aliases": ["../Pokemon Dark Horizon", "../Dark Horizon"],
+      "display_name": "Pokemon Dark Horizon",
+      "enabled": true,
+      "direct_mount": true,
+      "map_block_start": 35000,
+      "position_mode": "fixed",
+      "mode_options": ["shared"],
+      "preferred_language": "en"
+    },
+    "infinity": {
+      "root": "../Infinity",
+      "root_aliases": ["../Pokemon Infinity"],
+      "display_name": "Pokemon Infinity",
+      "enabled": true,
+      "direct_mount": true,
+      "map_block_start": 36000,
+      "position_mode": "fixed",
+      "mode_options": ["shared"],
+      "preferred_language": "en"
+    },
+    "solar_eclipse": {
+      "root": "../SolarEclipse",
+      "root_aliases": ["../Pokemon Solar Eclipse", "../Solar Eclipse", "../Solar Light Lunar Dark", "../Solar Light and Lunar Dark"],
+      "display_name": "Pokemon Solar Eclipse",
+      "enabled": true,
+      "direct_mount": true,
+      "map_block_start": 37000,
+      "position_mode": "fixed",
+      "mode_options": ["shared"],
+      "preferred_language": "en"
+    },
+    "vanguard": {
+      "root": "../Vanguard",
+      "root_aliases": ["../Pokemon Vanguard"],
+      "display_name": "Pokemon Vanguard",
+      "enabled": true,
+      "direct_mount": true,
+      "map_block_start": 38000,
+      "position_mode": "fixed",
+      "mode_options": ["shared"],
+      "preferred_language": "en"
+    },
+    "pokemon_z": {
+      "root": "../Z/Pokemon Z V2.13",
+      "root_aliases": ["../Pokemon Z", "../Z"],
+      "display_name": "Pokemon Z",
+      "enabled": true,
+      "direct_mount": true,
+      "map_block_start": 39000,
+      "position_mode": "fixed",
+      "mode_options": ["shared"],
+      "preferred_language": "en"
+    },
+    "chaos_in_vesita": {
+      "root": "../ChaosInVesita",
+      "root_aliases": ["../Pokemon Chaos in Vesita", "../Chaos in Vesita"],
+      "display_name": "Pokemon Chaos in Vesita",
+      "enabled": true,
+      "direct_mount": true,
+      "prepared_data_root": "C:/Games/PIF/ExpansionLibrary/ExtractedArchives/chaos_in_vesita/Data",
+      "prepared_project_root": "C:/Games/PIF/ExpansionLibrary/ExtractedArchives/chaos_in_vesita",
+      "map_block_start": 40000,
+      "position_mode": "fixed",
+      "mode_options": ["shared"],
+      "preferred_language": "en"
+    },
+    "deserted": {
+      "root": "../Deserted",
+      "root_aliases": ["../Pokemon Deserted"],
+      "display_name": "Pokemon Deserted",
+      "enabled": true,
+      "direct_mount": true,
+      "map_block_start": 41000,
+      "position_mode": "fixed",
+      "mode_options": ["shared"],
+      "preferred_language": "en"
+    },
+    "gadir_deluxe": {
+      "root": "../GadirDelux",
+      "root_aliases": ["../GadirDeluxe", "../Pokemon Gadir Deluxe", "../Pokemon Gadir Delux"],
+      "display_name": "Pokemon Gadir Deluxe",
+      "enabled": true,
+      "direct_mount": true,
+      "map_block_start": 42000,
+      "position_mode": "fixed",
+      "mode_options": ["shared"],
+      "preferred_language": "en"
+    },
+    "hollow_woods": {
+      "root": "../HollowWoods",
+      "root_aliases": ["../Pokemon Hollow Woods", "../Hollow Woods"],
+      "display_name": "Pokemon Hollow Woods",
+      "enabled": true,
+      "direct_mount": true,
+      "map_block_start": 43000,
+      "position_mode": "fixed",
+      "mode_options": ["shared"],
+      "preferred_language": "en"
+    },
+    "keishou": {
+      "root": "../Keishou",
+      "root_aliases": ["../Pokemon Keishou"],
+      "display_name": "Pokemon Keishou",
+      "enabled": true,
+      "direct_mount": true,
+      "prepared_data_root": "C:/Games/PIF/ExpansionLibrary/ExtractedArchives/keishou/Data",
+      "prepared_project_root": "C:/Games/PIF/ExpansionLibrary/ExtractedArchives/keishou",
+      "map_block_start": 44000,
+      "position_mode": "fixed",
+      "mode_options": ["shared"],
+      "preferred_language": "en"
+    },
+    "unbreakable_ties": {
+      "root": "../UnbreakableTies",
+      "root_aliases": ["../Pokemon Unbreakable Ties", "../Unbreakable Ties"],
+      "display_name": "Pokemon Unbreakable Ties",
+      "enabled": true,
+      "direct_mount": true,
+      "map_block_start": 45000,
+      "position_mode": "fixed",
+      "mode_options": ["shared"],
+      "preferred_language": "en"
+    }
+  }
+}

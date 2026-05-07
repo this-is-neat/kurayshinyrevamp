@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "version": "2026.05-rc1",
+  "shims": {
+    "pbZoomIn": {
+      "category": "map_visual",
+      "default": "true",
+      "note": "Visual zoom request is ignored safely."
+    },
+    "pbZoomOut": {
+      "category": "map_visual",
+      "default": "true",
+      "note": "Visual zoom request is ignored safely."
+    },
+    "pbWatchTV": {
+      "category": "item_handlers",
+      "default": "true",
+      "note": "TV flavor event is acknowledged."
+    },
+    "pbCheckRoaming": {
+      "category": "encounters",
+      "default": "false",
+      "note": "Unsupported roaming check fails closed."
+    },
+    "pbHasStarters?": {
+      "category": "startup",
+      "default": "party_present",
+      "note": "Starter ownership is inferred from host party."
+    },
+    "prerandomizeMiningStones": {
+      "category": "startup",
+      "default": "true",
+      "note": "Mining pre-randomization is skipped safely."
+    },
+    "useAirDragonite": {
+      "category": "story_transfer",
+      "default": "false",
+      "note": "Unsupported ride shortcut fails closed."
+    },
+    "pbHealingMachine": {
+      "category": "item_handlers",
+      "default": "heal_party",
+      "note": "Host party heal fallback."
+    },
+    "characterPopup": {
+      "category": "story_transfer",
+      "default": "true",
+      "note": "Popup marker is skipped safely."
+    },
+    "getCompletedQuests": {
+      "category": "menu_settings",
+      "default": "array",
+      "note": "Quest list is host-local until native quest bridge is certified."
+    },
+    "getActiveQuests": {
+      "category": "menu_settings",
+      "default": "array",
+      "note": "Quest list is host-local until native quest bridge is certified."
+    },
+    "pbRandomItem": {
+      "category": "item_handlers",
+      "default": "nil",
+      "note": "Unsupported random pickup gives no item."
+    },
+    "TrainerBattle.start": {
+      "category": "trainer_battle",
+      "default": "true",
+      "note": "Last-resort trainer wrapper prevents crashes."
+    },
+    "LevelCapsEX.enabled?": {
+      "category": "menu_settings",
+      "default": "false",
+      "note": "Unsupported level-cap plugin is treated as disabled."
+    },
+    "FollowingPkmn.active?": {
+      "category": "follower_system",
+      "default": "false",
+      "note": "Follower system reports inactive unless a world bridge owns it."
+    },
+    "NilClass#quantity": {
+      "category": "item_handlers",
+      "default": "zero",
+      "note": "Missing item storage queries fail closed."
+    }
+  }
+}

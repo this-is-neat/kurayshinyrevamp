@@ -80,6 +80,16 @@ Pokemon Essentials GitHub: https://github.com/Maruno17/pokemon-essentials
 
 **If you've been banned from the Kuray Hub Discord, you can fill this form to ask for an unban or more information about the ban:** https://forms.gle/TPCprf38ANmYNB5T8
 
+## Multi-World Travel Framework
+
+This checkout now includes the release-candidate `travel_expansion_framework` mod under [`Mods/travel_expansion_framework`](./Mods/travel_expansion_framework). It lets one Kuray Infinite Fusion save enter supported external gameworld installs while keeping Infinite Fusion authoritative for save data, party, PC/storage, bag, dex progress, battle UI, and recovery.
+
+The other fangames are not bundled in this repo. Install or extract the games you own beside the KIF/PIF folder, then configure their paths in [`Mods/travel_expansion_framework/travel_expansion_sources.json`](./Mods/travel_expansion_framework/travel_expansion_sources.json) if your folders differ from the defaults.
+
+Full install and smoke-test instructions are here:
+
+- [`Mods/travel_expansion_framework/README_RELEASE_INSTALL.md`](./Mods/travel_expansion_framework/README_RELEASE_INSTALL.md)
+
 # List of Constant Features
 
 - **Modding support** **| by DEMICE**
