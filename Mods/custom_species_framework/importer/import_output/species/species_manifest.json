@@ -1,0 +1,71 @@
+{
+    "species":  [
+                    {
+                        "id":  "CSF_MONGRATIS_PYTHONOVA",
+                        "source_pack":  "Mongratis",
+                        "insert_status":  "ready",
+                        "assets":  {
+                                       "icon":  "Graphics/Pokemon/Imported/mongratis_community_sampler/Icons/CSF_MONGRATIS_PYTHONOVA.png",
+                                       "front":  "Graphics/Pokemon/Imported/mongratis_community_sampler/Front/CSF_MONGRATIS_PYTHONOVA.png",
+                                       "back":  "Graphics/Pokemon/Imported/mongratis_community_sampler/Back/CSF_MONGRATIS_PYTHONOVA.png"
+                                   },
+                        "framework_slot":  10,
+                        "permission":  "Free to use with credit",
+                        "display_name":  "Pythonova"
+                    },
+                    {
+                        "id":  "CSF_MONGRATIS_SUNNYDRA",
+                        "source_pack":  "Mongratis",
+                        "insert_status":  "ready",
+                        "assets":  {
+                                       "icon":  "Graphics/Pokemon/Imported/mongratis_community_sampler/Icons/CSF_MONGRATIS_SUNNYDRA.png",
+                                       "front":  "Graphics/Pokemon/Imported/mongratis_community_sampler/Front/CSF_MONGRATIS_SUNNYDRA.png",
+                                       "back":  "Graphics/Pokemon/Imported/mongratis_community_sampler/Back/CSF_MONGRATIS_SUNNYDRA.png",
+                                       "overworld":  "Graphics/Pokemon/Imported/mongratis_community_sampler/Overworld/CSF_MONGRATIS_SUNNYDRA.png"
+                                   },
+                        "framework_slot":  6,
+                        "permission":  "Free to use with credit",
+                        "display_name":  "Sunnydra"
+                    },
+                    {
+                        "id":  "CSF_MONGRATIS_COBARETT",
+                        "source_pack":  "Mongratis",
+                        "insert_status":  "ready",
+                        "assets":  {
+                                       "icon":  "Graphics/Pokemon/Imported/mongratis_community_sampler/Icons/CSF_MONGRATIS_COBARETT.png",
+                                       "front":  "Graphics/Pokemon/Imported/mongratis_community_sampler/Front/CSF_MONGRATIS_COBARETT.png",
+                                       "back":  "Graphics/Pokemon/Imported/mongratis_community_sampler/Back/CSF_MONGRATIS_COBARETT.png"
+                                   },
+                        "framework_slot":  7,
+                        "permission":  "Free to use with credit",
+                        "display_name":  "Cobarett"
+                    },
+                    {
+                        "id":  "CSF_MONGRATIS_HISSIORITE",
+                        "source_pack":  "Mongratis",
+                        "insert_status":  "ready",
+                        "assets":  {
+                                       "icon":  "Graphics/Pokemon/Imported/mongratis_community_sampler/Icons/CSF_MONGRATIS_HISSIORITE.png",
+                                       "front":  "Graphics/Pokemon/Imported/mongratis_community_sampler/Front/CSF_MONGRATIS_HISSIORITE.png",
+                                       "back":  "Graphics/Pokemon/Imported/mongratis_community_sampler/Back/CSF_MONGRATIS_HISSIORITE.png"
+                                   },
+                        "framework_slot":  8,
+                        "permission":  "Free to use with credit",
+                        "display_name":  "Hissiorite"
+                    },
+                    {
+                        "id":  "CSF_MONGRATIS_MERLICUN",
+                        "source_pack":  "Mongratis",
+                        "insert_status":  "ready",
+                        "assets":  {
+                                       "icon":  "Graphics/Pokemon/Imported/mongratis_community_sampler/Icons/CSF_MONGRATIS_MERLICUN.png",
+                                       "front":  "Graphics/Pokemon/Imported/mongratis_community_sampler/Front/CSF_MONGRATIS_MERLICUN.png",
+                                       "back":  "Graphics/Pokemon/Imported/mongratis_community_sampler/Back/CSF_MONGRATIS_MERLICUN.png",
+                                       "overworld":  "Graphics/Pokemon/Imported/mongratis_community_sampler/Overworld/CSF_MONGRATIS_MERLICUN.png"
+                                   },
+                        "framework_slot":  9,
+                        "permission":  "Free to use with credit",
+                        "display_name":  "Merlicun"
+                    }
+                ]
+}

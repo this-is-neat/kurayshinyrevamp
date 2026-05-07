@@ -1,0 +1,13 @@
+{
+  "encounters": [
+    {
+      "enabled": false,
+      "map_id": 1,
+      "encounter_type": "Land",
+      "species": "CSF_SANDSHREW_GLACIAL",
+      "weight": 5,
+      "min_level": 6,
+      "max_level": 8
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "name": "Custom Species Framework",
+  "id": "custom_species_framework",
+  "version": "1.1.0",
+  "author": "OpenAI Codex",
+  "description": "Production-quality framework for custom Fakemon, regional variants, browser-based species creation, starter integration, fusion rules, and future content hooks.",
+  "tags": ["Content", "Gameplay", "Fusion", "UI", "Bug Fix"],
+  "dependencies": [],
+  "incompatible": [],
+  "settings": [],
+  "scripts": [
+    "001_Config.rb",
+    "002_DataAndRegistry.rb",
+    "003_ValidationAndBootstrap.rb",
+    "004_CorePatches.rb",
+    "005_PokedexAndVisualPatches.rb",
+    "006_StarterAndFusionHooks.rb",
+    "007_EncounterTrainerSaveHooks.rb",
+    "008_CreatorTools.rb",
+    "009_FusedSpeciesSafety.rb"
+  ]
+}

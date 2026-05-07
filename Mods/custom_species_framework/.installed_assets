@@ -1,0 +1,15 @@
+Graphics/Pokemon/Back/CSF_AQUALITH.png
+Graphics/Pokemon/Back/CSF_CINDRAKE.png
+Graphics/Pokemon/Back/CSF_VERDALYK.png
+Graphics/Pokemon/Front/CSF_AQUALITH.png
+Graphics/Pokemon/Front/CSF_CINDRAKE.png
+Graphics/Pokemon/Front/CSF_VERDALYK.png
+Graphics/Pokemon/Icons/CSF_AQUALITH.png
+Graphics/Pokemon/Icons/CSF_CINDRAKE.png
+Graphics/Pokemon/Icons/CSF_VERDALYK.png
+data/encounters.json
+data/framework_config.json
+data/species/fakemon_starters.json
+data/species/regional_variants.json
+data/starter_sets.json
+data/trainer_hooks.json

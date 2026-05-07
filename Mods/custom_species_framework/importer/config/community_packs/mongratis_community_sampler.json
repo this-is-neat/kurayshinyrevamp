@@ -1,0 +1,45 @@
+{
+  "pack_id": "mongratis_community_sampler",
+  "pack_name": "Mongratis Community Sampler",
+  "collection_name": "Mongratis",
+  "collection_url": "https://pokengine.org/collections/107s7x9x/Mongratis",
+  "collection_permission_summary": "Mongratis is a communal dex made specifically from Fakemon who have been graciously donated to Pokemon fans for use in their non-commercial fan games.",
+  "output_directory": "../../sources/mongratis_community_sampler",
+  "id_prefix": "CSF_MONGRATIS",
+  "required_permission_text": "Free to use with credit",
+  "required_assets": [
+    "front",
+    "back",
+    "icon"
+  ],
+  "move_aliases": {
+    "Corrosive Bite": "Bite"
+  },
+  "species": [
+    {
+      "uid": "00ptxzlq",
+      "display_name": "Hissiorite",
+      "url": "https://pokengine.org/mons/00ptxzlq/Hissiorite?collection=107s7x9x"
+    },
+    {
+      "uid": "002qrwwn",
+      "display_name": "Cobarett",
+      "url": "https://pokengine.org/mons/002qrwwn/Cobarett?collection=107s7x9x"
+    },
+    {
+      "uid": "00rgw87i",
+      "display_name": "Pythonova",
+      "url": "https://pokengine.org/mons/00rgw87i/Pythonova?collection=107s7x9x"
+    },
+    {
+      "uid": "00vfbxmp",
+      "display_name": "Merlicun",
+      "url": "https://pokengine.org/mons/00vfbxmp/Merlicun?collection=107s7x9x"
+    },
+    {
+      "uid": "00yys19h",
+      "display_name": "Sunnydra",
+      "url": "https://pokengine.org/mons/00yys19h/Sunnydra?collection=107s7x9x"
+    }
+  ]
+}

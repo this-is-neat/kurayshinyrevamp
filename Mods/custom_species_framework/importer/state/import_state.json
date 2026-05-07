@@ -1,0 +1,15 @@
+{
+    "source_hashes":  {
+
+                      },
+    "applied_bundles":  [
+
+                        ],
+    "slot_assignments":  {
+                             "CSF_MONGRATIS_SUNNYDRA":  6,
+                             "CSF_MONGRATIS_MERLICUN":  9,
+                             "CSF_MONGRATIS_COBARETT":  7,
+                             "CSF_MONGRATIS_HISSIORITE":  8,
+                             "CSF_MONGRATIS_PYTHONOVA":  10
+                         }
+}

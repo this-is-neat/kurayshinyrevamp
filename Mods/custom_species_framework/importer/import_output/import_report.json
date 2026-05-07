@@ -1,0 +1,53 @@
+{
+    "framework_root":  "C:\\Games\\PIF\\Mods\\custom_species_framework",
+    "generated_at":  "2026-04-22 04:04:19",
+    "apply_result":  {
+                         "skipped":  [
+                                         "C:\\Games\\PIF\\Mods\\custom_species_framework\\Graphics\\Pokemon\\Imported\\mongratis_community_sampler\\Back\\CSF_MONGRATIS_COBARETT.png",
+                                         "C:\\Games\\PIF\\Mods\\custom_species_framework\\Graphics\\Pokemon\\Imported\\mongratis_community_sampler\\Back\\CSF_MONGRATIS_HISSIORITE.png",
+                                         "C:\\Games\\PIF\\Mods\\custom_species_framework\\Graphics\\Pokemon\\Imported\\mongratis_community_sampler\\Back\\CSF_MONGRATIS_MERLICUN.png",
+                                         "C:\\Games\\PIF\\Mods\\custom_species_framework\\Graphics\\Pokemon\\Imported\\mongratis_community_sampler\\Back\\CSF_MONGRATIS_PYTHONOVA.png",
+                                         "C:\\Games\\PIF\\Mods\\custom_species_framework\\Graphics\\Pokemon\\Imported\\mongratis_community_sampler\\Back\\CSF_MONGRATIS_SUNNYDRA.png",
+                                         "C:\\Games\\PIF\\Mods\\custom_species_framework\\Graphics\\Pokemon\\Imported\\mongratis_community_sampler\\Front\\CSF_MONGRATIS_COBARETT.png",
+                                         "C:\\Games\\PIF\\Mods\\custom_species_framework\\Graphics\\Pokemon\\Imported\\mongratis_community_sampler\\Front\\CSF_MONGRATIS_HISSIORITE.png",
+                                         "C:\\Games\\PIF\\Mods\\custom_species_framework\\Graphics\\Pokemon\\Imported\\mongratis_community_sampler\\Front\\CSF_MONGRATIS_MERLICUN.png",
+                                         "C:\\Games\\PIF\\Mods\\custom_species_framework\\Graphics\\Pokemon\\Imported\\mongratis_community_sampler\\Front\\CSF_MONGRATIS_PYTHONOVA.png",
+                                         "C:\\Games\\PIF\\Mods\\custom_species_framework\\Graphics\\Pokemon\\Imported\\mongratis_community_sampler\\Front\\CSF_MONGRATIS_SUNNYDRA.png",
+                                         "C:\\Games\\PIF\\Mods\\custom_species_framework\\Graphics\\Pokemon\\Imported\\mongratis_community_sampler\\Icons\\CSF_MONGRATIS_COBARETT.png",
+                                         "C:\\Games\\PIF\\Mods\\custom_species_framework\\Graphics\\Pokemon\\Imported\\mongratis_community_sampler\\Icons\\CSF_MONGRATIS_HISSIORITE.png",
+                                         "C:\\Games\\PIF\\Mods\\custom_species_framework\\Graphics\\Pokemon\\Imported\\mongratis_community_sampler\\Icons\\CSF_MONGRATIS_MERLICUN.png",
+                                         "C:\\Games\\PIF\\Mods\\custom_species_framework\\Graphics\\Pokemon\\Imported\\mongratis_community_sampler\\Icons\\CSF_MONGRATIS_PYTHONOVA.png",
+                                         "C:\\Games\\PIF\\Mods\\custom_species_framework\\Graphics\\Pokemon\\Imported\\mongratis_community_sampler\\Icons\\CSF_MONGRATIS_SUNNYDRA.png",
+                                         "C:\\Games\\PIF\\Mods\\custom_species_framework\\Graphics\\Pokemon\\Imported\\mongratis_community_sampler\\Overworld\\CSF_MONGRATIS_MERLICUN.png",
+                                         "C:\\Games\\PIF\\Mods\\custom_species_framework\\Graphics\\Pokemon\\Imported\\mongratis_community_sampler\\Overworld\\CSF_MONGRATIS_SUNNYDRA.png"
+                                     ],
+                         "applied":  [
+                                         "C:\\Games\\PIF\\Mods\\custom_species_framework\\NOTICE_imports.txt",
+                                         "C:\\Games\\PIF\\Mods\\custom_species_framework\\data\\species\\imported_mongratis_community_sampler.json",
+                                         "C:\\Games\\PIF\\Mods\\custom_species_framework\\importer\\applied_manifests\\mongratis_credits.json"
+                                     ],
+                         "conflicts":  [
+
+                                       ]
+                     },
+    "apply_bundle":  true,
+    "totals":  {
+                   "discovered":  5,
+                   "rejected":  0,
+                   "ready":  5,
+                   "review":  0
+               },
+    "dry_run_only":  false,
+    "sources":  [
+                    {
+                        "rejected_entries":  0,
+                        "review_entries":  0,
+                        "source_type":  "structured_pack",
+                        "discovered_species":  5,
+                        "permission_reason":  "Matched approved permission phrase \u0027free to use\u0027.",
+                        "pack_name":  "Mongratis Community Sampler",
+                        "approved_entries":  5,
+                        "permission_status":  "APPROVED"
+                    }
+                ]
+}

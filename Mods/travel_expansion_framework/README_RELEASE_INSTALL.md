@@ -5,9 +5,12 @@ This mod lets one Kuray Infinite Fusion save visit registered external Pokemon f
 ## Install The Mod
 
 1. Copy the whole `travel_expansion_framework` folder into `Mods/travel_expansion_framework`.
-2. Keep the folder name exactly `travel_expansion_framework`.
-3. Launch the game once. The framework writes reports under `Logs/travel_expansion_framework/Reports`.
-4. Use the bedroom PC/travel terminal to enter any detected world.
+2. Copy the whole `custom_species_framework` folder into `Mods/custom_species_framework` if you want imported/custom Pokemon species from those worlds to resolve safely.
+3. Keep both folder names exactly as shown.
+4. Launch the game once. The framework writes reports under `Logs/travel_expansion_framework/Reports`.
+5. Use the bedroom PC/travel terminal to enter any detected world.
+
+`travel_expansion_framework` can load worlds by itself, but `custom_species_framework` is the paired release component for custom Fakemon/species registration, save repair, missing-pack fallback, and restoring dormant species when a pack returns.
 
 ## Install External Game Worlds
 

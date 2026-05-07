@@ -1,0 +1,21 @@
+{
+  "allow_partial_entries": false,
+  "require_backsprite": true,
+  "require_icon": true,
+  "overwrite_existing_species": false,
+  "strict_permission_mode": true,
+  "target_framework_mode": "custom_species_framework_v1",
+  "target_sprite_width": 96,
+  "target_sprite_height": 96,
+  "target_backsprite_width": 96,
+  "target_backsprite_height": 96,
+  "target_icon_width": 64,
+  "target_icon_height": 64,
+  "resize_mode": "fit_canvas",
+  "generate_framework_bundle": true,
+  "dry_run_only": true,
+  "apply_bundle_to_framework": false,
+  "html_download_image_assets": true,
+  "html_download_linked_archives": true,
+  "state_file": "state/import_state.json"
+}

@@ -1,0 +1,19 @@
+{
+  "trainer_hooks": [
+    {
+      "enabled": false,
+      "trainer_type": "YOUNGSTER",
+      "trainer_name": "Ben",
+      "slot": 0,
+      "species": "CSF_SANDSHREW_GLACIAL",
+      "level": 8,
+      "moves": ["SCRATCH", "POWDERSNOW"],
+      "item": null,
+      "ability": null,
+      "gender": null,
+      "nature": null,
+      "shiny": false,
+      "nickname": ""
+    }
+  ]
+}

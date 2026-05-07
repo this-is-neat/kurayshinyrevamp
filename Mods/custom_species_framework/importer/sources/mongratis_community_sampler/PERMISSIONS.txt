@@ -1,0 +1,16 @@
+﻿Permission Summary
+
+Collection-level statement:
+Mongratis is a communal dex made specifically from Fakemon who have been graciously donated to Pokemon fans for use in their non-commercial fan games.
+
+Per-species permission pages:
+  - Hissiorite: Free to use with credit
+    Source: https://pokengine.org/mons/00ptxzlq/Hissiorite?collection=107s7x9x
+  - Cobarett: Free to use with credit
+    Source: https://pokengine.org/mons/002qrwwn/Cobarett?collection=107s7x9x
+  - Pythonova: Free to use with credit
+    Source: https://pokengine.org/mons/00rgw87i/Pythonova?collection=107s7x9x
+  - Merlicun: Free to use with credit
+    Source: https://pokengine.org/mons/00vfbxmp/Merlicun?collection=107s7x9x
+  - Sunnydra: Free to use with credit
+    Source: https://pokengine.org/mons/00yys19h/Sunnydra?collection=107s7x9x

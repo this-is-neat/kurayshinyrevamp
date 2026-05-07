@@ -1,0 +1,858 @@
+﻿{
+    "species":  [
+                    {
+                        "height":  4,
+                        "species_name":  "Hissiorite",
+                        "id":  "CSF_MONGRATIS_HISSIORITE",
+                        "egg_moves":  [
+
+                                      ],
+                        "base_stats":  {
+                                           "DEFENSE":  39,
+                                           "ATTACK":  60,
+                                           "SPECIAL_ATTACK":  51,
+                                           "SPECIAL_DEFENSE":  45,
+                                           "HP":  49,
+                                           "SPEED":  65
+                                       },
+                        "evolutions":  [
+                                           {
+                                               "method":  "LEVEL",
+                                               "parameter":  16,
+                                               "species":  "CSF_MONGRATIS_COBARETT"
+                                           },
+                                           {
+                                               "method":  "LEVEL",
+                                               "parameter":  34,
+                                               "species":  "CSF_MONGRATIS_PYTHONOVA"
+                                           }
+                                       ],
+                        "display_name":  "Hissiorite",
+                        "catch_rate":  0,
+                        "source_pack":  "Mongratis",
+                        "happiness":  0,
+                        "egg_groups":  [
+                                           "Dragon",
+                                           "Field"
+                                       ],
+                        "notes":  "Concept, design, sprite, name, type, and dex flavor by Princess-Phoenix This fakemon originates from Princess-Phoenix\u0027s \u0027Project Freemon\u0027 on DeviantArt. \"Hissiorite\u0027s line is based on a snake and is inspired by shooting stars entering the atmosphere. The name is a combination of Meteorite + Hissing.\" Evo line: Complete\n\nDropped unsupported teach moves during import prep: Vise Grip",
+                        "weight":  8,
+                        "category":  "Meteor Snake",
+                        "pokedex_entry":  "The base of it\u0027s neck emits super-heated gas that envelopes it\u0027s body and causes it to hover a few inches off the ground, similar to a hot air balloon. Because of this, it can travel quickly, even over water.",
+                        "source_url":  "https://pokengine.org/mons/00ptxzlq/Hissiorite?collection=107s7x9x",
+                        "teach_moves":  [
+                                            "HEATWAVE",
+                                            "IRONTAIL",
+                                            "DRAGONTAIL",
+                                            "DRAGONPULSE",
+                                            "ACCELEROCK",
+                                            "AUTOTOMIZE",
+                                            "BIDE",
+                                            "BODYSLAM",
+                                            "BRUTALSWING",
+                                            "CONSTRICT",
+                                            "DOUBLEHIT",
+                                            "DRAGONASCENT",
+                                            "EXPLOSION",
+                                            "EXTREMESPEED",
+                                            "FIERYDANCE",
+                                            "FIREBLAST",
+                                            "FIREFANG",
+                                            "FLAMECHARGE",
+                                            "FLAMEBURST",
+                                            "FLAMETHROWER",
+                                            "FLY",
+                                            "FOCUSENERGY",
+                                            "GLARE",
+                                            "INFERNO",
+                                            "LASERFOCUS",
+                                            "LEER",
+                                            "LIGHTSCREEN",
+                                            "MEANLOOK",
+                                            "MYSTICALFIRE",
+                                            "POISONFANG",
+                                            "POISONGAS",
+                                            "PURSUIT",
+                                            "SCORCHINGSANDS",
+                                            "SCARYFACE",
+                                            "SMOG",
+                                            "SMOKESCREEN",
+                                            "SUNNYDAY",
+                                            "WRAP",
+                                            "BITE"
+                                        ],
+                        "hidden_ability":  "LEVITATE",
+                        "usage_permission":  "Free to use with credit",
+                        "types":  [
+                                      "FIRE"
+                                  ],
+                        "creator":  "Princess-Phoenix",
+                        "growth_rate":  "Erratic",
+                        "abilities":  [
+                                          "FLAMEBODY",
+                                          "HEATPROOF"
+                                      ],
+                        "moves":  [
+                                      {
+                                          "move":  "SMOKESCREEN",
+                                          "level":  1
+                                      },
+                                      {
+                                          "move":  "WRAP",
+                                          "level":  1
+                                      },
+                                      {
+                                          "move":  "EMBER",
+                                          "level":  6
+                                      },
+                                      {
+                                          "move":  "MEANLOOK",
+                                          "level":  9
+                                      },
+                                      {
+                                          "move":  "BITE",
+                                          "level":  12
+                                      },
+                                      {
+                                          "move":  "SMOG",
+                                          "level":  15
+                                      },
+                                      {
+                                          "move":  "DRAGONRAGE",
+                                          "level":  19
+                                      },
+                                      {
+                                          "move":  "GLARE",
+                                          "level":  21
+                                      },
+                                      {
+                                          "move":  "FIREFANG",
+                                          "level":  25
+                                      },
+                                      {
+                                          "move":  "FLAMECHARGE",
+                                          "level":  28
+                                      },
+                                      {
+                                          "move":  "LASERFOCUS",
+                                          "level":  31
+                                      },
+                                      {
+                                          "move":  "FLAMETHROWER",
+                                          "level":  33
+                                      },
+                                      {
+                                          "move":  "SUNNYDAY",
+                                          "level":  37
+                                      },
+                                      {
+                                          "move":  "INFERNO",
+                                          "level":  39
+                                      },
+                                      {
+                                          "move":  "DRAGONASCENT",
+                                          "level":  43
+                                      },
+                                      {
+                                          "move":  "FLAREBLITZ",
+                                          "level":  49
+                                      }
+                                  ],
+                        "credit_text":  "Credit to Princess-Phoenix for Hissiorite via Pokengine Mongratis. Pack owner/maintainer: Plouton. Source page: https://pokengine.org/mons/00ptxzlq/Hissiorite?collection=107s7x9x. Use with credit for non-commercial fangames."
+                    },
+                    {
+                        "height":  6,
+                        "species_name":  "Cobarett",
+                        "id":  "CSF_MONGRATIS_COBARETT",
+                        "egg_moves":  [
+
+                                      ],
+                        "base_stats":  {
+                                           "DEFENSE":  59,
+                                           "ATTACK":  76,
+                                           "SPECIAL_ATTACK":  68,
+                                           "SPECIAL_DEFENSE":  55,
+                                           "HP":  62,
+                                           "SPEED":  85
+                                       },
+                        "evolutions":  [
+                                           {
+                                               "method":  "LEVEL",
+                                               "parameter":  34,
+                                               "species":  "CSF_MONGRATIS_PYTHONOVA"
+                                           }
+                                       ],
+                        "display_name":  "Cobarett",
+                        "catch_rate":  45,
+                        "source_pack":  "Mongratis",
+                        "happiness":  70,
+                        "egg_groups":  [
+                                           "Field",
+                                           "Dragon"
+                                       ],
+                        "notes":  "Concept, design, sprite, name, type, and dex flavor by Princess-Phoenix This fakemon originates from Princess-Phoenix\u0027s \u0027Project Freemon\u0027 on DeviantArt. Etymology: \"Cobarett\u0027s name is a mix of Cobra and Comet\" Evo line: Complete\n\nDropped unsupported teach moves during import prep: Vise Grip",
+                        "weight":  202,
+                        "category":  "Comet Snake",
+                        "pokedex_entry":  "It covers itself in thick, billowing smoke so that it can slide easily through thick brush. THe source of the smoke is its molten body temperature, which is so hot that tongues of flame shoot from it\u0027s mouth.",
+                        "source_url":  "https://pokengine.org/mons/002qrwwn/Cobarett?collection=107s7x9x",
+                        "teach_moves":  [
+                                            "HEATWAVE",
+                                            "IRONTAIL",
+                                            "DRAGONTAIL",
+                                            "DRAGONPULSE",
+                                            "ACCELEROCK",
+                                            "AUTOTOMIZE",
+                                            "BIDE",
+                                            "BODYSLAM",
+                                            "BRUTALSWING",
+                                            "CONSTRICT",
+                                            "DOUBLEHIT",
+                                            "DRAGONASCENT",
+                                            "EXPLOSION",
+                                            "EXTREMESPEED",
+                                            "FIERYDANCE",
+                                            "FIREBLAST",
+                                            "FIREFANG",
+                                            "FLAMECHARGE",
+                                            "FLAMEBURST",
+                                            "FLAMETHROWER",
+                                            "FLY",
+                                            "FOCUSENERGY",
+                                            "GLARE",
+                                            "INFERNO",
+                                            "LASERFOCUS",
+                                            "LEER",
+                                            "LIGHTSCREEN",
+                                            "MEANLOOK",
+                                            "MYSTICALFIRE",
+                                            "POISONFANG",
+                                            "POISONGAS",
+                                            "PURSUIT",
+                                            "SCORCHINGSANDS",
+                                            "SCARYFACE",
+                                            "SMOG",
+                                            "SMOKESCREEN",
+                                            "SUNNYDAY",
+                                            "WRAP",
+                                            "BITE"
+                                        ],
+                        "hidden_ability":  "LEVITATE",
+                        "usage_permission":  "Free to use with credit",
+                        "types":  [
+                                      "FIRE"
+                                  ],
+                        "creator":  "Princess-Phoenix",
+                        "growth_rate":  "Parabolic",
+                        "abilities":  [
+                                          "FLAMEBODY",
+                                          "HEATPROOF"
+                                      ],
+                        "moves":  [
+                                      {
+                                          "move":  "POISONFANG",
+                                          "level":  1
+                                      },
+                                      {
+                                          "move":  "SMOKESCREEN",
+                                          "level":  1
+                                      },
+                                      {
+                                          "move":  "WRAP",
+                                          "level":  1
+                                      },
+                                      {
+                                          "move":  "EMBER",
+                                          "level":  6
+                                      },
+                                      {
+                                          "move":  "MEANLOOK",
+                                          "level":  9
+                                      },
+                                      {
+                                          "move":  "BITE",
+                                          "level":  12
+                                      },
+                                      {
+                                          "move":  "SMOG",
+                                          "level":  15
+                                      },
+                                      {
+                                          "move":  "DRAGONRAGE",
+                                          "level":  21
+                                      },
+                                      {
+                                          "move":  "GLARE",
+                                          "level":  25
+                                      },
+                                      {
+                                          "move":  "FIREFANG",
+                                          "level":  28
+                                      },
+                                      {
+                                          "move":  "FLAMECHARGE",
+                                          "level":  31
+                                      },
+                                      {
+                                          "move":  "SCORCHINGSANDS",
+                                          "level":  33
+                                      },
+                                      {
+                                          "move":  "LASERFOCUS",
+                                          "level":  36
+                                      },
+                                      {
+                                          "move":  "FLAMETHROWER",
+                                          "level":  38
+                                      },
+                                      {
+                                          "move":  "SUNNYDAY",
+                                          "level":  41
+                                      },
+                                      {
+                                          "move":  "INFERNO",
+                                          "level":  45
+                                      },
+                                      {
+                                          "move":  "DRAGONASCENT",
+                                          "level":  49
+                                      },
+                                      {
+                                          "move":  "FLAREBLITZ",
+                                          "level":  54
+                                      }
+                                  ],
+                        "credit_text":  "Credit to Princess-Phoenix for Cobarett via Pokengine Mongratis. Pack owner/maintainer: Plouton. Source page: https://pokengine.org/mons/002qrwwn/Cobarett?collection=107s7x9x. Use with credit for non-commercial fangames."
+                    },
+                    {
+                        "height":  14,
+                        "species_name":  "Pythonova",
+                        "id":  "CSF_MONGRATIS_PYTHONOVA",
+                        "egg_moves":  [
+
+                                      ],
+                        "base_stats":  {
+                                           "DEFENSE":  76,
+                                           "ATTACK":  112,
+                                           "SPECIAL_ATTACK":  80,
+                                           "SPECIAL_DEFENSE":  78,
+                                           "HP":  80,
+                                           "SPEED":  108
+                                       },
+                        "evolutions":  [
+
+                                       ],
+                        "display_name":  "Pythonova",
+                        "catch_rate":  0,
+                        "source_pack":  "Mongratis",
+                        "happiness":  0,
+                        "egg_groups":  [
+                                           "Field",
+                                           "Dragon"
+                                       ],
+                        "notes":  "Concept, design, sprite, name, type, and dex flavor by Princess-Phoenix This fakemon originates from Princess-Phoenix\u0027s \u0027Project Freemon\u0027 on DeviantArt. \"It is a very long snake fakemon thanks to the smoke tail, but if the smoke is removed its actual body is hilariously short and front heavy, with its tail tip ending a little beyond where the darker grey tail smoke starts. Like the rest of its line the high heat contained in its body and smoke act as a hot air balloon and allows it to hover in the air or fly around. \" Evo line: Complete\n\nDropped unsupported teach moves during import prep: Vise Grip",
+                        "weight":  2041,
+                        "category":  "Nova Snake",
+                        "pokedex_entry":  "It is short-tempered and when enraged, the flames on it\u0027s back burn hotter and it\u0027s smoke tail becomes thicker and longer. It uses it\u0027s smoke tail to coil around and smother it\u0027s target.",
+                        "source_url":  "https://pokengine.org/mons/00rgw87i/Pythonova?collection=107s7x9x",
+                        "teach_moves":  [
+                                            "BLASTBURN",
+                                            "FIREPLEDGE",
+                                            "HEATWAVE",
+                                            "IRONTAIL",
+                                            "DRAGONTAIL",
+                                            "HYPERBEAM",
+                                            "DRACOMETEOR",
+                                            "DRAGONPULSE",
+                                            "EXTREMESPEED",
+                                            "OVERHEAT",
+                                            "JAWLOCK",
+                                            "ACCELEROCK",
+                                            "AUTOTOMIZE",
+                                            "BIDE",
+                                            "BODYSLAM",
+                                            "BRUTALSWING",
+                                            "CONSTRICT",
+                                            "DOUBLEHIT",
+                                            "DRAGONASCENT",
+                                            "EXPLOSION",
+                                            "FIERYDANCE",
+                                            "FIREBLAST",
+                                            "FIREFANG",
+                                            "FLAMECHARGE",
+                                            "FLAMEBURST",
+                                            "FLAMETHROWER",
+                                            "FLY",
+                                            "FOCUSENERGY",
+                                            "GLARE",
+                                            "INFERNO",
+                                            "LASERFOCUS",
+                                            "LEER",
+                                            "LIGHTSCREEN",
+                                            "MEANLOOK",
+                                            "MYSTICALFIRE",
+                                            "POISONFANG",
+                                            "POISONGAS",
+                                            "PURSUIT",
+                                            "SCORCHINGSANDS",
+                                            "SCARYFACE",
+                                            "SMOG",
+                                            "SMOKESCREEN",
+                                            "SUNNYDAY",
+                                            "WRAP",
+                                            "BITE"
+                                        ],
+                        "hidden_ability":  "LEVITATE",
+                        "usage_permission":  "Free to use with credit",
+                        "types":  [
+                                      "FIRE"
+                                  ],
+                        "creator":  "Princess-Phoenix",
+                        "growth_rate":  "Parabolic",
+                        "abilities":  [
+                                          "FLAMEBODY",
+                                          "HEATPROOF"
+                                      ],
+                        "moves":  [
+                                      {
+                                          "move":  "BITE",
+                                          "level":  1
+                                      },
+                                      {
+                                          "move":  "SMOKESCREEN",
+                                          "level":  1
+                                      },
+                                      {
+                                          "move":  "WRAP",
+                                          "level":  1
+                                      },
+                                      {
+                                          "move":  "EMBER",
+                                          "level":  6
+                                      },
+                                      {
+                                          "move":  "MEANLOOK",
+                                          "level":  9
+                                      },
+                                      {
+                                          "move":  "BITE",
+                                          "level":  12
+                                      },
+                                      {
+                                          "move":  "SMOG",
+                                          "level":  15
+                                      },
+                                      {
+                                          "move":  "DRAGONRAGE",
+                                          "level":  21
+                                      },
+                                      {
+                                          "move":  "GLARE",
+                                          "level":  25
+                                      },
+                                      {
+                                          "move":  "FIREFANG",
+                                          "level":  28
+                                      },
+                                      {
+                                          "move":  "FLAMECHARGE",
+                                          "level":  31
+                                      },
+                                      {
+                                          "move":  "SCORCHINGSANDS",
+                                          "level":  33
+                                      },
+                                      {
+                                          "move":  "LASERFOCUS",
+                                          "level":  37
+                                      },
+                                      {
+                                          "move":  "FLAMETHROWER",
+                                          "level":  40
+                                      },
+                                      {
+                                          "move":  "SUNNYDAY",
+                                          "level":  45
+                                      },
+                                      {
+                                          "move":  "INFERNO",
+                                          "level":  48
+                                      },
+                                      {
+                                          "move":  "AUTOTOMIZE",
+                                          "level":  54
+                                      },
+                                      {
+                                          "move":  "DRAGONASCENT",
+                                          "level":  60
+                                      },
+                                      {
+                                          "move":  "DRAGONDANCE",
+                                          "level":  66
+                                      },
+                                      {
+                                          "move":  "FLAREBLITZ",
+                                          "level":  70
+                                      }
+                                  ],
+                        "credit_text":  "Credit to Princess-Phoenix for Pythonova via Pokengine Mongratis. Pack owner/maintainer: Plouton. Source page: https://pokengine.org/mons/00rgw87i/Pythonova?collection=107s7x9x. Use with credit for non-commercial fangames."
+                    },
+                    {
+                        "height":  8,
+                        "species_name":  "Merlicun",
+                        "id":  "CSF_MONGRATIS_MERLICUN",
+                        "egg_moves":  [
+                                          "BUGBITE",
+                                          "DRAGONDANCE",
+                                          "DRAGONRUSH",
+                                          "TAKEDOWN",
+                                          "PSYBEAM",
+                                          "STICKYWEB",
+                                          "ANCIENTPOWER"
+                                      ],
+                        "base_stats":  {
+                                           "DEFENSE":  60,
+                                           "ATTACK":  65,
+                                           "SPECIAL_ATTACK":  35,
+                                           "SPECIAL_DEFENSE":  60,
+                                           "HP":  75,
+                                           "SPEED":  45
+                                       },
+                        "evolutions":  [
+
+                                       ],
+                        "display_name":  "Merlicun",
+                        "catch_rate":  45,
+                        "source_pack":  "Mongratis",
+                        "happiness":  70,
+                        "egg_groups":  [
+                                           "Bug",
+                                           "Dragon"
+                                       ],
+                        "notes":  "Concept, design, sprite, name, type, size, weight, ability, and dex flavor by Princess-Phoenix This fakemon originates from Princess-Phoenix\u0027s \u0027Project Freemon\u0027 on DeviantArt. \"This is Merlicun, which is designed as sort of half larva/half pupae. They evolve at high levels, and so they are far stronger than they initially appear to be.\" Evo line: Complete\n\nDropped unsupported teach moves during import prep: Cuddle, Jumpscare, Swarming Terrain, Thread Lash",
+                        "weight":  22,
+                        "category":  "Dragon Worm",
+                        "pokedex_entry":  "Merlicun is a hardy insect creature that has evolved to be efficient at both attack and defense. They gather in the tree canopies of ancient forests to feed on fruits and leaves. When threatened they will first size up their opponent. If they feel as though they can win they will relentlessly headbutt their foe. But, if they appear to be overpowered they will compress their body into what resembles pupae and focus on defending themselves.",
+                        "source_url":  "https://pokengine.org/mons/00vfbxmp/Merlicun?collection=107s7x9x",
+                        "teach_moves":  [
+                                            "ANCIENTPOWER",
+                                            "ATTRACT",
+                                            "BIDE",
+                                            "BUGBITE",
+                                            "CONFIDE",
+                                            "CURSE",
+                                            "CUT",
+                                            "DOUBLETEAM",
+                                            "DOUBLEEDGE",
+                                            "DRACOMETEOR",
+                                            "DRAGONDANCE",
+                                            "DRAGONRAGE",
+                                            "ENDURE",
+                                            "FACADE",
+                                            "FRUSTRATION",
+                                            "GIGADRAIN",
+                                            "HEADBUTT",
+                                            "INFESTATION",
+                                            "IRONDEFENSE",
+                                            "IRONHEAD",
+                                            "LEECHLIFE",
+                                            "LIGHTSCREEN",
+                                            "LUNGE",
+                                            "MEGADRAIN",
+                                            "MIMIC",
+                                            "NATURALGIFT",
+                                            "NATUREPOWER",
+                                            "OUTRAGE",
+                                            "PROTECT",
+                                            "PSYCHIC",
+                                            "PSYWAVE",
+                                            "RAGE",
+                                            "RAINDANCE",
+                                            "REFLECT",
+                                            "REST",
+                                            "RETURN",
+                                            "ROUND",
+                                            "SCREECH",
+                                            "SECRETPOWER",
+                                            "SHADOWBALL",
+                                            "SIGNALBEAM",
+                                            "SLEEPTALK",
+                                            "SNORE",
+                                            "STICKYWEB",
+                                            "STRUGGLEBUG",
+                                            "SUBSTITUTE",
+                                            "SUNNYDAY",
+                                            "SWAGGER",
+                                            "SWIFT",
+                                            "SWORDSDANCE",
+                                            "TAKEDOWN",
+                                            "TOXIC",
+                                            "XSCISSOR"
+                                        ],
+                        "hidden_ability":  "",
+                        "usage_permission":  "Free to use with credit",
+                        "types":  [
+                                      "DRAGON",
+                                      "BUG"
+                                  ],
+                        "creator":  "Princess-Phoenix",
+                        "growth_rate":  "Slow",
+                        "abilities":  [
+                                          "TINTEDLENS"
+                                      ],
+                        "moves":  [
+                                      {
+                                          "move":  "TACKLE",
+                                          "level":  1
+                                      },
+                                      {
+                                          "move":  "HARDEN",
+                                          "level":  4
+                                      },
+                                      {
+                                          "move":  "STRINGSHOT",
+                                          "level":  7
+                                      },
+                                      {
+                                          "move":  "BIDE",
+                                          "level":  11
+                                      },
+                                      {
+                                          "move":  "STRUGGLEBUG",
+                                          "level":  15
+                                      },
+                                      {
+                                          "move":  "HEADBUTT",
+                                          "level":  18
+                                      },
+                                      {
+                                          "move":  "DRAGONRAGE",
+                                          "level":  23
+                                      },
+                                      {
+                                          "move":  "PINMISSILE",
+                                          "level":  26
+                                      },
+                                      {
+                                          "move":  "PROTECT",
+                                          "level":  30
+                                      },
+                                      {
+                                          "move":  "LUNGE",
+                                          "level":  34
+                                      },
+                                      {
+                                          "move":  "IRONHEAD",
+                                          "level":  37
+                                      },
+                                      {
+                                          "move":  "FELLSTINGER",
+                                          "level":  42
+                                      },
+                                      {
+                                          "move":  "DOUBLEEDGE",
+                                          "level":  49
+                                      },
+                                      {
+                                          "move":  "OUTRAGE",
+                                          "level":  55
+                                      }
+                                  ],
+                        "credit_text":  "Credit to Princess-Phoenix for Merlicun via Pokengine Mongratis. Pack owner/maintainer: Plouton. Source page: https://pokengine.org/mons/00vfbxmp/Merlicun?collection=107s7x9x. Use with credit for non-commercial fangames."
+                    },
+                    {
+                        "height":  18,
+                        "species_name":  "Sunnydra",
+                        "id":  "CSF_MONGRATIS_SUNNYDRA",
+                        "egg_moves":  [
+                                          "LEECHSEED",
+                                          "BIDE",
+                                          "CURSE",
+                                          "ENDURE",
+                                          "ENCORE",
+                                          "SWEETSCENT",
+                                          "MORNINGSUN",
+                                          "INGRAIN",
+                                          "GRASSWHISTLE",
+                                          "NATURALGIFT",
+                                          "GRASSYTERRAIN"
+                                      ],
+                        "base_stats":  {
+                                           "DEFENSE":  70,
+                                           "ATTACK":  90,
+                                           "SPECIAL_ATTACK":  125,
+                                           "SPECIAL_DEFENSE":  100,
+                                           "HP":  90,
+                                           "SPEED":  30
+                                       },
+                        "evolutions":  [
+
+                                       ],
+                        "display_name":  "Sunnydra",
+                        "catch_rate":  50,
+                        "source_pack":  "Mongratis",
+                        "happiness":  70,
+                        "egg_groups":  [
+                                           "Grass"
+                                       ],
+                        "notes":  "Designed and Sprited by KajiAtsui Originally made for Atsui Dex . Battle details by Plouton",
+                        "weight":  190,
+                        "category":  "Sunflower",
+                        "pokedex_entry":  "On sunny days, they sit very still with their faces turned to the sun, soaking in the warmth. If disturbed, they become highly aggressive.",
+                        "source_url":  "https://pokengine.org/mons/00yys19h/Sunnydra?collection=107s7x9x",
+                        "teach_moves":  [
+                                            "SNORE",
+                                            "GIGADRAIN",
+                                            "SYNTHESIS",
+                                            "UPROAR",
+                                            "HELPINGHAND",
+                                            "ENDEAVOR",
+                                            "WORRYSEED",
+                                            "SEEDBOMB",
+                                            "EARTHPOWER",
+                                            "AFTERYOU",
+                                            "SWORDSDANCE",
+                                            "HYPERBEAM",
+                                            "SOLARBEAM",
+                                            "TOXIC",
+                                            "DOUBLETEAM",
+                                            "LIGHTSCREEN",
+                                            "REST",
+                                            "SUBSTITUTE",
+                                            "PROTECT",
+                                            "SLUDGEBOMB",
+                                            "SWAGGER",
+                                            "ATTRACT",
+                                            "SLEEPTALK",
+                                            "RETURN",
+                                            "FRUSTRATION",
+                                            "SAFEGUARD",
+                                            "HIDDENPOWER",
+                                            "SUNNYDAY",
+                                            "FACADE",
+                                            "NATUREPOWER",
+                                            "ENERGYBALL",
+                                            "GIGAIMPACT",
+                                            "GRASSKNOT",
+                                            "ROUND",
+                                            "CONFIDE",
+                                            "DOUBLEEDGE",
+                                            "RAGE",
+                                            "MEGADRAIN",
+                                            "MIMIC",
+                                            "BIDE",
+                                            "TAKEDOWN"
+                                        ],
+                        "hidden_ability":  "EARLYBIRD",
+                        "usage_permission":  "Free to use with credit",
+                        "types":  [
+                                      "GRASS",
+                                      "DRAGON"
+                                  ],
+                        "creator":  "KajiAtsui",
+                        "growth_rate":  "Parabolic",
+                        "abilities":  [
+                                          "CHLOROPHYLL",
+                                          "SOLARPOWER"
+                                      ],
+                        "moves":  [
+                                      {
+                                          "move":  "POUND",
+                                          "level":  1
+                                      },
+                                      {
+                                          "move":  "ABSORB",
+                                          "level":  1
+                                      },
+                                      {
+                                          "move":  "GROWTH",
+                                          "level":  1
+                                      },
+                                      {
+                                          "move":  "FLOWERSHIELD",
+                                          "level":  1
+                                      },
+                                      {
+                                          "move":  "INGRAIN",
+                                          "level":  5
+                                      },
+                                      {
+                                          "move":  "GRASSWHISTLE",
+                                          "level":  8
+                                      },
+                                      {
+                                          "move":  "MEGADRAIN",
+                                          "level":  12
+                                      },
+                                      {
+                                          "move":  "LEECHSEED",
+                                          "level":  15
+                                      },
+                                      {
+                                          "move":  "RAZORLEAF",
+                                          "level":  19
+                                      },
+                                      {
+                                          "move":  "WORRYSEED",
+                                          "level":  22
+                                      },
+                                      {
+                                          "move":  "GIGADRAIN",
+                                          "level":  24
+                                      },
+                                      {
+                                          "move":  "BULLETSEED",
+                                          "level":  26
+                                      },
+                                      {
+                                          "move":  "TWISTER",
+                                          "level":  28
+                                      },
+                                      {
+                                          "move":  "PETALDANCE",
+                                          "level":  30
+                                      },
+                                      {
+                                          "move":  "NATURALGIFT",
+                                          "level":  33
+                                      },
+                                      {
+                                          "move":  "DRAGONPULSE",
+                                          "level":  35
+                                      },
+                                      {
+                                          "move":  "SOLARBEAM",
+                                          "level":  36
+                                      },
+                                      {
+                                          "move":  "DOUBLEEDGE",
+                                          "level":  39
+                                      },
+                                      {
+                                          "move":  "DRAGONDANCE",
+                                          "level":  42
+                                      },
+                                      {
+                                          "move":  "SUNNYDAY",
+                                          "level":  44
+                                      },
+                                      {
+                                          "move":  "LEAFSTORM",
+                                          "level":  49
+                                      },
+                                      {
+                                          "move":  "HEATWAVE",
+                                          "level":  54
+                                      },
+                                      {
+                                          "move":  "PETALBLIZZARD",
+                                          "level":  57
+                                      },
+                                      {
+                                          "move":  "SOLARBEAM",
+                                          "level":  60
+                                      }
+                                  ],
+                        "credit_text":  "Credit to KajiAtsui for Sunnydra via Pokengine Mongratis. Pack owner/maintainer: Plouton. Source page: https://pokengine.org/mons/00yys19h/Sunnydra?collection=107s7x9x. Use with credit for non-commercial fangames."
+                    }
+                ]
+}

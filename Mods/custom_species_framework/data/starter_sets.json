@@ -1,0 +1,69 @@
+{
+  "starter_sets": [
+    {
+      "id": "framework_default",
+      "label": "Framework Fakemon Trio",
+      "replace_default_starters": true,
+      "intro_selectable": true,
+      "intro_default": true,
+      "intro_order": 0,
+      "startup_mode": "species_override",
+      "species": ["CSF_VERDALYK", "CSF_CINDRAKE", "CSF_AQUALITH"],
+      "rival_counterpick": {
+        "CSF_VERDALYK": "CSF_CINDRAKE",
+        "CSF_CINDRAKE": "CSF_AQUALITH",
+        "CSF_AQUALITH": "CSF_VERDALYK"
+      }
+    },
+    {
+      "id": "kanto_classic",
+      "label": "Kanto Classic",
+      "replace_default_starters": false,
+      "intro_selectable": true,
+      "intro_order": 1,
+      "startup_mode": "kanto_map",
+      "species": ["BULBASAUR", "CHARMANDER", "SQUIRTLE"],
+      "rival_counterpick": {}
+    },
+    {
+      "id": "johto_classic",
+      "label": "Johto Classic",
+      "replace_default_starters": false,
+      "intro_selectable": true,
+      "intro_order": 2,
+      "startup_mode": "johto_map",
+      "species": ["CHIKORITA", "CYNDAQUIL", "TOTODILE"],
+      "rival_counterpick": {}
+    },
+    {
+      "id": "hoenn_classic",
+      "label": "Hoenn Classic",
+      "replace_default_starters": false,
+      "intro_selectable": true,
+      "intro_order": 3,
+      "startup_mode": "hoenn_map",
+      "species": ["TREECKO", "TORCHIC", "MUDKIP"],
+      "rival_counterpick": {}
+    },
+    {
+      "id": "sinnoh_classic",
+      "label": "Sinnoh Classic",
+      "replace_default_starters": false,
+      "intro_selectable": true,
+      "intro_order": 4,
+      "startup_mode": "sinnoh_map",
+      "species": ["TURTWIG", "CHIMCHAR", "PIPLUP"],
+      "rival_counterpick": {}
+    },
+    {
+      "id": "kalos_classic",
+      "label": "Kalos Classic",
+      "replace_default_starters": false,
+      "intro_selectable": true,
+      "intro_order": 5,
+      "startup_mode": "kalos_map",
+      "species": ["CHESPIN", "FENNEKIN", "FROAKIE"],
+      "rival_counterpick": {}
+    }
+  ]
+}

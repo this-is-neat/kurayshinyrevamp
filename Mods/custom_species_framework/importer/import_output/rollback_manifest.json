@@ -1,0 +1,30 @@
+{
+    "generated_at":  "2026-04-22 04:04:19",
+    "skipped_files":  [
+                          "C:\\Games\\PIF\\Mods\\custom_species_framework\\Graphics\\Pokemon\\Imported\\mongratis_community_sampler\\Back\\CSF_MONGRATIS_COBARETT.png",
+                          "C:\\Games\\PIF\\Mods\\custom_species_framework\\Graphics\\Pokemon\\Imported\\mongratis_community_sampler\\Back\\CSF_MONGRATIS_HISSIORITE.png",
+                          "C:\\Games\\PIF\\Mods\\custom_species_framework\\Graphics\\Pokemon\\Imported\\mongratis_community_sampler\\Back\\CSF_MONGRATIS_MERLICUN.png",
+                          "C:\\Games\\PIF\\Mods\\custom_species_framework\\Graphics\\Pokemon\\Imported\\mongratis_community_sampler\\Back\\CSF_MONGRATIS_PYTHONOVA.png",
+                          "C:\\Games\\PIF\\Mods\\custom_species_framework\\Graphics\\Pokemon\\Imported\\mongratis_community_sampler\\Back\\CSF_MONGRATIS_SUNNYDRA.png",
+                          "C:\\Games\\PIF\\Mods\\custom_species_framework\\Graphics\\Pokemon\\Imported\\mongratis_community_sampler\\Front\\CSF_MONGRATIS_COBARETT.png",
+                          "C:\\Games\\PIF\\Mods\\custom_species_framework\\Graphics\\Pokemon\\Imported\\mongratis_community_sampler\\Front\\CSF_MONGRATIS_HISSIORITE.png",
+                          "C:\\Games\\PIF\\Mods\\custom_species_framework\\Graphics\\Pokemon\\Imported\\mongratis_community_sampler\\Front\\CSF_MONGRATIS_MERLICUN.png",
+                          "C:\\Games\\PIF\\Mods\\custom_species_framework\\Graphics\\Pokemon\\Imported\\mongratis_community_sampler\\Front\\CSF_MONGRATIS_PYTHONOVA.png",
+                          "C:\\Games\\PIF\\Mods\\custom_species_framework\\Graphics\\Pokemon\\Imported\\mongratis_community_sampler\\Front\\CSF_MONGRATIS_SUNNYDRA.png",
+                          "C:\\Games\\PIF\\Mods\\custom_species_framework\\Graphics\\Pokemon\\Imported\\mongratis_community_sampler\\Icons\\CSF_MONGRATIS_COBARETT.png",
+                          "C:\\Games\\PIF\\Mods\\custom_species_framework\\Graphics\\Pokemon\\Imported\\mongratis_community_sampler\\Icons\\CSF_MONGRATIS_HISSIORITE.png",
+                          "C:\\Games\\PIF\\Mods\\custom_species_framework\\Graphics\\Pokemon\\Imported\\mongratis_community_sampler\\Icons\\CSF_MONGRATIS_MERLICUN.png",
+                          "C:\\Games\\PIF\\Mods\\custom_species_framework\\Graphics\\Pokemon\\Imported\\mongratis_community_sampler\\Icons\\CSF_MONGRATIS_PYTHONOVA.png",
+                          "C:\\Games\\PIF\\Mods\\custom_species_framework\\Graphics\\Pokemon\\Imported\\mongratis_community_sampler\\Icons\\CSF_MONGRATIS_SUNNYDRA.png",
+                          "C:\\Games\\PIF\\Mods\\custom_species_framework\\Graphics\\Pokemon\\Imported\\mongratis_community_sampler\\Overworld\\CSF_MONGRATIS_MERLICUN.png",
+                          "C:\\Games\\PIF\\Mods\\custom_species_framework\\Graphics\\Pokemon\\Imported\\mongratis_community_sampler\\Overworld\\CSF_MONGRATIS_SUNNYDRA.png"
+                      ],
+    "applied_files":  [
+                          "C:\\Games\\PIF\\Mods\\custom_species_framework\\NOTICE_imports.txt",
+                          "C:\\Games\\PIF\\Mods\\custom_species_framework\\data\\species\\imported_mongratis_community_sampler.json",
+                          "C:\\Games\\PIF\\Mods\\custom_species_framework\\importer\\applied_manifests\\mongratis_credits.json"
+                      ],
+    "conflicts":  [
+
+                  ]
+}

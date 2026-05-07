@@ -1,0 +1,24 @@
+{
+  "framework_mode": "custom_species_framework_v1",
+  "species_registry": {
+    "mode": "per_pack_json",
+    "directory": "data/species",
+    "filename_template": "imported_{pack_slug}.json"
+  },
+  "assets": {
+    "front": "Graphics/Pokemon/Imported/{pack_slug}/Front/{internal_id}.png",
+    "back": "Graphics/Pokemon/Imported/{pack_slug}/Back/{internal_id}.png",
+    "icon": "Graphics/Pokemon/Imported/{pack_slug}/Icons/{internal_id}.png",
+    "overworld": "Graphics/Pokemon/Imported/{pack_slug}/Overworld/{internal_id}.png",
+    "shiny_front": "Graphics/Pokemon/Imported/{pack_slug}/ShinyFront/{internal_id}.png",
+    "shiny_back": "Graphics/Pokemon/Imported/{pack_slug}/ShinyBack/{internal_id}.png"
+  },
+  "bundle": {
+    "directory": "framework_bundle"
+  },
+  "credits": {
+    "directory": "importer/applied_manifests",
+    "credits_manifest_template": "{pack_slug}_credits.json",
+    "notice_template": "NOTICE_imports.txt"
+  }
+}

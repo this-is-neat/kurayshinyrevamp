@@ -1,0 +1,52 @@
+{
+  "sources": [
+    {
+      "id": "mongratis_pack",
+      "enabled": true,
+      "type": "folder",
+      "location": "C:/Downloads/MongratisPack",
+      "pack_name": "Mongratis",
+      "source_url": "https://example.com/mongratis-pack",
+      "creator": "Mongratis",
+      "credit_text": "Credit to Mongratis for the Fakemon sprite pack.",
+      "usage_permission": "Free to use in non-commercial fangames with credit.",
+      "license_files": [
+        "README.txt",
+        "LICENSE.txt"
+      ],
+      "metadata_files": [
+        "species.json",
+        "pokemon.txt"
+      ],
+      "notes": "Set type to zip, github_zip, or html_page if the source is not a plain folder.",
+      "species_overrides": {
+        "Examplemon": {
+          "name": "Examplemon",
+          "category": "Bloom Sprite",
+          "types": [
+            "GRASS",
+            "FAIRY"
+          ],
+          "abilities": [
+            "OVERGROW",
+            "NATURALCURE"
+          ],
+          "hidden_ability": "LEAFGUARD",
+          "base_stats": {
+            "HP": 60,
+            "ATTACK": 55,
+            "DEFENSE": 60,
+            "SPECIAL_ATTACK": 75,
+            "SPECIAL_DEFENSE": 70,
+            "SPEED": 50
+          },
+          "moves": [
+            { "level": 1, "move": "TACKLE" },
+            { "level": 5, "move": "ABSORB" }
+          ],
+          "pokedex_entry": "A reusable example species override for importer testing."
+        }
+      }
+    }
+  ]
+}

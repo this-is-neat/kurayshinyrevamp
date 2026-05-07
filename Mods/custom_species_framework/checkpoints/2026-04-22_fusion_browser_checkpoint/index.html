@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Infinite Fusion Pokédex Studio</title>
+  <link rel="stylesheet" href="styles.css?v=20260422j">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <div class="brand-block">
+        <p class="eyebrow">Custom Species Framework</p>
+        <h1>Infinite Fusion Pokédex Studio</h1>
+        <p class="subtitle">Browse the installed Pokédex, build full Fakemon and regional variants, and export mod-ready species packs from one local browser tool.</p>
+      </div>
+
+      <div class="header-actions">
+        <div id="catalogStatus" class="status-pill">Loading game catalog...</div>
+        <div class="toolbar-group">
+          <button id="undoBtn" class="ghost-button" type="button">Undo</button>
+          <button id="redoBtn" class="ghost-button" type="button">Redo</button>
+          <button id="newSpeciesBtn" class="ghost-button" type="button">New Species</button>
+          <button id="saveSpeciesBtn" class="primary-button" type="button">Save Species</button>
+        </div>
+      </div>
+    </header>
+
+    <section id="messageBanner" class="message-banner hidden"></section>
+
+    <div class="studio-grid">
+      <aside class="left-rail panel">
+        <nav class="primary-nav">
+          <button class="nav-button" data-mode="creator" type="button">Wizard</button>
+          <button class="nav-button active" data-mode="pokedex" type="button">Pokédex</button>
+          <button class="nav-button" data-mode="integration" type="button">Advanced</button>
+        </nav>
+
+        <section class="sidebar-pane hidden" data-mode="creator">
+          <div class="section-heading compact">
+            <div>
+              <h2>Regional Variant Quest</h2>
+              <p>The easiest first win is a regional variant: start from an installed Pokémon, edit the new version, publish it, then claim it in the player's bedroom PC.</p>
+            </div>
+          </div>
+
+          <article class="guide-panel quest-panel">
+            <div class="section-heading compact">
+              <div>
+                <h3>Quest Steps</h3>
+                <p>Use the wizard to move from picking a base species to a clean in-game delivery ticket.</p>
+              </div>
+            </div>
+            <div id="wizardProgressSummary" class="validation-summary"></div>
+            <div id="wizardStepList" class="wizard-step-list"></div>
+            <div class="inline-actions">
+              <button id="wizardNextStepBtn" class="primary-button" type="button">Open Next Step</button>
+              <button id="wizardPublishShortcutBtn" class="ghost-button" type="button">Open Bedroom PC Step</button>
+            </div>
+            <p id="wizardQuestHint" class="meta-copy">Open the Pokédex, choose a base species, then let the wizard walk that regional variant to a playable bedroom PC delivery.</p>
+          </article>
+
+          <article class="guide-panel advanced-note">
+            <h4>Advanced Tasks Stay Separate</h4>
+            <p>Starter menu changes, import packs, and export bundles live in Advanced so the first guided path stays focused on one playable variant.</p>
+          </article>
+
+          <div class="section-heading compact">
+            <div>
+              <h3>Quick Start Shells</h3>
+              <p>Templates for fast first drafts before you fill in the rest of the species.</p>
+            </div>
+          </div>
+
+          <div class="template-grid">
+            <button class="template-card" data-template="starter_grass" type="button">
+              <strong>Grass Starter</strong>
+              <span>Balanced first-stage starter shell.</span>
+            </button>
+            <button class="template-card" data-template="starter_fire" type="button">
+              <strong>Fire Starter</strong>
+              <span>Fast special-leaning starter shell.</span>
+            </button>
+            <button class="template-card" data-template="starter_water" type="button">
+              <strong>Water Starter</strong>
+              <span>Bulky versatile starter shell.</span>
+            </button>
+            <button class="template-card" data-template="early_bug" type="button">
+              <strong>Early Bug</strong>
+              <span>Quick early-route evolution line.</span>
+            </button>
+            <button class="template-card" data-template="regional_bird" type="button">
+              <strong>Regional Bird</strong>
+              <span>Speed-focused route companion.</span>
+            </button>
+            <button class="template-card" data-template="pseudo_legendary" type="button">
+              <strong>Pseudo Legend</strong>
+              <span>Three-stage late-game powerhouse shell.</span>
+            </button>
+            <button class="template-card" data-template="fossil" type="button">
+              <strong>Fossil</strong>
+              <span>Revived ancient species baseline.</span>
+            </button>
+            <button class="template-card" data-template="baby" type="button">
+              <strong>Baby</strong>
+              <span>Friendship-based hatchling baseline.</span>
+            </button>
+            <button class="template-card" data-template="single_rare" type="button">
+              <strong>Rare Single-Stage</strong>
+              <span>Strong standalone encounter shell.</span>
+            </button>
+          </div>
+
+          <div class="sidebar-subsection">
+            <div class="section-heading compact">
+              <div>
+                <h3>Studio Species</h3>
+                <p>Saved browser-managed Fakemon and variants ready to edit or republish.</p>
+              </div>
+            </div>
+            <div id="creatorSpeciesList" class="species-list"></div>
+          </div>
+        </section>
+
+        <section class="sidebar-pane" data-mode="pokedex">
+          <div class="section-heading compact">
+            <div>
+              <h2>Pokédex Browser</h2>
+              <p>Search the installed game data and compare species side by side.</p>
+            </div>
+          </div>
+
+          <div class="field-grid">
+            <label class="field">
+              <span>Search Species</span>
+              <input id="dexSearch" type="text" placeholder="Name, ID, or Pokédex number">
+            </label>
+
+            <div class="field-grid two-columns">
+              <label class="field">
+                <span>Catalog Scope</span>
+                <select id="dexCatalogScope">
+                  <option value="species">Species</option>
+                  <option value="fusion">Fusion Slice</option>
+                </select>
+              </label>
+
+              <label class="field">
+                <span>Type</span>
+                <select id="dexTypeFilter"></select>
+              </label>
+
+              <label class="field">
+                <span>Kind</span>
+                <select id="dexKindFilter">
+                  <option value="all">All</option>
+                  <option value="base_game">Base Game</option>
+                  <option value="fakemon">Fakemon</option>
+                  <option value="regional_variant">Regional Variant</option>
+                </select>
+              </label>
+
+              <label class="field">
+                <span>Ability</span>
+                <input id="dexAbilityFilter" type="text" list="ability-options" placeholder="OVERGROW">
+              </label>
+
+              <label class="field">
+                <span>Sort</span>
+                <select id="dexSort">
+                  <option value="dex">Dex Number</option>
+                  <option value="name">Name</option>
+                  <option value="bst">BST</option>
+                </select>
+              </label>
+            </div>
+          </div>
+
+          <div class="inline-actions">
+            <button id="clearDexFiltersBtn" class="ghost-button small" type="button">Clear Filters</button>
+            <button id="clearCompareBtn" class="ghost-button small" type="button">Clear Compare</button>
+          </div>
+
+          <div id="dexSpeciesList" class="species-list"></div>
+        </section>
+
+        <section class="sidebar-pane hidden" data-mode="integration">
+          <div class="section-heading compact">
+            <div>
+              <h2>Advanced Tools</h2>
+              <p>Starter editing, importer review, and export bundles live here after the main bedroom PC quest is finished.</p>
+            </div>
+          </div>
+
+          <div id="integrationSummary" class="summary-stack"></div>
+        </section>
+      </aside>
+
+      <main class="center-stage">
+        <section class="view-section hidden" data-mode="creator">
+          <div class="workspace-header">
+            <div>
+              <h2>Regional Variant Bedroom PC Wizard</h2>
+              <p>Start from an existing species, make a coexistence-safe variant, then see it show up in the player's bedroom PC list.</p>
+            </div>
+            <div class="inline-summary">
+              <span id="slotBadge" class="summary-badge">Unsaved</span>
+              <span id="kindBadge" class="summary-badge soft">Fakemon</span>
+              <span class="summary-badge neutral">BST <strong id="bstValue">300</strong></span>
+              <span class="summary-badge neutral">Role <strong id="roleEstimate">Balanced</strong></span>
+            </div>
+          </div>
+
+          <div class="quest-banner">
+            <div>
+              <strong class="quest-label">Guided Result</strong>
+              <h3 id="wizardBannerTitle">Pick a base Pokémon, edit a regional variant, then queue it for the bedroom PC.</h3>
+              <p id="wizardBannerText">This first workflow keeps the original species untouched and lets players finish one real, testable variant before taking on full Fakemon art or starter-menu changes.</p>
+            </div>
+            <div class="quest-banner-badges">
+              <span id="wizardProgressBadge" class="summary-badge neutral">0 / 5 Ready</span>
+              <span id="wizardCurrentBadge" class="summary-badge soft">Start Here</span>
+            </div>
+          </div>
+
+          <section class="editor-panel fusion-builder-panel hidden" aria-hidden="true">
+            <div class="panel-heading compact">
+              <div>
+                <h3>Fusion Variant Builder</h3>
+                <p>Pick a head and body from the installed PokÃ©dex, preview the mix, then turn it into a new regional-variant draft.</p>
+              </div>
+              <span class="summary-badge neutral">Pick Both Parts</span>
+            </div>
+
+            <div class="field-grid two-columns fusion-builder-fields">
+              <label class="field">
+                <span>Fusion Head</span>
+                <input data-placeholder-id="creatorFusionHeadPlaceholder" type="text" list="species-options" placeholder="PIKACHU">
+              </label>
+
+              <label class="field">
+                <span>Fusion Body</span>
+                <input data-placeholder-id="creatorFusionBodyPlaceholder" type="text" list="species-options" placeholder="CHARMANDER">
+              </label>
+            </div>
+
+            <div class="inline-actions fusion-builder-actions">
+              <button data-placeholder-id="creatorSwapFusionPartsPlaceholder" class="ghost-button small" type="button">Swap</button>
+              <button data-placeholder-id="creatorClearFusionBuilderPlaceholder" class="ghost-button small" type="button">Clear</button>
+              <button data-placeholder-id="creatorFusionVariantPlaceholder" class="primary-button small" type="button" disabled>Create Fusion Regional Variant</button>
+            </div>
+
+            <div class="fusion-builder-preview is-empty">
+              <div class="fusion-builder-preview-grid">
+                <img data-placeholder-id="creatorFusionPreviewPlaceholder" class="fusion-builder-preview-image" alt="Fusion source preview">
+                <div class="fusion-builder-preview-copy">
+                  <p><strong>Head:</strong> Select a PokÃ©dex species and assign it as the fusion head.</p>
+                  <p><strong>Body:</strong> Pair it with another installed species to stage a safe fusion source.</p>
+                  <p><strong>Result:</strong> Once the catalog finishes loading, app.js replaces this shell with the live preview and clone-ready state.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div class="tab-strip">
+            <button class="tab-button active" data-creator-tab="overview" type="button">1. Basics</button>
+            <button class="tab-button" data-creator-tab="identity" type="button">2. Traits</button>
+            <button class="tab-button" data-creator-tab="stats" type="button">3. Stats</button>
+            <button class="tab-button" data-creator-tab="moves" type="button">4. Moves</button>
+            <button class="tab-button" data-creator-tab="visuals" type="button">5. Art</button>
+            <button class="tab-button" data-creator-tab="lore" type="button">6. Dex</button>
+            <button class="tab-button" data-creator-tab="validation" type="button">7. Check</button>
+            <button class="tab-button" data-creator-tab="publish" type="button">8. Bedroom PC</button>
+            <button class="tab-button" data-creator-tab="evolutions" type="button">Evos</button>
+            <button class="tab-button" data-creator-tab="world" type="button">World+</button>
+            <button class="tab-button" data-creator-tab="fusion" type="button">Fusion+</button>
+          </div>
+
+          <form id="speciesForm" class="editor-stack">
+            <input id="existingId" type="hidden">
+
+            <section class="editor-panel active" data-creator-tab="overview">
+              <div class="panel-heading">
+                <h3>Overview</h3>
+                <p>Name, internal identifiers, and the high-level role this species plays in the framework.</p>
+              </div>
+
+              <div class="field-grid two-columns">
+                <label class="field">
+                  <span>Kind</span>
+                  <select id="kind">
+                    <option value="fakemon">Fakemon</option>
+                    <option value="regional_variant">Regional Variant</option>
+                  </select>
+                </label>
+
+                <label class="field">
+                  <span>Display Name</span>
+                  <input id="name" type="text" placeholder="Verdalyk">
+                </label>
+
+                <label class="field">
+                  <span>Internal ID</span>
+                  <input id="internalId" type="text" placeholder="CSF_VERDALYK">
+                </label>
+
+                <label class="field">
+                  <span>Category</span>
+                  <input id="category" type="text" placeholder="Seedling Lynx">
+                </label>
+
+                <label class="field">
+                  <span>Generation Tag</span>
+                  <input id="generation" type="number" min="0" step="1" value="9">
+                </label>
+
+                <label class="field">
+                  <span>Starter Template Pull</span>
+                  <input id="templateSourceLabel" type="text" placeholder="Optional notes for your design concept">
+                </label>
+              </div>
+
+              <div id="regionalFields" class="field-grid two-columns hidden regional-workbench">
+                <article class="guide-panel wide regional-source-panel">
+                  <div class="panel-heading compact">
+                    <div>
+                      <h4>Regional Variant Source</h4>
+                      <p>Choose whether this draft remixes one installed species or a fusion head/body pair that should stay intact.</p>
+                    </div>
+                    <span class="summary-badge neutral">Coexistence Safe</span>
+                  </div>
+
+                  <div class="field-grid two-columns regional-source-mode-grid">
+                    <label class="field">
+                      <span>Source Mode</span>
+                      <select id="variantSourceMode">
+                        <option value="species">Single Species</option>
+                        <option value="fusion">Fusion Pair</option>
+                      </select>
+                    </label>
+
+                    <div class="source-mode-copy">
+                      <strong>Builder Note</strong>
+                      <p>Single-species mode keeps base and fallback inputs editable. Fusion mode tracks head and body inputs, then app.js computes the live fusion symbol for the draft automatically.</p>
+                    </div>
+                  </div>
+                </article>
+
+                <div id="regionalSingleSourceFields" class="field-grid two-columns wide regional-source-block">
+                  <label class="field">
+                    <span>Base Species</span>
+                    <input id="baseSpecies" type="text" list="species-options" placeholder="SANDSHREW">
+                  </label>
+
+                  <label class="field">
+                    <span>Fallback Species</span>
+                    <input id="fallbackSpecies" type="text" list="species-options" placeholder="SANDSHREW">
+                  </label>
+                </div>
+
+                <div id="regionalFusionSourceFields" class="field-grid two-columns wide regional-source-block hidden">
+                  <label class="field">
+                    <span>Fusion Head Source</span>
+                    <input id="variantFusionHead" type="text" list="species-options" placeholder="PIKACHU">
+                  </label>
+
+                  <label class="field">
+                    <span>Fusion Body Source</span>
+                    <input id="variantFusionBody" type="text" list="species-options" placeholder="CHARMANDER">
+                  </label>
+
+                  <label class="field wide fusion-base-field">
+                    <span>Computed Fusion Base Symbol</span>
+                    <input id="variantFusionBase" type="text" placeholder="B4H25" readonly>
+                  </label>
+
+                  <article class="guide-panel wide fusion-source-note">
+                    <h4>Fusion Variant Drafting</h4>
+                    <p>The creator still saves a regional-variant draft, but fusion mode keeps the head/body lineage visible and pushes the matching `B#H#` source symbol into the hidden base and fallback values.</p>
+                  </article>
+                </div>
+
+                <label class="field wide">
+                  <span>Variant Family</span>
+                  <input id="variantFamily" type="text" placeholder="Glacial Sandshrew Line">
+                </label>
+              </div>
+
+              <div class="checkbox-grid">
+                <label class="checkbox-field"><input id="starterEligible" type="checkbox"> Starter Eligible</label>
+                <label class="checkbox-field"><input id="encounterEligible" type="checkbox"> Encounter Eligible</label>
+                <label class="checkbox-field"><input id="trainerEligible" type="checkbox"> Trainer Eligible</label>
+              </div>
+            </section>
+
+            <section class="editor-panel hidden" data-creator-tab="identity">
+              <div class="panel-heading">
+                <h3>Identity</h3>
+                <p>Typing, abilities, breeding data, growth, and body information.</p>
+              </div>
+
+              <div class="field-grid three-columns">
+                <label class="field">
+                  <span>Type 1</span>
+                  <select id="type1"></select>
+                </label>
+
+                <label class="field">
+                  <span>Type 2</span>
+                  <select id="type2"></select>
+                </label>
+
+                <label class="field">
+                  <span>Growth Rate</span>
+                  <select id="growthRate"></select>
+                </label>
+
+                <label class="field">
+                  <span>Gender Ratio</span>
+                  <select id="genderRatio"></select>
+                </label>
+
+                <label class="field">
+                  <span>Primary Ability</span>
+                  <input id="primaryAbility" type="text" list="ability-options" placeholder="OVERGROW">
+                </label>
+
+                <label class="field">
+                  <span>Secondary Ability</span>
+                  <input id="secondaryAbility" type="text" list="ability-options" placeholder="Optional">
+                </label>
+
+                <label class="field">
+                  <span>Hidden Ability</span>
+                  <input id="hiddenAbility" type="text" list="ability-options" placeholder="LEAFGUARD">
+                </label>
+
+                <label class="field">
+                  <span>Egg Group 1</span>
+                  <select id="eggGroup1"></select>
+                </label>
+
+                <label class="field">
+                  <span>Egg Group 2</span>
+                  <select id="eggGroup2"></select>
+                </label>
+
+                <label class="field">
+                  <span>Height</span>
+                  <input id="height" type="number" min="1" step="1" value="6">
+                </label>
+
+                <label class="field">
+                  <span>Weight</span>
+                  <input id="weight" type="number" min="1" step="1" value="60">
+                </label>
+
+                <label class="field">
+                  <span>Color</span>
+                  <select id="color"></select>
+                </label>
+
+                <label class="field">
+                  <span>Shape</span>
+                  <select id="shape"></select>
+                </label>
+
+                <label class="field">
+                  <span>Habitat</span>
+                  <select id="habitat"></select>
+                </label>
+
+                <label class="field">
+                  <span>Base EXP</span>
+                  <input id="baseExp" type="number" min="1" step="1" value="64">
+                </label>
+
+                <label class="field">
+                  <span>Catch Rate</span>
+                  <input id="catchRate" type="number" min="1" step="1" value="45">
+                </label>
+
+                <label class="field">
+                  <span>Happiness</span>
+                  <input id="happiness" type="number" min="0" step="1" value="70">
+                </label>
+
+                <label class="field">
+                  <span>Hatch Steps</span>
+                  <input id="hatchSteps" type="number" min="1" step="1" value="5120">
+                </label>
+              </div>
+            </section>
+
+            <section class="editor-panel hidden" data-creator-tab="stats">
+              <div class="panel-heading">
+                <h3>Stats</h3>
+                <p>Balance the stat line and review the role estimate and power curve hints as you edit.</p>
+              </div>
+
+              <div class="stats-grid">
+                <label class="field"><span>HP</span><input id="statHp" class="stat-input" type="number" min="1" step="1" value="50"></label>
+                <label class="field"><span>Attack</span><input id="statAttack" class="stat-input" type="number" min="1" step="1" value="50"></label>
+                <label class="field"><span>Defense</span><input id="statDefense" class="stat-input" type="number" min="1" step="1" value="50"></label>
+                <label class="field"><span>Sp. Atk</span><input id="statSpecialAttack" class="stat-input" type="number" min="1" step="1" value="50"></label>
+                <label class="field"><span>Sp. Def</span><input id="statSpecialDefense" class="stat-input" type="number" min="1" step="1" value="50"></label>
+                <label class="field"><span>Speed</span><input id="statSpeed" class="stat-input" type="number" min="1" step="1" value="50"></label>
+              </div>
+
+              <div class="insight-grid">
+                <article class="insight-card">
+                  <h4>Role Estimate</h4>
+                  <p id="roleInsight">Balanced stats with room to specialize.</p>
+                </article>
+                <article class="insight-card">
+                  <h4>Type Coverage</h4>
+                  <p id="typeCoverageInsight">Choose at least one type to review offensive and defensive coverage.</p>
+                </article>
+                <article class="insight-card">
+                  <h4>Evolution Curve</h4>
+                  <p id="evolutionCurveInsight">No evolution curve available yet.</p>
+                </article>
+              </div>
+            </section>
+
+            <section class="editor-panel hidden" data-creator-tab="moves">
+              <div class="panel-heading">
+                <h3>Moves</h3>
+                <p>Define level-up progression, TM compatibility, tutoring, and egg inheritance.</p>
+              </div>
+
+              <div class="list-section">
+                <div class="list-heading">
+                  <h4>Level-Up Moves</h4>
+                  <button id="addMoveBtn" class="ghost-button small" type="button">Add Move</button>
+                </div>
+                <div id="movesList" class="repeater-list"></div>
+              </div>
+
+              <div class="triple-lists">
+                <div class="list-section">
+                  <div class="list-heading">
+                    <h4>TM Moves</h4>
+                    <button id="addTmMoveBtn" class="ghost-button small" type="button">Add TM Move</button>
+                  </div>
+                  <div id="tmMovesList" class="repeater-list simple"></div>
+                </div>
+
+                <div class="list-section">
+                  <div class="list-heading">
+                    <h4>Tutor Moves</h4>
+                    <button id="addTutorMoveBtn" class="ghost-button small" type="button">Add Tutor Move</button>
+                  </div>
+                  <div id="tutorMovesList" class="repeater-list simple"></div>
+                </div>
+
+                <div class="list-section">
+                  <div class="list-heading">
+                    <h4>Egg Moves</h4>
+                    <button id="addEggMoveBtn" class="ghost-button small" type="button">Add Egg Move</button>
+                  </div>
+                  <div id="eggMovesList" class="repeater-list simple"></div>
+                </div>
+              </div>
+            </section>
+
+            <section class="editor-panel hidden" data-creator-tab="evolutions">
+              <div class="panel-heading">
+                <h3>Evolutions</h3>
+                <p>Build the next stages and preview the family tree as you go.</p>
+              </div>
+
+              <div class="list-section">
+                <div class="list-heading">
+                  <h4>Evolution Builder</h4>
+                  <button id="addEvolutionBtn" class="ghost-button small" type="button">Add Evolution</button>
+                </div>
+                <div id="evolutionsList" class="repeater-list evolutions"></div>
+              </div>
+
+              <div class="tree-panel">
+                <h4>Evolution Tree Preview</h4>
+                <div id="evolutionTreeBuilder" class="tree-preview empty">Add evolutions or clone a species family to preview its tree here.</div>
+              </div>
+            </section>
+
+            <section class="editor-panel hidden" data-creator-tab="visuals">
+              <div class="panel-heading">
+                <h3>Visuals</h3>
+                <p>Import sprites, preview them live, and line up the artwork for party, battle, and Dex use.</p>
+              </div>
+
+              <div class="asset-grid">
+                <label class="asset-card">
+                  <span>Front Sprite</span>
+                  <img id="frontPreview" alt="Front sprite preview">
+                  <input id="frontAsset" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
+                  <small>Required. Imported artwork is converted into PNG automatically.</small>
+                </label>
+
+                <label class="asset-card">
+                  <span>Back Sprite</span>
+                  <img id="backPreview" alt="Back sprite preview">
+                  <input id="backAsset" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
+                  <small>Optional. If omitted, the front sprite is reused safely.</small>
+                </label>
+
+                <label class="asset-card">
+                  <span>Icon Sprite</span>
+                  <img id="iconPreview" alt="Icon preview">
+                  <input id="iconAsset" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
+                  <small>Optional. The framework normalizes icon sheets for party and PC usage.</small>
+                </label>
+              </div>
+
+              <div class="guide-panel">
+                <h4>Fusion Alignment Guide</h4>
+                <p>Use the Fusion tab offsets to fine-tune sprite placement. The live preview will mirror those changes here and in the right-hand preview rail.</p>
+              </div>
+
+              <div class="guide-panel">
+                <div class="section-heading compact">
+                  <div>
+                    <h4>Installed Art Library</h4>
+                    <p>Regional variants can reuse any installed sprite set from their source species or chosen fusion instead of starting from scratch.</p>
+                  </div>
+                  <button id="refreshDraftVariantChoicesBtn" class="ghost-button small" type="button">Refresh Choices</button>
+                </div>
+                <p class="meta-copy">Choosing a front sprite here copies that installed art into the draft so the finished species stays self-contained in the framework.</p>
+                <div id="draftVisualVariantGallery" class="variant-gallery-empty empty-state">Choose a base PokÃ©mon or fusion source to load its installed art choices.</div>
+              </div>
+            </section>
+
+            <section class="editor-panel hidden" data-creator-tab="lore">
+              <div class="panel-heading">
+                <h3>Dex / Lore</h3>
+                <p>Write the in-game Pokédex text and any species flavor notes you want to keep with the design.</p>
+              </div>
+
+              <label class="field">
+                <span>Pokédex Entry</span>
+                <textarea id="pokedexEntry" rows="5" placeholder="Describe the species here."></textarea>
+              </label>
+
+              <label class="field">
+                <span>Design Notes</span>
+                <textarea id="designNotes" rows="5" placeholder="Optional private notes for your mod workflow."></textarea>
+              </label>
+            </section>
+
+            <section class="editor-panel hidden" data-creator-tab="world">
+              <div class="panel-heading">
+                <h3>World Data</h3>
+                <p>Prepare encounter and trainer metadata so the species can scale beyond starter-only usage later.</p>
+              </div>
+
+              <div class="field-grid three-columns">
+                <label class="field">
+                  <span>Encounter Rarity</span>
+                  <input id="encounterRarity" type="text" placeholder="Rare">
+                </label>
+
+                <label class="field">
+                  <span>Encounter Level Min</span>
+                  <input id="encounterLevelMin" type="number" min="0" step="1" value="0">
+                </label>
+
+                <label class="field">
+                  <span>Encounter Level Max</span>
+                  <input id="encounterLevelMax" type="number" min="0" step="1" value="0">
+                </label>
+              </div>
+
+              <label class="field">
+                <span>Encounter Zones</span>
+                <textarea id="encounterZones" rows="3" placeholder="Comma or line separated biomes, maps, routes, or encounter tables."></textarea>
+              </label>
+
+              <label class="field">
+                <span>Trainer Roles</span>
+                <textarea id="trainerRoles" rows="3" placeholder="Gym ace, swimmer route team, postgame rematch pool..."></textarea>
+              </label>
+
+              <label class="field">
+                <span>Trainer Notes</span>
+                <textarea id="trainerNotes" rows="4" placeholder="Usage notes for future trainer-party hooks."></textarea>
+              </label>
+            </section>
+
+            <section class="editor-panel hidden" data-creator-tab="fusion">
+              <div class="panel-heading">
+                <h3>Fusion Metadata</h3>
+                <p>Store Infinite Fusion compatibility hints without overwriting base-game species data.</p>
+              </div>
+
+              <div class="field-grid two-columns">
+                <label class="field">
+                  <span>Fusion Rule</span>
+                  <select id="fusionRule">
+                    <option value="blocked">Blocked</option>
+                    <option value="standard">Standard Fusion</option>
+                    <option value="restricted">Restricted</option>
+                  </select>
+                </label>
+
+                <label class="field">
+                  <span>Export Pack Name</span>
+                  <input id="exportPackName" type="text" placeholder="my_fakemon_pack">
+                </label>
+
+                <label class="field">
+                  <span>Head Offset X</span>
+                  <input id="headOffsetX" type="number" step="1" value="0">
+                </label>
+
+                <label class="field">
+                  <span>Head Offset Y</span>
+                  <input id="headOffsetY" type="number" step="1" value="0">
+                </label>
+
+                <label class="field">
+                  <span>Body Offset X</span>
+                  <input id="bodyOffsetX" type="number" step="1" value="0">
+                </label>
+
+                <label class="field">
+                  <span>Body Offset Y</span>
+                  <input id="bodyOffsetY" type="number" step="1" value="0">
+                </label>
+
+                <label class="field">
+                  <span>Export Author</span>
+                  <input id="exportAuthor" type="text" placeholder="Optional author name">
+                </label>
+
+                <label class="field">
+                  <span>Export Version</span>
+                  <input id="exportVersion" type="text" placeholder="1.0.0">
+                </label>
+              </div>
+
+              <label class="field">
+                <span>Fusion Naming Notes</span>
+                <textarea id="fusionNamingNotes" rows="3" placeholder="Short notes for naming fusions or variant labels."></textarea>
+              </label>
+
+              <label class="field">
+                <span>Sprite Behavior Hints</span>
+                <textarea id="fusionSpriteHints" rows="3" placeholder="Alignment hints, sprite generation notes, or art pipeline reminders."></textarea>
+              </label>
+
+              <label class="field">
+                <span>Export Tags</span>
+                <input id="exportTags" type="text" placeholder="starter, forest, regional, water">
+              </label>
+            </section>
+
+            <section class="editor-panel hidden" data-creator-tab="validation">
+              <div class="panel-heading">
+                <h3>Validation</h3>
+                <p>Review the same checks the publish step will use before the species is allowed into the bedroom PC queue.</p>
+              </div>
+
+              <div class="validation-summary">
+                <div class="severity-pill error">Errors <strong id="validationErrorsCount">0</strong></div>
+                <div class="severity-pill warning">Warnings <strong id="validationWarningsCount">0</strong></div>
+                <div class="severity-pill suggestion">Suggestions <strong id="validationSuggestionsCount">0</strong></div>
+              </div>
+
+              <div id="validationList" class="validation-list"></div>
+            </section>
+
+            <section class="editor-panel hidden" data-creator-tab="publish">
+              <div class="panel-heading">
+                <h3>Bedroom PC Delivery</h3>
+                <p>This is the end of the guided quest. Save the current species, queue one playable specimen, then claim it from the player's bedroom PC in-game.</p>
+              </div>
+
+              <div class="field-grid two-columns">
+                <article class="guide-panel">
+                  <h4>Publish Checklist</h4>
+                  <p>The wizard checks species data, art, and delivery settings before it writes anything to the live framework files.</p>
+                  <div id="homePcPublishChecklist" class="validation-list"></div>
+                </article>
+
+                <article class="guide-panel">
+                  <h4>What The Player Will Do</h4>
+                  <div class="wizard-outcome-list">
+                    <div class="wizard-outcome-item"><strong>1.</strong><span>Restart the game if this is a brand-new species or its data changed.</span></div>
+                    <div class="wizard-outcome-item"><strong>2.</strong><span>Go to the bedroom PC at home.</span></div>
+                    <div class="wizard-outcome-item"><strong>3.</strong><span>Choose the custom delivery option and claim the queued species.</span></div>
+                  </div>
+                  <button id="publishHomePcBtn" class="primary-button full-width" type="button">Save Species And Queue Bedroom PC Delivery</button>
+                </article>
+              </div>
+
+              <div class="field-grid three-columns">
+                <label class="field">
+                  <span>Delivery Label</span>
+                  <input id="deliveryLabel" type="text" placeholder="Verdalyk Delivery">
+                </label>
+
+                <label class="field">
+                  <span>Level</span>
+                  <input id="deliveryLevel" type="number" min="1" max="100" step="1" value="10">
+                </label>
+
+                <label class="field">
+                  <span>Quantity</span>
+                  <input id="deliveryQuantity" type="number" min="1" max="6" step="1" value="1">
+                </label>
+
+                <label class="field">
+                  <span>Nickname</span>
+                  <input id="deliveryNickname" type="text" placeholder="Optional nickname">
+                </label>
+
+                <label class="field">
+                  <span>Held Item</span>
+                  <input id="deliveryHeldItem" type="text" list="item-options" placeholder="Optional held item">
+                </label>
+
+                <label class="checkbox-field align-bottom delivery-toggle">
+                  <input id="deliveryShiny" type="checkbox">
+                  Deliver a shiny specimen
+                </label>
+              </div>
+
+              <label class="field">
+                <span>Player-Facing Delivery Message</span>
+                <textarea id="deliveryMessage" rows="3" placeholder="Queued from the browser studio for pickup at the player's bedroom PC."></textarea>
+              </label>
+
+              <label class="field">
+                <span>Creator Notes</span>
+                <textarea id="deliveryNotes" rows="3" placeholder="Optional reminders about why this delivery was published."></textarea>
+              </label>
+
+              <div class="field-grid two-columns">
+                <article class="guide-panel">
+                  <div class="list-heading">
+                    <div>
+                      <h4>Bedroom PC Queue</h4>
+                      <p>Pending deliveries appear in-game until claimed or canceled.</p>
+                    </div>
+                    <button id="refreshDeliveryQueueBtn" class="ghost-button small" type="button">Refresh Queue</button>
+                  </div>
+                  <div id="deliveryQueueSummary" class="key-value-list"></div>
+                </article>
+
+                <article class="guide-panel">
+                  <h4>Guided Goal</h4>
+                  <p>Finish this step once, see the species arrive in-game, then use Advanced tools later for starter overhauls, pack intake, and broader framework work.</p>
+                </article>
+              </div>
+
+              <div class="field-grid two-columns">
+                <article class="info-card">
+                  <div class="list-heading">
+                    <div>
+                      <h4>Pending Deliveries</h4>
+                      <p>Species waiting to be claimed from the bedroom PC.</p>
+                    </div>
+                  </div>
+                  <div id="deliveryPendingList" class="species-list"></div>
+                </article>
+
+                <article class="info-card">
+                  <div class="list-heading">
+                    <div>
+                      <h4>Delivery History</h4>
+                      <p>Claimed or canceled entries stay here as a paper trail.</p>
+                    </div>
+                  </div>
+                  <div id="deliveryHistoryList" class="species-list"></div>
+                </article>
+              </div>
+            </section>
+          </form>
+
+          <div class="footer-actions">
+            <button id="duplicateSpeciesBtn" class="ghost-button" type="button">Duplicate Species</button>
+            <button id="deleteSpeciesBtn" class="danger-button" type="button">Delete Species</button>
+          </div>
+        </section>
+
+        <section class="view-section active" data-mode="pokedex">
+          <div class="workspace-header">
+            <div>
+              <h2>Pokédex Viewer</h2>
+              <p>Inspect base-game and custom species, compare them, and turn any installed Pokémon into a new regional variant without replacing the original.</p>
+            </div>
+            <div class="inline-actions">
+              <button id="createVariantFromDexBtn" class="primary-button" type="button">Create Regional Variant</button>
+              <button id="cloneToCreatorBtn" class="ghost-button" type="button">Use As Fakemon Template</button>
+              <button id="setFusionHeadBtn" class="ghost-button small" type="button">Use As Fusion Head</button>
+              <button id="setFusionBodyBtn" class="ghost-button small" type="button">Use As Fusion Body</button>
+              <button id="setCompareLeftBtn" class="ghost-button" type="button">Set Compare A</button>
+              <button id="setCompareRightBtn" class="ghost-button" type="button">Set Compare B</button>
+            </div>
+          </div>
+
+          <section id="dexFusionBuilderPanel" class="editor-panel fusion-builder-panel">
+            <div class="panel-heading compact">
+              <div>
+                <h3>Fusion Variant Builder</h3>
+                <p>Pick a head and body from the installed Pokedex, preview the mix, then turn it into a new regional-variant draft.</p>
+              </div>
+              <span class="summary-badge neutral">Pick Both Parts</span>
+            </div>
+
+            <div class="field-grid two-columns fusion-builder-fields">
+              <label class="field">
+                <span>Fusion Head</span>
+                <input id="dexFusionHead" type="text" list="species-options" placeholder="PIKACHU">
+              </label>
+
+              <label class="field">
+                <span>Fusion Body</span>
+                <input id="dexFusionBody" type="text" list="species-options" placeholder="CHARMANDER">
+              </label>
+            </div>
+
+            <div class="inline-actions fusion-builder-actions">
+              <button id="swapFusionPartsBtn" class="ghost-button small" type="button">Swap</button>
+              <button id="clearFusionBuilderBtn" class="ghost-button small" type="button">Clear</button>
+              <button id="createFusionVariantBtn" class="primary-button small" type="button" disabled>Create Fusion Regional Variant</button>
+            </div>
+
+            <div class="fusion-builder-preview is-empty">
+              <div class="fusion-builder-preview-grid">
+                <img id="dexFusionPreviewImage" class="fusion-builder-preview-image" alt="Fusion source preview">
+                <div class="fusion-builder-preview-copy">
+                  <p><strong>Head:</strong> Select a Pokedex species and assign it as the fusion head.</p>
+                  <p><strong>Body:</strong> Pair it with another installed species to stage a safe fusion source.</p>
+                  <p><strong>Result:</strong> Once the catalog finishes loading, app.js replaces this shell with the live preview and clone-ready state.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div class="tab-strip">
+            <button class="tab-button active" data-dex-tab="overview" type="button">Overview</button>
+            <button class="tab-button" data-dex-tab="stats" type="button">Stats</button>
+            <button class="tab-button" data-dex-tab="moves" type="button">Moves</button>
+            <button class="tab-button" data-dex-tab="evolutions" type="button">Evolutions</button>
+            <button class="tab-button" data-dex-tab="compare" type="button">Compare</button>
+          </div>
+
+          <section id="dexOverviewPanel" class="editor-panel active" data-dex-tab="overview"></section>
+          <section id="dexStatsPanel" class="editor-panel hidden" data-dex-tab="stats"></section>
+          <section id="dexMovesPanel" class="editor-panel hidden" data-dex-tab="moves"></section>
+          <section id="dexEvolutionsPanel" class="editor-panel hidden" data-dex-tab="evolutions"></section>
+          <section id="dexComparePanel" class="editor-panel hidden" data-dex-tab="compare"></section>
+        </section>
+
+        <section class="view-section hidden" data-mode="integration">
+          <div class="workspace-header">
+            <div>
+              <h2>Advanced Framework Tools</h2>
+              <p>Starter overhaul work, community pack intake, and bundle export stay here so the main wizard can stay focused on one bedroom PC-ready species.</p>
+            </div>
+            <div class="inline-actions">
+              <button id="exportSpeciesBtn" class="ghost-button" type="button">Export Species Pack</button>
+            </div>
+          </div>
+
+          <div class="tab-strip">
+            <button class="tab-button" data-integration-tab="starter" type="button">Starter Trio</button>
+          <button class="tab-button" data-integration-tab="importer" type="button">Import Packs</button>
+          <button class="tab-button" data-integration-tab="review" type="button">Review Queue</button>
+          <button class="tab-button active" data-integration-tab="export" type="button">Export</button>
+            <button class="tab-button" data-integration-tab="validation" type="button">Validation</button>
+          </div>
+
+          <section class="editor-panel hidden" data-integration-tab="starter">
+            <div class="panel-heading">
+              <h3>Starter Trio</h3>
+              <p>This is an advanced change because it affects fresh-save intro flow. Use it after the bedroom PC quest path is already working cleanly.</p>
+            </div>
+
+            <div class="field-grid two-columns">
+              <label class="field">
+                <span>Starter Set Label</span>
+                <input id="starterLabel" type="text" placeholder="My Custom Fakemon Trio">
+              </label>
+
+              <label class="checkbox-field align-bottom">
+                <input id="starterActivate" type="checkbox">
+                Make this the active default starter trio
+              </label>
+            </div>
+
+            <div class="starter-grid">
+              <div class="starter-slot">
+                <h4>Starter Slot 1</h4>
+                <select id="starterSpecies1"></select>
+                <label class="field">
+                  <span>Rival Counterpick</span>
+                  <select id="starterCounter1"></select>
+                </label>
+              </div>
+
+              <div class="starter-slot">
+                <h4>Starter Slot 2</h4>
+                <select id="starterSpecies2"></select>
+                <label class="field">
+                  <span>Rival Counterpick</span>
+                  <select id="starterCounter2"></select>
+                </label>
+              </div>
+
+              <div class="starter-slot">
+                <h4>Starter Slot 3</h4>
+                <select id="starterSpecies3"></select>
+                <label class="field">
+                  <span>Rival Counterpick</span>
+                  <select id="starterCounter3"></select>
+                </label>
+              </div>
+            </div>
+
+            <div class="footer-actions">
+              <span class="meta-copy">Apply starter changes only after the guided bedroom PC pipeline is already working the way you want.</span>
+              <button id="saveStarterBtn" class="primary-button" type="button">Save Starter Trio</button>
+            </div>
+          </section>
+
+        <section class="editor-panel hidden" data-integration-tab="importer">
+            <div class="panel-heading">
+              <h3>Pack Intake</h3>
+              <p>Paste or edit the importer manifest, tune safe intake rules, and run dry imports before anything touches the live framework.</p>
+            </div>
+
+            <div class="field-grid two-columns">
+              <article class="guide-panel">
+                <h4>Source Manifest</h4>
+                <p>List approved source folders, zip archives, repo exports, or HTML pages here. The importer will preserve permissions, credits, and pack metadata.</p>
+                <label class="field">
+                  <span>Import Sources JSON</span>
+                  <textarea id="importManifestEditor" class="code-editor tall" spellcheck="false"></textarea>
+                </label>
+              </article>
+
+              <article class="guide-panel">
+                <h4>Import Rules</h4>
+                <p>Keep strict permission mode on by default so the intake pipeline routes questionable packs into review instead of importing them silently.</p>
+                <div class="importer-toggle-grid">
+                  <label class="checkbox-field">
+                    <input id="importStrictPermission" type="checkbox">
+                    Strict permission mode
+                  </label>
+                  <label class="checkbox-field">
+                    <input id="importAllowPartial" type="checkbox">
+                    Allow partial entries
+                  </label>
+                  <label class="checkbox-field">
+                    <input id="importRequireBack" type="checkbox">
+                    Require backsprite
+                  </label>
+                  <label class="checkbox-field">
+                    <input id="importRequireIcon" type="checkbox">
+                    Require icon
+                  </label>
+                  <label class="checkbox-field">
+                    <input id="importOverwriteExisting" type="checkbox">
+                    Allow overwrite on apply
+                  </label>
+                </div>
+
+                <div id="importPathsPanel" class="key-value-list"></div>
+              </article>
+            </div>
+
+            <div class="footer-actions wrap-actions">
+              <div class="inline-actions">
+                <button id="loadImportExampleBtn" class="ghost-button" type="button">Load Example Manifest</button>
+                <button id="saveImportWorkspaceBtn" class="ghost-button" type="button">Save Import Workspace</button>
+              </div>
+              <div class="inline-actions">
+                <button id="runImportDryRunBtn" class="primary-button" type="button">Run Dry Import</button>
+                <button id="applyImportBundleBtn" class="danger-button" type="button">Apply Import Bundle</button>
+              </div>
+            </div>
+
+            <div class="field-grid two-columns">
+              <article class="manifest-panel">
+                <h4>Last Run Summary</h4>
+                <div id="importRunSummary" class="key-value-list"></div>
+              </article>
+
+              <article class="manifest-panel">
+                <h4>Importer Log</h4>
+                <pre id="importLogTail" class="log-panel"></pre>
+              </article>
+            </div>
+          </section>
+
+          <section class="editor-panel hidden" data-integration-tab="review">
+            <div class="panel-heading">
+              <h3>Review Queue</h3>
+              <p>Inspect ready imports, partial entries, permission issues, and final credits before promoting anything into the framework.</p>
+            </div>
+
+            <div id="importReviewSummary" class="validation-summary"></div>
+
+            <div class="import-review-grid">
+              <article class="info-card">
+                <div class="list-heading">
+                  <div>
+                    <h4>Ready For Insert</h4>
+                    <p>Approved entries with enough data to package cleanly.</p>
+                  </div>
+                </div>
+                <div id="importReadyList" class="import-entry-list"></div>
+              </article>
+
+              <article class="info-card">
+                <div class="list-heading">
+                  <div>
+                    <h4>Needs Review</h4>
+                    <p>Items blocked by missing data, unclear permissions, or validation issues.</p>
+                  </div>
+                </div>
+                <div id="importReviewList" class="import-entry-list"></div>
+              </article>
+
+              <article class="info-card">
+                <div class="list-heading">
+                  <div>
+                    <h4>Rejected</h4>
+                    <p>Entries skipped automatically because the source or files were unsafe to import.</p>
+                  </div>
+                </div>
+                <div id="importRejectedList" class="import-entry-list"></div>
+              </article>
+
+              <article class="info-card">
+                <div class="list-heading">
+                  <div>
+                    <h4>Credits Manifest</h4>
+                    <p>Every inserted species keeps creator attribution, pack origin, and required reuse notes.</p>
+                  </div>
+                </div>
+                <div id="importCreditsList" class="import-entry-list"></div>
+              </article>
+            </div>
+          </section>
+
+        <section class="editor-panel active" data-integration-tab="export">
+            <div class="panel-heading">
+              <h3>Export</h3>
+              <p>Review the files the framework will install directly, then download a clean bundle for sharing if needed.</p>
+            </div>
+
+            <div id="exportManifest" class="manifest-panel"></div>
+            <div id="exportDownloadPanel" class="download-panel hidden"></div>
+          </section>
+
+          <section class="editor-panel hidden" data-integration-tab="validation">
+            <div class="panel-heading">
+              <h3>Validation Snapshot</h3>
+              <p>See the same validation pass from the creator step alongside starter/export integration reminders.</p>
+            </div>
+
+            <div id="integrationValidationSummary" class="validation-summary"></div>
+            <div id="integrationValidationList" class="validation-list"></div>
+          </section>
+        </section>
+      </main>
+
+      <aside class="right-rail panel">
+        <div class="preview-header">
+          <div>
+            <h2>Live Preview</h2>
+            <p>Battle-facing presentation updates instantly as you edit.</p>
+          </div>
+
+          <div class="segmented-control">
+            <button class="segment active" data-preview-face="front" type="button">Front</button>
+            <button class="segment" data-preview-face="back" type="button">Back</button>
+            <button id="previewShinyBtn" class="segment" type="button">Shiny</button>
+          </div>
+        </div>
+
+        <div class="preview-stack">
+          <section class="preview-card hero-preview">
+            <div class="preview-meta">
+              <span id="previewDexNumber" class="preview-number">No. ---</span>
+              <span id="previewSourcePill" class="preview-source">Draft</span>
+            </div>
+            <div class="hero-art-wrap">
+              <img id="previewHeroImage" alt="Species preview art">
+            </div>
+            <div class="hero-copy">
+              <h3 id="previewName">New Species</h3>
+              <p id="previewCategory">Custom Species</p>
+              <div id="previewTypeChips" class="type-chip-row"></div>
+            </div>
+          </section>
+
+          <section class="preview-card battle-card">
+            <div class="battle-topline">
+              <strong id="battlePreviewName">New Species</strong>
+              <span id="battlePreviewLevel">Lv. 5</span>
+            </div>
+            <div class="battle-bar">
+              <div id="battlePreviewBar" class="battle-bar-fill"></div>
+            </div>
+            <div class="battle-stats">
+              <span id="battlePreviewBst">BST 300</span>
+              <span id="battlePreviewAbility">Ability: None</span>
+            </div>
+          </section>
+
+          <section class="preview-card dex-preview-card">
+            <h3>Pokédex Entry</h3>
+            <p id="previewDexEntry">Build or select a species to preview its Pokédex entry here.</p>
+          </section>
+
+          <section class="preview-card">
+            <h3>Evolution Chain</h3>
+            <div id="previewEvolutionChain" class="tree-preview empty">No evolution data yet.</div>
+          </section>
+
+          <section class="preview-card party-preview-card">
+            <h3>Party / Icon Preview</h3>
+            <div class="party-slot">
+              <div class="party-icon-wrap">
+                <img id="previewPartyIcon" alt="Party icon preview">
+              </div>
+              <div class="party-copy">
+                <strong id="previewPartyName">New Species</strong>
+                <span id="previewPartyRole">Balanced role</span>
+              </div>
+            </div>
+          </section>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <datalist id="move-options"></datalist>
+  <datalist id="ability-options"></datalist>
+  <datalist id="species-options"></datalist>
+  <datalist id="type-options"></datalist>
+  <datalist id="item-options"></datalist>
+
+  <template id="levelMoveTemplate">
+    <div class="repeater-row">
+      <label class="field compact">
+        <span>Level</span>
+        <input class="row-level" type="number" min="1" step="1" value="1">
+      </label>
+      <label class="field wide compact">
+        <span>Move</span>
+        <input class="row-move" type="text" list="move-options" placeholder="TACKLE">
+      </label>
+      <button class="remove-row ghost-button small" type="button">Remove</button>
+    </div>
+  </template>
+
+  <template id="simpleMoveTemplate">
+    <div class="repeater-row simple">
+      <label class="field wide compact">
+        <span>Move</span>
+        <input class="row-move" type="text" list="move-options" placeholder="LEAFBLADE">
+      </label>
+      <button class="remove-row ghost-button small" type="button">Remove</button>
+    </div>
+  </template>
+
+  <template id="evolutionTemplate">
+    <div class="repeater-row evolution">
+      <label class="field compact">
+        <span>Species</span>
+        <input class="row-species" type="text" list="species-options" placeholder="CSF_STAGE2">
+      </label>
+      <label class="field compact">
+        <span>Method</span>
+        <select class="row-method"></select>
+      </label>
+      <label class="field compact">
+        <span>Parameter</span>
+        <input class="row-parameter" type="text" placeholder="16 or THUNDERSTONE">
+      </label>
+      <button class="remove-row ghost-button small" type="button">Remove</button>
+    </div>
+  </template>
+
+  <script src="app.js?v=20260422j"></script>
+</body>
+</html>

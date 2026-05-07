@@ -84,6 +84,8 @@ Pokemon Essentials GitHub: https://github.com/Maruno17/pokemon-essentials
 
 This checkout now includes the release-candidate `travel_expansion_framework` mod under [`Mods/travel_expansion_framework`](./Mods/travel_expansion_framework). It lets one Kuray Infinite Fusion save enter supported external gameworld installs while keeping Infinite Fusion authoritative for save data, party, PC/storage, bag, dex progress, battle UI, and recovery.
 
+It also includes [`Mods/custom_species_framework`](./Mods/custom_species_framework), the paired custom Pokemon framework used for imported Fakemon/species registration, custom species save safety, sprite resolution, and missing-pack recovery.
+
 The other fangames are not bundled in this repo. Install or extract the games you own beside the KIF/PIF folder, then configure their paths in [`Mods/travel_expansion_framework/travel_expansion_sources.json`](./Mods/travel_expansion_framework/travel_expansion_sources.json) if your folders differ from the defaults.
 
 Full install and smoke-test instructions are here:
