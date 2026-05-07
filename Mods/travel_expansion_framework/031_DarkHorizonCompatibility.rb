@@ -655,6 +655,37 @@ def pbHealingMachine(*_args)
   return true
 end unless defined?(pbHealingMachine)
 
+module TravelExpansionFramework
+  module_function
+
+  def darkhorizon_xd_pc!
+    if defined?(pbPokeCenterPC)
+      pbPokeCenterPC
+      return true
+    end
+    if defined?(PokemonStorageScene) && defined?(PokemonStorageScreen) && defined?($PokemonStorage) && $PokemonStorage
+      pbFadeOutIn {
+        scene = PokemonStorageScene.new
+        screen = PokemonStorageScreen.new(scene, $PokemonStorage)
+        screen.pbStartScreen(0)
+      }
+      return true
+    end
+    log("[darkhorizon] pbXDPC skipped because host PC UI is unavailable") if respond_to?(:log)
+    return true
+  rescue => e
+    log("[darkhorizon] pbXDPC failed safely: #{e.class}: #{e.message}") if respond_to?(:log)
+    return true
+  end
+end
+
+def pbXDPC(*_args)
+  return TravelExpansionFramework.darkhorizon_xd_pc! if defined?(TravelExpansionFramework) &&
+                                                        TravelExpansionFramework.respond_to?(:darkhorizon_xd_pc!)
+  return pbPokeCenterPC if defined?(pbPokeCenterPC)
+  return true
+end unless defined?(pbXDPC)
+
 if defined?(Interpreter)
   class Interpreter
     def pbStartNewGame(*args)
@@ -708,6 +739,13 @@ if defined?(Interpreter)
       $Trainer.heal_party if defined?($Trainer) && $Trainer && $Trainer.respond_to?(:heal_party)
       return true
     end unless method_defined?(:pbHealingMachine)
+
+    def pbXDPC(*_args)
+      return TravelExpansionFramework.darkhorizon_xd_pc! if defined?(TravelExpansionFramework) &&
+                                                            TravelExpansionFramework.respond_to?(:darkhorizon_xd_pc!)
+      return pbPokeCenterPC if defined?(pbPokeCenterPC)
+      return true
+    end unless method_defined?(:pbXDPC)
   end
 end
 

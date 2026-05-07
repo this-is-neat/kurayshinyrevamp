@@ -99,6 +99,7 @@ module TravelExpansionFramework
     "prerandomizeMiningStones"  => { "category" => "startup",          "default" => "true",  "note" => "Mining pre-randomization is skipped safely." },
     "useAirDragonite"           => { "category" => "story_transfer",   "default" => "false", "note" => "Unsupported ride shortcut fails closed." },
     "pbHealingMachine"          => { "category" => "item_handlers",    "default" => "heal_party", "note" => "Host party heal fallback." },
+    "pbXDPC"                    => { "category" => "item_handlers",    "default" => "host_pc", "note" => "External PC terminal opens the host PC UI." },
     "characterPopup"            => { "category" => "story_transfer",   "default" => "true",  "note" => "Popup marker is skipped safely." },
     "getCompletedQuests"        => { "category" => "menu_settings",    "default" => "array", "note" => "Quest list is host-local until native quest bridge is certified." },
     "getActiveQuests"           => { "category" => "menu_settings",    "default" => "array", "note" => "Quest list is host-local until native quest bridge is certified." },
@@ -410,6 +411,9 @@ module TravelExpansionFramework
     when "heal_party"
       release_heal_party!
       return true
+    when "host_pc"
+      release_open_host_pc!
+      return true
     else
       return true
     end
@@ -446,6 +450,25 @@ module TravelExpansionFramework
   rescue => e
     log("[release] heal party fallback failed: #{e.class}: #{e.message}") if respond_to?(:log)
     return false
+  end
+
+  def release_open_host_pc!
+    if defined?(pbPokeCenterPC)
+      pbPokeCenterPC
+      return true
+    end
+    if defined?(PokemonStorageScene) && defined?(PokemonStorageScreen) && defined?($PokemonStorage) && $PokemonStorage
+      pbFadeOutIn {
+        scene = PokemonStorageScene.new
+        screen = PokemonStorageScreen.new(scene, $PokemonStorage)
+        screen.pbStartScreen(0)
+      }
+      return true
+    end
+    return true
+  rescue => e
+    log("[release] host PC fallback failed safely: #{e.class}: #{e.message}") if respond_to?(:log)
+    return true
   end
 
   def release_quest_store(key)
@@ -528,6 +551,10 @@ end unless defined?(useAirDragonite)
 def pbHealingMachine(*args)
   return TravelExpansionFramework.release_safe_stub("pbHealingMachine", "heal_party", "item_handlers", *args)
 end unless defined?(pbHealingMachine)
+
+def pbXDPC(*args)
+  return TravelExpansionFramework.release_safe_stub("pbXDPC", "host_pc", "item_handlers", *args)
+end unless defined?(pbXDPC)
 
 def characterPopup(label, event_ref = nil, *args)
   return TravelExpansionFramework.release_safe_stub("characterPopup", "true", "story_transfer", label, event_ref, *args)

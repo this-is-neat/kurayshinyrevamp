@@ -42,6 +42,11 @@
       "default": "heal_party",
       "note": "Host party heal fallback."
     },
+    "pbXDPC": {
+      "category": "item_handlers",
+      "default": "host_pc",
+      "note": "External PC terminal opens the host PC UI."
+    },
     "characterPopup": {
       "category": "story_transfer",
       "default": "true",
