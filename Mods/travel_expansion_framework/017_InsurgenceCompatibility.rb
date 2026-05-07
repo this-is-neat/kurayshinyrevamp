@@ -782,6 +782,19 @@ module TravelExpansionFramework
     log("[insurgence] challenge profile apply failed: #{e.class}: #{e.message}")
     return []
   end
+
+  def insurgence_poke_mart_worker!(*args)
+    stock = args.find { |arg| arg.is_a?(Array) }
+    speech = args.find { |arg| arg.is_a?(String) }
+    stock ||= release_default_mart_stock if respond_to?(:release_default_mart_stock)
+    log("[insurgence] bridged pbPokeMartWorker to host mart")
+    return release_open_host_mart!(stock, speech, false) if respond_to?(:release_open_host_mart!)
+    return pbPokemonMart(stock, speech, false) if defined?(pbPokemonMart) && stock.is_a?(Array)
+    return true
+  rescue => e
+    log("[insurgence] pbPokeMartWorker bridge failed safely: #{e.class}: #{e.message}")
+    return true
+  end
 end
 
 module Kernel
@@ -853,7 +866,27 @@ module Kernel
     TravelExpansionFramework.log("[insurgence] pbChangeBackToNormal failed: #{e.class}: #{e.message}")
     return false
   end
+
+  def self.pbPokeMartWorker(*args)
+    return TravelExpansionFramework.insurgence_poke_mart_worker!(*args) if TravelExpansionFramework.insurgence_expansion_id?
+    return TravelExpansionFramework.release_safe_stub("pbPokeMartWorker", "host_mart", "item_handlers", *args) if TravelExpansionFramework.respond_to?(:release_safe_stub)
+    return true
+  rescue => e
+    TravelExpansionFramework.log("[insurgence] Kernel.pbPokeMartWorker failed safely: #{e.class}: #{e.message}") if defined?(TravelExpansionFramework) &&
+                                                                                                                     TravelExpansionFramework.respond_to?(:log)
+    return true
+  end
 end
+
+def pbPokeMartWorker(*args)
+  return TravelExpansionFramework.insurgence_poke_mart_worker!(*args) if TravelExpansionFramework.insurgence_expansion_id?
+  return TravelExpansionFramework.release_safe_stub("pbPokeMartWorker", "host_mart", "item_handlers", *args) if TravelExpansionFramework.respond_to?(:release_safe_stub)
+  return true
+rescue => e
+  TravelExpansionFramework.log("[insurgence] pbPokeMartWorker failed safely: #{e.class}: #{e.message}") if defined?(TravelExpansionFramework) &&
+                                                                                                          TravelExpansionFramework.respond_to?(:log)
+  return true
+end unless defined?(pbPokeMartWorker)
 
 class PokemonSystem
   def purism

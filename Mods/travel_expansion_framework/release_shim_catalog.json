@@ -47,6 +47,11 @@
       "default": "host_pc",
       "note": "External PC terminal opens the host PC UI."
     },
+    "pbPokeMartWorker": {
+      "category": "item_handlers",
+      "default": "host_mart",
+      "note": "External mart worker opens a safe host mart inventory."
+    },
     "characterPopup": {
       "category": "story_transfer",
       "default": "true",

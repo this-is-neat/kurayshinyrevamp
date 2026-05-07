@@ -100,6 +100,7 @@ module TravelExpansionFramework
     "useAirDragonite"           => { "category" => "story_transfer",   "default" => "false", "note" => "Unsupported ride shortcut fails closed." },
     "pbHealingMachine"          => { "category" => "item_handlers",    "default" => "heal_party", "note" => "Host party heal fallback." },
     "pbXDPC"                    => { "category" => "item_handlers",    "default" => "host_pc", "note" => "External PC terminal opens the host PC UI." },
+    "pbPokeMartWorker"          => { "category" => "item_handlers",    "default" => "host_mart", "note" => "External mart worker opens a safe host mart inventory." },
     "characterPopup"            => { "category" => "story_transfer",   "default" => "true",  "note" => "Popup marker is skipped safely." },
     "getCompletedQuests"        => { "category" => "menu_settings",    "default" => "array", "note" => "Quest list is host-local until native quest bridge is certified." },
     "getActiveQuests"           => { "category" => "menu_settings",    "default" => "array", "note" => "Quest list is host-local until native quest bridge is certified." },
@@ -414,6 +415,9 @@ module TravelExpansionFramework
     when "host_pc"
       release_open_host_pc!
       return true
+    when "host_mart"
+      release_open_host_mart!
+      return true
     else
       return true
     end
@@ -468,6 +472,65 @@ module TravelExpansionFramework
     return true
   rescue => e
     log("[release] host PC fallback failed safely: #{e.class}: #{e.message}") if respond_to?(:log)
+    return true
+  end
+
+  def release_item_exists?(item)
+    return GameData::Item.exists?(item) if defined?(GameData::Item) && GameData::Item.respond_to?(:exists?)
+    return !GameData::Item.get(item).nil? if defined?(GameData::Item) && GameData::Item.respond_to?(:get)
+    return true
+  rescue
+    return false
+  end
+
+  def release_default_mart_stock
+    badges = 0
+    if defined?($Trainer) && $Trainer
+      badges = integer($Trainer.badge_count, 0) if $Trainer.respond_to?(:badge_count)
+      badges = integer($Trainer.numbadges, badges) if badges <= 0 && $Trainer.respond_to?(:numbadges)
+    end
+    stock = case badges
+            when 0
+              [:POTION, :ANTIDOTE, :POKEBALL]
+            when 1
+              [:POTION, :ANTIDOTE, :PARLYZHEAL, :BURNHEAL, :ESCAPEROPE, :REPEL, :POKEBALL]
+            when 2..5
+              [:SUPERPOTION, :ANTIDOTE, :PARLYZHEAL, :BURNHEAL, :ESCAPEROPE, :SUPERREPEL, :POKEBALL]
+            when 6..9
+              [:SUPERPOTION, :ANTIDOTE, :PARLYZHEAL, :BURNHEAL, :ESCAPEROPE, :SUPERREPEL, :POKEBALL, :GREATBALL]
+            else
+              [:POKEBALL, :GREATBALL, :ULTRABALL, :SUPERREPEL, :MAXREPEL, :ESCAPEROPE, :FULLHEAL, :HYPERPOTION]
+            end
+    stock.find_all { |item| release_item_exists?(item) }
+  rescue => e
+    log("[release] default mart stock build failed: #{e.class}: #{e.message}") if respond_to?(:log)
+    [:POTION, :ANTIDOTE, :POKEBALL].find_all { |item| release_item_exists?(item) }
+  end
+
+  def release_open_host_mart!(stock = nil, speech = nil, cantsell = false)
+    stock = release_default_mart_stock if !stock.is_a?(Array) || stock.empty?
+    stock = stock.find_all { |item| release_item_exists?(item) }
+    stock = [:POTION, :POKEBALL].find_all { |item| release_item_exists?(item) } if stock.empty?
+    if Kernel.respond_to?(:pbPokemonMart)
+      Kernel.pbPokemonMart(stock, speech, cantsell)
+      return true
+    end
+    if Object.private_method_defined?(:pbPokemonMart) || Object.method_defined?(:pbPokemonMart)
+      Object.new.send(:pbPokemonMart, stock, speech, cantsell)
+      return true
+    end
+    if defined?(pbPokemonMart)
+      pbPokemonMart(stock, speech, cantsell)
+      return true
+    end
+    if Kernel.respond_to?(:pbMessage)
+      Kernel.pbMessage("The Poke Mart service is not available right now.")
+    elsif defined?(pbMessage)
+      pbMessage("The Poke Mart service is not available right now.")
+    end
+    return true
+  rescue => e
+    log("[release] host mart fallback failed safely: #{e.class}: #{e.message}") if respond_to?(:log)
     return true
   end
 
@@ -555,6 +618,10 @@ end unless defined?(pbHealingMachine)
 def pbXDPC(*args)
   return TravelExpansionFramework.release_safe_stub("pbXDPC", "host_pc", "item_handlers", *args)
 end unless defined?(pbXDPC)
+
+def pbPokeMartWorker(*args)
+  return TravelExpansionFramework.release_safe_stub("pbPokeMartWorker", "host_mart", "item_handlers", *args)
+end unless defined?(pbPokeMartWorker)
 
 def characterPopup(label, event_ref = nil, *args)
   return TravelExpansionFramework.release_safe_stub("characterPopup", "true", "story_transfer", label, event_ref, *args)
@@ -854,6 +921,10 @@ module Kernel
     TravelExpansionFramework.record_release_shim_hit("Kernel.doLegendEntrance", "story_transfer", "true") if defined?(TravelExpansionFramework)
     return true
   end unless method_defined?(:doLegendEntrance)
+
+  def self.pbPokeMartWorker(*args)
+    return TravelExpansionFramework.release_safe_stub("pbPokeMartWorker", "host_mart", "item_handlers", *args)
+  end unless respond_to?(:pbPokeMartWorker)
 end
 
 class NilClass
